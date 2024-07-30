@@ -1,0 +1,180 @@
+---
+title: "My wonderful paper"
+abstract: "This is the abstract"
+bibliography: references.bib
+documentclass: jds
+format: pdf
+preamble: >
+  \usepackage{amsfonts,amsmath,amssymb,amsthm}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(patchwork)
+library(MASS)
+library(ggh4x)
+pm10 <- read_csv(here::here("data", "pm10.csv")) |> 
+  filter(!is.na(pm10)) |>    
+  mutate(season = as.factor(season))  
+```
+
+
+# Introduction
+
+In this paper, a concept called analysis plan is proposed to describe the logical structure of a data analysis. An analysis plan is a set of analysis steps plus their expected outcomes. It is a formal representation of the analysis process and can be used to guide the analysis process, to communicate and compare the analysis process to others, and to evaluate the analysis process. The concept of analysis plan is illustrated with examples and the implications of the concept for data analysis practice is discussed.
+
+The analysis plan described in this paper should be differentiated from the pre-specifies analysis plan document often used in biostatistics to specifies the hypothesis, data collection mechanism, statistical procedures etc of randomized experiments. 
+
+
+# Analysis plan
+
+describe/ define what analysis plan is 
+
+analysis plan and outcome plan 
+
+analysis plan as unit tests to divide the "result universe", which allows us to answer questions like:
+
+- how would the results change if the value of a unit test change
+- whether our outcome expectation aligns with the plan expectation, meaning whether "it is possible for the combination of plan expectations to produce the outcome expectation"
+
+# Examples
+
+## A toy example
+
+## Linear regression
+
+Consider a linear regression model to study the effect of PM10 on mortality (provide context of using PM10 to study mortality). Analysts may expect a significant (p-value $\le$ 0.05) PM10 coefficient in the linear model from the literature. There are multiple factors that can affect the outcome expectation of linear regression as such, for example, 1) sample size, 2) model specification, and 3) correlation structure between variables. Temperature is often an important confounder to consider in such study (add reference). 
+
+To construct the result universe, we can simulate datasets with different configerations of the above factors. Here, sample sizes of 50, 100, 500, and 1000 are considered. Two model specifications are included: 1) linear model with PM10 as the only covariate ($\text{mortality} \sim \text{PM10}$), 2) linear model with PM10 and temperature as covariates ($\text{mortality} \sim \text{PM10} + \text{temp}$. A grid-based approach is used to simulate correlation structure. Reasonable ranges of correlation between the three variables are
+
+\begin{align*}
+\text{cor}(\text{mortality}, \text{PM10}) &\in [-0.01, 0] \\ 
+\text{cor}(\text{mortality}, \text{temperature}) &\in [-0.6, -0.2] \\ \text{cor}(\text{PM10}, \text{temperature}) &\in [0.2, 0.6] 
+\end{align*}
+
+```{r}
+# Generate correlation matrices 
+corr_grid <- expand.grid(seq(-0.01, -0.001, by = 0.001), 
+                         seq(-0.6, -0.2, 0.05), seq(0.2, 0.6, 0.05))  
+
+# Function to compute correlation matrix for each combination 
+gen_corr_mtx <- function(r1, r2, r3) {   
+  cor_matrix <- matrix(c(1, r1, r2,                          
+                         r1, 1, r3,                          
+                         r2, r3, 1), nrow = 3, byrow = TRUE)          
+  # Store the matrix in the list   
+  if (all(eigen(cor_matrix)$values > 0)) return(cor_matrix) 
+  }  
+
+# Plan for parallel processing
+corr_mtx <- lapply(1:nrow(corr_grid), function(i) {   
+  gen_corr_mtx(corr_grid[i, 1], corr_grid[i, 2], corr_grid[i, 3]) }) 
+corr_mtx <- corr_mtx[map_lgl(corr_mtx, ~!is.null(.x))]  
+sample_size <- c(50, 100, 500, 1000) 
+model <- c("mortality ~ pm10 + temp", "mortality ~ pm10") |> map(as.formula) 
+
+generate_data <- function(n, mtx, seed = 123) {   
+  mu <- c(0, 0, 0)   
+  data <- mvrnorm(n, mu, mtx, empirical = TRUE)   
+  U <- pnorm(data, mean = 0, sd = 1)   
+  set.seed(seed)      
+  tibble(mortality = qpois(U[,1], 182), # assume distribution
+         pm10 = qnorm(U[,2], mean = 26, sd = 12),           
+         temp = qnorm(U[,3], mean = 55, sd = 16))   
+  }  
+
+res <- tibble(corr_mtx = corr_mtx) |> 
+  mutate(id = row_number()) |> 
+  crossing(sample_size, model) |> 
+  rowwise() |>   
+  mutate(data = list(generate_data(n = sample_size, mtx = corr_mtx)),          
+         fit = list(summary(lm(model, data))$coefficients))  
+```
+
+
+```{r}
+#| fig.width = 10,
+#| fig.height = 5
+dt <- res |>   
+  mutate(     
+    p_value = fit[2,4],     
+    coef = fit[2,1],     
+    xy_correlation = as.numeric(corr_mtx[1, 2]),     
+    xz_correlation = as.numeric(corr_mtx[1, 3]),     
+    yz_correlation = as.numeric(corr_mtx[2, 3]),     
+    fml = deparse(model) |> as.factor(),     
+    expect = ifelse(p_value < 0.05, 1, 0) |> as.factor(),     
+    ) |>    
+  ungroup() 
+
+code_tbl <- crossing(V1 = c("signifpm10", NA),           
+                     V2 = c("smallsample", NA), 
+                     V3 = c("withtemp", NA)) |>      
+  mutate(col1 = paste0(V1,"_", V2, "_", V3))   
+
+lookup_tbl <- tibble(   
+  value = crossing(x = c(1, 0), y = c(1, 0), z = c(1, 0)) |>      
+    mutate(col = paste0(x,"_", y, "_", z)) |> 
+    arrange(-x, -y, -z) |>      
+    pull(col),   
+  plan1 = unique(code_tbl$col1) )  
+
+dt2 <- dt |>    
+  mutate(T1 = ifelse(sample_size < 200, 1, 0),          
+         T2 = ifelse(fml == "mortality ~ pm10 + temp", 1, 0),          
+         pp1 = paste0(expect, "_", T1, "_", T2),) |>    
+  left_join(lookup_tbl, by = c("pp1" = "value"))      
+
+p0 <- dt |> ggplot() +   
+  geom_point(aes(x = p_value , y = coef), color = "grey", size = 0.5) +  
+  labs(x = "p-value", y = "coefficient") +   
+  scale_color_brewer(palette = "Dark2", direction = -1) +   
+  theme_bw() +    
+  theme(aspect.ratio = 1, 
+        panel.grid.minor = element_blank()) 
+
+p0 + 
+  geom_point(aes(x = p_value , y = coef), size = 0.5) +  
+  facet_grid(as.character(model) ~ sample_size) +    
+  labs(title = "Coefficient vs. p-value")
+```
+
+```{r}
+#| label = "fig-result-universe",
+#| fig.width = 10,
+#| fig.height = 5
+df0 <-  dt |> filter(sample_size == 500, xy_correlation == -0.005, 
+                     between(xz_correlation, -0.46, -0.43),
+                     yz_correlation == 0.4) |> arrange(expect)
+#df2 <- df0 |> filter(fml == "mortality ~ pm10 + temp") # test for model spec
+
+p1 <- p0 + 
+  geom_point(aes(x = p_value , y = coef, color = expect), size = 0.5) +  
+  labs(title = "Coefficient vs. p-value") + 
+  theme(legend.position = 'none')
+
+p3 <- p0 + 
+  geom_point(aes(x = p_value, y = coef, color = fml), size = 0.5) +
+  labs(title = "Effect of adding temperature") 
+
+df00 <-  dt |> filter(xy_correlation == -0.005, 
+                     between(xz_correlation, -0.46, -0.43),
+                     yz_correlation == 0.4) |> arrange(expect)
+df4 <- df00 |> filter((fml == "mortality ~ pm10 + temp"))
+
+p5 <- p0 + 
+  geom_point(data = df4, aes(x = p_value, y = coef, color = expect), size = 1) +
+  geom_path(data = df4, aes(x = p_value, y = coef), color = "black",
+            arrow = arrow(type = "open", angle = 30, length = unit(0.1, "inches"))) +
+  scale_color_brewer(palette = "Dark2", direction = -1) +
+  labs(title = "Effect of sample size") 
+
+(p1 | p3 | p5) + plot_annotation(tag_levels = "a") + 
+  plot_layout(guides = 'collect') &
+  theme(legend.position = 'bottom') 
+```
+
+@fig-result-universe shows that result universe of the linear regression model with a) colored by whether the p-value of PM10 is significant (less than 0.05), b) highlighting the effect of adding temperature to the model for a fixed correlation structure, and c) highlighting the effect of increasing sample size.
