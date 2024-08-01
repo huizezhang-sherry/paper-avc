@@ -1,9 +1,11 @@
 ---
 title: "My wonderful paper"
 abstract: "This is the abstract"
-bibliography: references.bib
+#bibliography: references.bib
 documentclass: jds
-format: pdf
+format: 
+  pdf: 
+   keep-tex: true
 preamble: >
   \usepackage{amsfonts,amsmath,amssymb,amsthm}
 editor_options: 
@@ -24,12 +26,15 @@ pm10 <- read_csv(here::here("data", "pm10.csv")) |>
 
 # Introduction
 
-In this paper, a concept called analysis plan is proposed to describe the logical structure of a data analysis. An analysis plan is a set of analysis steps plus their expected outcomes. It is a formal representation of the analysis process and can be used to guide the analysis process, to communicate and compare the analysis process to others, and to evaluate the analysis process. The concept of analysis plan is illustrated with examples and the implications of the concept for data analysis practice is discussed.
+(background)
+
+In this paper, a concept called analysis plan is proposed to describe the logical structure of a data analysis. An analysis plan is a set of analysis steps plus their expected outcomes. It is a formal representation of the analysis process and can be used to guide the analysis process, to communicate and compare the analysis process to others, and to evaluate the analysis process. The concept of analysis plan is illustrated with examples. The implications of the concept for data analysis practice is discussed.
 
 The analysis plan described in this paper should be differentiated from the pre-specifies analysis plan document often used in biostatistics to specifies the hypothesis, data collection mechanism, statistical procedures etc of randomized experiments. 
 
+The rest of the paper is organized as follows: @sec-plan describes the concept of analysis plan in detail. @sec-examples provides examples of analysis plan [more details]. (need another section here or before examples?) @sec-conclusion concludes the paper.
 
-# Analysis plan
+# Analysis plan {#sec-plan}
 
 describe/ define what analysis plan is 
 
@@ -40,25 +45,28 @@ analysis plan as unit tests to divide the "result universe", which allows us to 
 - how would the results change if the value of a unit test change
 - whether our outcome expectation aligns with the plan expectation, meaning whether "it is possible for the combination of plan expectations to produce the outcome expectation"
 
-# Examples
+# Examples {#sec-examples}
+
+Three examples are presented to illustrate how the concept of analysis plan can be applied to data analysis. [toy example]. @sec-linear-reg illustrates how constructing  the result universe in a linear regression model of PM10 on mortality can help understand the impact of sample size, model specification, and variable correlation structure on data analysis. [example three]
 
 ## A toy example
 
-## Linear regression
+## Linear regression {#sec-linear-reg}
 
-Consider a linear regression model to study the effect of PM10 on mortality (provide context of using PM10 to study mortality). Analysts may expect a significant (p-value $\le$ 0.05) PM10 coefficient in the linear model from the literature. There are multiple factors that can affect the outcome expectation of linear regression as such, for example, 1) sample size, 2) model specification, and 3) correlation structure between variables. Temperature is often an important confounder to consider in such study (add reference). 
+Consider a linear regression model to study the effect of PM10 on mortality (provide context of using PM10 to study mortality). Analysts may expect a significant (p-value $\le$ 0.05) PM10 coefficient in the linear model from the literature. This is the *outcome expectation*. There are multiple factors that can affect the outcome expectation of linear regression, which here is called *plan expectation*, for example, 1) sample size, 2) model specification, and 3) correlation structure between variables. Adequate sample size is required to achieve the desired power to detect the significance of PM10 on mortality. Temperature is often an important confounder to consider in such study (add reference). From some domain knowledge, an analyst may expect that the significance of PM10 coefficient can be attained by adding temperature to the model. Analysts may also expect certain correlation structure between PM10, temperature, and mortality, and the distribution of each variable. 
 
-To construct the result universe, we can simulate datasets with different configerations of the above factors. Here, sample sizes of 50, 100, 500, and 1000 are considered. Two model specifications are included: 1) linear model with PM10 as the only covariate ($\text{mortality} \sim \text{PM10}$), 2) linear model with PM10 and temperature as covariates ($\text{mortality} \sim \text{PM10} + \text{temp}$. A grid-based approach is used to simulate correlation structure. Reasonable ranges of correlation between the three variables are
+To build the result universe, datasets can be simulated to either meet and fail these plan expectations, allowing the analysts to observe the significance of PM10 coefficient. Here, sample sizes of 50, 100, 500, and 1000 are considered. Two model specifications are included: 1) linear model with PM10 as the only covariate ($\text{mortality} \sim \text{PM10}$), 2) linear model with PM10 and temperature as covariates ($\text{mortality} \sim \text{PM10} + \text{temp}$). A grid-based approach is used to simulate correlation structure. Reasonable ranges of correlation between the three variables are $\text{cor}(\text{mortality}, \text{PM10}) \in [-0.01, 0]$, $\text{cor}(\text{mortality}, \text{temperature}) \in [-0.6, -0.2]$, and $\text{cor}(\text{PM10}, \text{temperature}) \in [0.2, 0.6]$. 
 
-\begin{align*}
-\text{cor}(\text{mortality}, \text{PM10}) &\in [-0.01, 0] \\ 
-\text{cor}(\text{mortality}, \text{temperature}) &\in [-0.6, -0.2] \\ \text{cor}(\text{PM10}, \text{temperature}) &\in [0.2, 0.6] 
-\end{align*}
+@fig-result-universe shows that result universe of the linear regression model and how a change of decision in one of the plan expectations above affect the outcome expectation. Panel a) is colored by the outcome expectation -- whether a significant p-value is found in the PM10 coefficient. Panel b) shows the effect of adding temperature to the model and the results show that the significance of PM10 coefficient can be achieved by adding temperature to the model for a sample size of 500. Panel c) shows that increasing sample size from 50 to 100 enhances the significance of p-value for PM10 and the significance remains with further increases in sample size. 
 
-```{r}
+A result universe constructed in this example can be presented to analysts to answer the what-if questions raised in the data analysis. What if the sample size is increased? What if temperature is added to the model? What would the results expect to be changed when the correlation structure is different? For analysts, expectations can be used as unit tests to divide the result universe, which allows them to understand the impact of each factor on the outcome expectation.
+
+The result universe also provides a holistic view of how the results obtained by the analysts are situated in all possible results. This can be seen as a direct towards trustworthy data analysis, where the audience of the analysis to exercise their own cognitive model [@grolemund_cognitive_2014] to evaluate the results reported. 
+
+```{r sim-linear-res}
 # Generate correlation matrices 
 corr_grid <- expand.grid(seq(-0.01, -0.001, by = 0.001), 
-                         seq(-0.6, -0.2, 0.05), seq(0.2, 0.6, 0.05))  
+                         seq(-0.6, -0.2, 0.05), seq(0.2, 0.6, 0.05))
 
 # Function to compute correlation matrix for each combination 
 gen_corr_mtx <- function(r1, r2, r3) {   
@@ -71,7 +79,8 @@ gen_corr_mtx <- function(r1, r2, r3) {
 
 # Plan for parallel processing
 corr_mtx <- lapply(1:nrow(corr_grid), function(i) {   
-  gen_corr_mtx(corr_grid[i, 1], corr_grid[i, 2], corr_grid[i, 3]) }) 
+  gen_corr_mtx(corr_grid[i, 1], corr_grid[i, 2], corr_grid[i, 3]) 
+  }) 
 corr_mtx <- corr_mtx[map_lgl(corr_mtx, ~!is.null(.x))]  
 sample_size <- c(50, 100, 500, 1000) 
 model <- c("mortality ~ pm10 + temp", "mortality ~ pm10") |> map(as.formula) 
@@ -82,9 +91,15 @@ generate_data <- function(n, mtx, seed = 123) {
   U <- pnorm(data, mean = 0, sd = 1)   
   set.seed(seed)      
   tibble(mortality = qpois(U[,1], 182), # assume distribution
-         pm10 = qnorm(U[,2], mean = 26, sd = 12),           
+         pm10 = qgamma(U[,2], shape = 6, rate = 0.2),           
          temp = qnorm(U[,3], mean = 55, sd = 16))   
   }  
+
+# test for dist fit
+# fitdist(pm10$pm10, "gamma") -> pm10_fit
+# plot(pm10_fit) # gamma is better than normal for the fit of pm10
+#fitdist(pm10$temp, "norm") -> temp_fit
+# plot(temp_fit)
 
 res <- tibble(corr_mtx = corr_mtx) |> 
   mutate(id = row_number()) |> 
@@ -96,8 +111,10 @@ res <- tibble(corr_mtx = corr_mtx) |>
 
 
 ```{r}
-#| fig.width = 10,
-#| fig.height = 5
+#| label: fig-result-universe
+#| fig-cap: "The result universe of linear regression model to study the effect of PM10 on mortality: a) colored by whether the p-value of PM10is significant (less than 0.05), b) the effect of adding temperature to the model for a sample size of 500, c) the effect of increasing sample size for a fixed correlation structure."
+#| fig.width: 12
+#| fig.height: 12
 dt <- res |>   
   mutate(     
     p_value = fit[2,4],     
@@ -131,50 +148,57 @@ dt2 <- dt |>
 p0 <- dt |> ggplot() +   
   geom_point(aes(x = p_value , y = coef), color = "grey", size = 0.5) +  
   labs(x = "p-value", y = "coefficient") +   
-  scale_color_brewer(palette = "Dark2", direction = -1) +   
   theme_bw() +    
   theme(aspect.ratio = 1, 
         panel.grid.minor = element_blank()) 
 
-p0 + 
-  geom_point(aes(x = p_value , y = coef), size = 0.5) +  
-  facet_grid(as.character(model) ~ sample_size) +    
-  labs(title = "Coefficient vs. p-value")
-```
-
-```{r}
-#| label = "fig-result-universe",
-#| fig.width = 10,
-#| fig.height = 5
 df0 <-  dt |> filter(sample_size == 500, xy_correlation == -0.005, 
                      between(xz_correlation, -0.46, -0.43),
                      yz_correlation == 0.4) |> arrange(expect)
-#df2 <- df0 |> filter(fml == "mortality ~ pm10 + temp") # test for model spec
+df2 <- df0 |> filter(fml == "mortality ~ pm10 + temp") # test for model spec
 
 p1 <- p0 + 
-  geom_point(aes(x = p_value , y = coef, color = expect), size = 0.5) +  
+  geom_point(aes(x = p_value , y = coef, color = expect), size = 0.3) +  
+  scale_color_brewer(palette = "Dark2", direction = -1) +
   labs(title = "Coefficient vs. p-value") + 
   theme(legend.position = 'none')
 
-p3 <- p0 + 
-  geom_point(aes(x = p_value, y = coef, color = fml), size = 0.5) +
+p2 <- p0 + 
+  geom_point(data = df0, aes(x = p_value, y = coef, color = expect), size = 2) +
+  geom_path(data = df0, aes(x = p_value, y = coef), color = "black",
+            arrow = arrow(type = "open", angle = 30, 
+                          length = unit(0.1, "inches"))) +
+  ggrepel::geom_label_repel(
+    data = df0, aes(x = p_value, y = coef, label = fml, color = expect)
+    ) +
+  scale_color_brewer(palette = "Dark2", direction = -1) +
   labs(title = "Effect of adding temperature") 
 
 df00 <-  dt |> filter(xy_correlation == -0.005, 
                      between(xz_correlation, -0.46, -0.43),
                      yz_correlation == 0.4) |> arrange(expect)
-df4 <- df00 |> filter((fml == "mortality ~ pm10 + temp"))
+df <- df00 |> filter((fml == "mortality ~ pm10 + temp"))
 
-p5 <- p0 + 
-  geom_point(data = df4, aes(x = p_value, y = coef, color = expect), size = 1) +
-  geom_path(data = df4, aes(x = p_value, y = coef), color = "black",
-            arrow = arrow(type = "open", angle = 30, length = unit(0.1, "inches"))) +
+
+p3 <- p0 + 
+  geom_point(data = df, aes(x = p_value, y = coef, color = expect), size = 2) +
+  geom_path(data = df, aes(x = p_value, y = coef), color = "black",
+            arrow = arrow(type = "open", angle = 30, 
+                          length = unit(0.1, "inches"))) +
+  ggrepel::geom_label_repel(
+    data = df, aes(x = p_value, y = coef, label = sample_size, color = expect)
+    ) +
   scale_color_brewer(palette = "Dark2", direction = -1) +
   labs(title = "Effect of sample size") 
 
-(p1 | p3 | p5) + plot_annotation(tag_levels = "a") + 
+(p1 | p2) / (p3 | plot_spacer()) + 
+  plot_annotation(tag_levels = "a") + 
   plot_layout(guides = 'collect') &
   theme(legend.position = 'bottom') 
 ```
 
-@fig-result-universe shows that result universe of the linear regression model with a) colored by whether the p-value of PM10 is significant (less than 0.05), b) highlighting the effect of adding temperature to the model for a fixed correlation structure, and c) highlighting the effect of increasing sample size.
+
+# Conclusion {#sec-conclusion}
+
+
+# References

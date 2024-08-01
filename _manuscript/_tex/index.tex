@@ -145,21 +145,29 @@ This is the abstract
 
 \section{Introduction}\label{introduction}
 
+(background)
+
 In this paper, a concept called analysis plan is proposed to describe
 the logical structure of a data analysis. An analysis plan is a set of
 analysis steps plus their expected outcomes. It is a formal
 representation of the analysis process and can be used to guide the
 analysis process, to communicate and compare the analysis process to
 others, and to evaluate the analysis process. The concept of analysis
-plan is illustrated with examples and the implications of the concept
-for data analysis practice is discussed.
+plan is illustrated with examples. The implications of the concept for
+data analysis practice is discussed.
 
 The analysis plan described in this paper should be differentiated from
 the pre-specifies analysis plan document often used in biostatistics to
 specifies the hypothesis, data collection mechanism, statistical
 procedures etc of randomized experiments.
 
-\section{Analysis plan}\label{analysis-plan}
+The rest of the paper is organized as follows: Section~\ref{sec-plan}
+describes the concept of analysis plan in detail.
+Section~\ref{sec-examples} provides examples of analysis plan {[}more
+details{]}. (need another section here or before examples?)
+Section~\ref{sec-conclusion} concludes the paper.
+
+\section{Analysis plan}\label{sec-plan}
 
 describe/ define what analysis plan is
 
@@ -178,57 +186,102 @@ allows us to answer questions like:
   expectations to produce the outcome expectation''
 \end{itemize}
 
-\section{Examples}\label{examples}
+\section{Examples}\label{sec-examples}
+
+Three examples are presented to illustrate how the concept of analysis
+plan can be applied to data analysis. {[}toy example{]}.
+Section~\ref{sec-linear-reg} illustrates how constructing the result
+universe in a linear regression model of PM10 on mortality can help
+understand the impact of sample size, model specification, and variable
+correlation structure on data analysis. {[}example three{]}
 
 \subsection{A toy example}\label{a-toy-example}
 
-\subsection{Linear regression}\label{linear-regression}
+\subsection{Linear regression}\label{sec-linear-reg}
 
 Consider a linear regression model to study the effect of PM10 on
-mortality (provide context of using PM10 to study mortality). From the
-literature, analysts may expect a significant PM10 coefficient in the
-linear model from the literature. This is the outcome expectation:
-p-value of PM10 coefficient is less than 0.05. There are multiple
-factors that can affect the outcome expectation of this analysis, for
-example, 1) sample size, 2) model specification, and 3) correlation
-structure between variables. Temperature is often an important
-confounder to consider in such study (add reference).
+mortality (provide context of using PM10 to study mortality). Analysts
+may expect a significant (p-value \(\le\) 0.05) PM10 coefficient in the
+linear model from the literature. This is the \emph{outcome
+expectation}. There are multiple factors that can affect the outcome
+expectation of linear regression, which here is called \emph{plan
+expectation}, for example, 1) sample size, 2) model specification, and
+3) correlation structure between variables. Adequate sample size is
+required to achieve the desired power to detect the significance of PM10
+on mortality. Temperature is often an important confounder to consider
+in such study (add reference). From some domain knowledge, an analyst
+may expect that the significance of PM10 coefficient can be attained by
+adding temperature to the model. Analysts may also expect certain
+correlation structure between PM10, temperature, and mortality, and the
+distribution of each variable.
 
-To construct the result universe, we can simulate datasets with
-different configerations of the above factors. Here, sample sizes of 50,
-100, 500, and 1000 are considered. Two model specifications are
-included: 1) linear model with PM10 as the only covariate
+To build the result universe, datasets can be simulated to either meet
+and fail these plan expectations, allowing the analysts to observe the
+significance of PM10 coefficient. Here, sample sizes of 50, 100, 500,
+and 1000 are considered. Two model specifications are included: 1)
+linear model with PM10 as the only covariate
 (\(\text{mortality} \sim \text{PM10}\)), 2) linear model with PM10 and
 temperature as covariates
-(\(\text{mortality} \sim \text{PM10} + \text{temp}\). A grid-based
+(\(\text{mortality} \sim \text{PM10} + \text{temp}\)). A grid-based
 approach is used to simulate correlation structure. Reasonable ranges of
 correlation between the three variables are
+\(\text{cor}(\text{mortality}, \text{PM10}) \in [-0.01, 0]\),
+\(\text{cor}(\text{mortality}, \text{temperature}) \in [-0.6, -0.2]\),
+and \(\text{cor}(\text{PM10}, \text{temperature}) \in [0.2, 0.6]\).
 
-\begin{align*}
-\text{cor}(\text{mortality}, \text{PM10}) &\in [-0.01, 0] \\ 
-\text{cor}(\text{mortality}, \text{temperature}) &\in [-0.6, -0.2] \\ \text{cor}(\text{PM10}, \text{temperature}) &\in [0.2, 0.6] 
-\end{align*}
+Figure~\ref{fig-result-universe} shows that result universe of the
+linear regression model and how a change of decision in one of the plan
+expectations above affect the outcome expectation. Panel a) is colored
+by the outcome expectation -- whether a significant p-value is found in
+the PM10 coefficient. Panel b) shows the effect of adding temperature to
+the model and the results show that the significance of PM10 coefficient
+can be achieved by adding temperature to the model for a sample size of
+500. Panel c) shows that increasing sample size from 50 to 100 enhances
+the significance of p-value for PM10 and the significance remains with
+further increases in sample size.
 
-\includegraphics{index_files/figure-pdf/unnamed-chunk-2-1.pdf}
+A result universe constructed in this example can be presented to
+analysts to answer the what-if questions raised in the data analysis.
+What if the sample size is increased? What if temperature is added to
+the model? What would the results expect to be changed when the
+correlation structure is different? For analysts, expectations can be
+used as unit tests to divide the result universe, which allows them to
+understand the impact of each factor on the outcome expectation.
+
+The result universe also provides a holistic view of how the results
+obtained by the analysts are situated in all possible results. This can
+be seen as a direct towards trustworthy data analysis, where the
+audience of the analysis to exercise their own cognitive model
+{[}@grolemund\_cognitive\_2014{]} to evaluate the results reported.
+
+\textsubscript{Source:
+\href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
+Notebook}}
 
 \phantomsection\label{cell-fig-result-universe}
 \begin{figure}[H]
 
 \centering{
 
-\captionsetup{labelsep=none}\includegraphics{index_files/figure-pdf/fig-result-universe-1.pdf}
+\includegraphics{index_files/figure-pdf/fig-result-universe-1.pdf}
 
 }
 
-\caption{\label{fig-result-universe}}
+\caption{\label{fig-result-universe}The result universe of linear
+regression model to study the effect of PM10 on mortality: a) colored by
+whether the p-value of PM10is significant (less than 0.05), b) the
+effect of adding temperature to the model for a sample size of 500, c)
+the effect of increasing sample size for a fixed correlation structure.}
 
 \end{figure}%
 
-Figure~\ref{fig-result-universe} shows that result universe of the
-linear regression model with a) colored by whether the p-value of PM10
-is significant (less than 0.05), b) highlighting the effect of adding
-temperature to the model for a fixed correlation structure, and c)
-highlighting the effect of increasing sample size.
+\textsubscript{Source:
+\href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
+Notebook}}
+
+\section{Conclusion}\label{sec-conclusion}
+
+\section{References}\label{references}
 
 
 
