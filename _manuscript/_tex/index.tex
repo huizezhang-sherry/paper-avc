@@ -120,6 +120,8 @@
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
+\usepackage[]{natbib}
+\bibliographystyle{plainnat}
 \usepackage{bookmark}
 
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
@@ -145,7 +147,7 @@ This is the abstract
 
 \section{Introduction}\label{introduction}
 
-(background)
+{[}background{]}
 
 In this paper, a concept called analysis plan is proposed to describe
 the logical structure of a data analysis. An analysis plan is a set of
@@ -169,21 +171,18 @@ Section~\ref{sec-conclusion} concludes the paper.
 
 \section{Analysis plan}\label{sec-plan}
 
-describe/ define what analysis plan is
-
-analysis plan and outcome plan
-
-analysis plan as unit tests to divide the ``result universe'', which
-allows us to answer questions like:
-
 \begin{itemize}
-\tightlist
 \item
-  how would the results change if the value of a unit test change
+  describe/ define what analysis plan is, expectation (outcome and plan)
 \item
-  whether our outcome expectation aligns with the plan expectation,
-  meaning whether ``it is possible for the combination of plan
-  expectations to produce the outcome expectation''
+  why it is useful to be explicit about expectation?
+
+  \begin{itemize}
+  \tightlist
+  \item
+    expectations can be used to formulate unit tests, which helps to
+    divide the ``result universe''
+  \end{itemize}
 \end{itemize}
 
 \section{Examples}\label{sec-examples}
@@ -229,6 +228,14 @@ correlation between the three variables are
 \(\text{cor}(\text{mortality}, \text{temperature}) \in [-0.6, -0.2]\),
 and \(\text{cor}(\text{PM10}, \text{temperature}) \in [0.2, 0.6]\).
 
+\begin{itemize}
+\item
+  add a paragraph to describe the simulation process
+\item
+  add a fourth panel to describe the comparison of a right/ wrong
+  expectation, i.e.~correlation on PM10 and mortality
+\end{itemize}
+
 Figure~\ref{fig-result-universe} shows that result universe of the
 linear regression model and how a change of decision in one of the plan
 expectations above affect the outcome expectation. Panel a) is colored
@@ -238,21 +245,23 @@ the model and the results show that the significance of PM10 coefficient
 can be achieved by adding temperature to the model for a sample size of
 500. Panel c) shows that increasing sample size from 50 to 100 enhances
 the significance of p-value for PM10 and the significance remains with
-further increases in sample size.
+further increases in sample size. {[}note: weave the ``actual data''
+into the example linear regression model{]}
 
-A result universe constructed in this example can be presented to
-analysts to answer the what-if questions raised in the data analysis.
-What if the sample size is increased? What if temperature is added to
-the model? What would the results expect to be changed when the
-correlation structure is different? For analysts, expectations can be
-used as unit tests to divide the result universe, which allows them to
-understand the impact of each factor on the outcome expectation.
+(these two paragraphs may go to a new section \emph{discussion}) A
+result universe constructed in this example can be presented to analysts
+to answer the what-if questions raised in the data analysis. What if the
+sample size is increased? What if temperature is added to the model?
+What would the results expect to be changed when the correlation
+structure is different? For analysts, expectations can be used as unit
+tests to divide the result universe, which allows them to understand the
+impact of each factor on the outcome expectation.
 
 The result universe also provides a holistic view of how the results
 obtained by the analysts are situated in all possible results. This can
 be seen as a direct towards trustworthy data analysis, where the
 audience of the analysis to exercise their own cognitive model
-{[}@grolemund\_cognitive\_2014{]} to evaluate the results reported.
+\citep{grolemund_cognitive_2014} to evaluate the results reported.
 
 \textsubscript{Source:
 \href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
@@ -281,8 +290,9 @@ Notebook}}
 
 \section{Conclusion}\label{sec-conclusion}
 
-\section{References}\label{references}
 
+\renewcommand\refname{References}
+  \bibliography{references.bib}
 
 
 \end{document}
