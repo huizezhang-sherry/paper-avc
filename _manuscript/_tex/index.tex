@@ -41,14 +41,28 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
 % Make \paragraph and \subparagraph free-standing
+\makeatletter
 \ifx\paragraph\undefined\else
   \let\oldparagraph\paragraph
-  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
 \fi
 \ifx\subparagraph\undefined\else
   \let\oldsubparagraph\subparagraph
-  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
 \fi
+\makeatother
 
 
 \providecommand{\tightlist}{%
@@ -117,6 +131,7 @@
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
 \makeatother
+
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -135,6 +150,7 @@
   urlcolor={Blue},
   pdfcreator={LaTeX via pandoc}}
 
+
 \title{My wonderful paper}
 \author{}
 \date{}
@@ -145,9 +161,20 @@
 This is the abstract
 \end{abstract}
 
+
 \section{Introduction}\label{introduction}
 
-{[}background{]}
+{[}background - In a data analysis workflow{]}
+
+For expert analysts, the expectation of the analysis process is often
+implicit. They may have a mental model of the analysis process and the
+expected results. However, for non-expert analysts, the expectation of
+the analysis process may not be clear. They may not know what to expect
+from the analysis process, or what to look for when an analysis process
+fails the expectation. An analysis plan can help to make the expectation
+of the analysis process explicit. It can help to guide the analysis
+process, to communicate and compare the analysis process to others, and
+to evaluate the analysis process.
 
 In this paper, a concept called analysis plan is proposed to describe
 the logical structure of a data analysis. An analysis plan is a set of
@@ -172,20 +199,136 @@ Section~\ref{sec-conclusion} concludes the paper.
 \section{Analysis plan}\label{sec-plan}
 
 \begin{itemize}
+\tightlist
 \item
   describe/ define what analysis plan is, expectation (outcome and plan)
+
+  \begin{itemize}
+  \tightlist
+  \item
+    expectations can be used to formulate unit tests, they can be used
+    to guide to diagnose in the analysis process: data issue,
+    unreasonable expectation -- expectation is ``wrong''
+  \item
+    some expectations can be about data: e.g.~check temporal gaps in
+    time series data. Some others are statistical checks: sample size,
+    outliers, model specification, or checks based on domain knowledge:
+    include temperature in the mortality \textasciitilde{} PM10 model.
+  \end{itemize}
+\end{itemize}
+
+Q: Whether we should formulate these concept with math notation?? A:
+only if it helps
+
+An analysis plan is a set of analysis steps plus their expected
+outcomes. An analysis plan consists of two parts: outcome expectation
+and plan expectation. Outcome expectation is the expected result of the
+analysis, for example, a significant p-value or a coefficient estimate
+within a certain range. Plan expectation is the expected results from
+the intermediate steps of the analysis, for example, the expected
+distribution of the data, or the expected correlation structure between
+variables.
+
+While there is typically one major result expectation in an analysis,
+multiple plan expectations can be formulated as unit tests to guide the
+analysis process. These plan expectations serve as road marks to test,
+at various stages of the analysis, whether the results are within
+expectation. When the outcome is out of expectation, these plan
+expectations can serve as unit tests to diagnose the analysis process.
+
+\begin{itemize}
+\tightlist
 \item
   why it is useful to be explicit about expectation?
 
   \begin{itemize}
   \tightlist
   \item
-    expectations can be used to formulate unit tests, which helps to
-    divide the ``result universe''
+    with simulation, the unit tests can be used to construct the
+    ``result universe''
+  \item
+    With formulated expectation, one can generate multiple version of
+    the dataset for teaching statistics
   \end{itemize}
 \end{itemize}
 
-\section{Examples}\label{sec-examples}
+When the expectation is formulated, we can also construct values fulfill
+or not fulfill the expectation. With simulation, this allows to
+construct the set of all possible results that can be obtained from the
+analysis process, which we called the result universe. With such a
+result universe, we can see how the results obtained by the analysts are
+situated in all possible results. When accompanied by the result
+universe, it is clearer how different factors in the analysis affects
+the main results. This can be seen as a direct towards trustworthy data
+analysis, where the audience of the analysis to exercise their own
+cognitive model \citep{grolemund_cognitive_2014} to evaluate the results
+reported.
+
+\subsection{A toy example}\label{a-toy-example}
+
+Let's think about a 5-day step count. You make a resolution to walk on
+average 5000 steps a day (your expectation) and using an app to record
+your step count. After 5 days, the app tells you've walked on average
+8000 steps.
+
+It is easy to come up with reasons why an 8000 average step is resulted
+based on common sense:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  you may run a 10k on day 1, resulting a high step count on the day
+  (outlier on the right).
+\item
+  you left your phone at home on day 3, resulting a zero or minimal step
+  count on the day (outlier on the left).
+\item
+  you may realise the step count may increase since you were in a hiking
+  trip in the last five days (average shift).
+\end{enumerate}
+
+Based on these reasons, you may devise a set of unit tests to check the
+step count data, i.e.~check the maximum and minimum step count, check
+the difference between each day.
+
+\begin{itemize}
+\tightlist
+\item
+  If the daily count looks like c(4000, 5000, 5500, 5500, 20000), the
+  maximum check will flag the data for investigate the maximum. The
+  difference between days test will also flag the data
+\item
+  If the daily count looks like c(20000, 20000, 20000, 20000, 20000),
+  the maximum check will flag the data for investigate the maximum.
+\end{itemize}
+
+Some part of the space is impossible: c(0, 4000, 5000, 5500, 5500) is
+flagged by the minimal tests but won't cause an average of 8000 average
+step.
+
+The statistical procedure of averaging 5 numbers ``around 5000'' to get
+a mean of 5000 is \emph{consistent} meaning if all the numbers are
+around 5000, we are guaranteed to get a mean around 5000. We could
+devise 5 unit tests to check each number. Since you're more familiar
+with your daily life, you may realise the step count may increase since
+you were in a hiking trip in the last two days. This may prompt you to
+check the step count.
+
+In a data analysis, it is not practical to check every entry of the
+data, a similar strategy of devising tests to check for
+
+\begin{itemize}
+\tightlist
+\item
+  The combination of unit tests are not unique
+\item
+  The unit tests provide guidance for diagnosing the results, but are
+  not red flags: c(2000, 2000, 5000, 8000, 8000) will likely to fail the
+  max diff test but receive a within expectation mean.
+\end{itemize}
+
+\section{Applications}\label{sec-examples}
 
 Three examples are presented to illustrate how the concept of analysis
 plan can be applied to data analysis. {[}toy example{]}.
@@ -193,8 +336,6 @@ Section~\ref{sec-linear-reg} illustrates how constructing the result
 universe in a linear regression model of PM10 on mortality can help
 understand the impact of sample size, model specification, and variable
 correlation structure on data analysis. {[}example three{]}
-
-\subsection{A toy example}\label{a-toy-example}
 
 \subsection{Linear regression}\label{sec-linear-reg}
 
@@ -248,21 +389,6 @@ the significance of p-value for PM10 and the significance remains with
 further increases in sample size. {[}note: weave the ``actual data''
 into the example linear regression model{]}
 
-(these two paragraphs may go to a new section \emph{discussion}) A
-result universe constructed in this example can be presented to analysts
-to answer the what-if questions raised in the data analysis. What if the
-sample size is increased? What if temperature is added to the model?
-What would the results expect to be changed when the correlation
-structure is different? For analysts, expectations can be used as unit
-tests to divide the result universe, which allows them to understand the
-impact of each factor on the outcome expectation.
-
-The result universe also provides a holistic view of how the results
-obtained by the analysts are situated in all possible results. This can
-be seen as a direct towards trustworthy data analysis, where the
-audience of the analysis to exercise their own cognitive model
-\citep{grolemund_cognitive_2014} to evaluate the results reported.
-
 \textsubscript{Source:
 \href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
 Notebook}}
@@ -293,6 +419,7 @@ Notebook}}
 
 \renewcommand\refname{References}
   \bibliography{references.bib}
+
 
 
 \end{document}
