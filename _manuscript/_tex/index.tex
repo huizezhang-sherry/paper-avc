@@ -198,43 +198,55 @@ Section~\ref{sec-conclusion} concludes the paper.
 
 \section{Analysis plan}\label{sec-plan}
 
-\begin{itemize}
-\tightlist
-\item
-  describe/ define what analysis plan is, expectation (outcome and plan)
-
-  \begin{itemize}
-  \tightlist
-  \item
-    expectations can be used to formulate unit tests, they can be used
-    to guide to diagnose in the analysis process: data issue,
-    unreasonable expectation -- expectation is ``wrong''
-  \item
-    some expectations can be about data: e.g.~check temporal gaps in
-    time series data. Some others are statistical checks: sample size,
-    outliers, model specification, or checks based on domain knowledge:
-    include temperature in the mortality \textasciitilde{} PM10 model.
-  \end{itemize}
-\end{itemize}
-
 Q: Whether we should formulate these concept with math notation?? A:
 only if it helps
 
-An analysis plan is a set of analysis steps plus their expected
-outcomes. An analysis plan consists of two parts: outcome expectation
-and plan expectation. Outcome expectation is the expected result of the
-analysis, for example, a significant p-value or a coefficient estimate
-within a certain range. Plan expectation is the expected results from
-the intermediate steps of the analysis, for example, the expected
-distribution of the data, or the expected correlation structure between
-variables.
+TODO: more about analysis plan itself here
 
-While there is typically one major result expectation in an analysis,
-multiple plan expectations can be formulated as unit tests to guide the
-analysis process. These plan expectations serve as road marks to test,
-at various stages of the analysis, whether the results are within
-expectation. When the outcome is out of expectation, these plan
-expectations can serve as unit tests to diagnose the analysis process.
+TODO: what if the expectation is ``wrong''
+
+An analysis plan is a set of analysis steps combined with expectations.
+Expectations represent our belief about certain aspects of the analysis,
+independent of the analysis itself. It can be divided into two types:
+\emph{outcome expectation} and \emph{plan expectation}. Outcome
+expectation refers to what we anticipate from the main result of the
+analysis based on prior knowledge. They shape how we interpret the
+results and assess whether they are consistent with existing knowledge
+or indicate the need for updates \citep{grolemund_cognitive_2014}. For
+example, in public health, prior research shows the average increase in
+mortality rate per unit increase in PM10 is about 0.50\%
+\citep{liu2019ambient}. This serves as an expectation for similar future
+studies. Plan expectations concern the intermediate steps within the
+analysis rather than the final outcome. They serve as checkpoints to
+detect deflection in the analysis process For example, we may expect
+temporal data to be ordered with no gaps and duplicates, or expect that
+temperature will be a significant covariate in the linear regression
+model of PM10 on mortality.
+
+(might be useful) Analysis plans can be constructed at various
+granularities, at the highest level, one may only has a plan of the
+specific method used for analysing data and the expected outcome. This
+provides little guidance when a deviation from expectation occurs. At
+the lowest level, one may have a plan for each data entry and every data
+handling steps. This provides too much detail and may not be practical
+in practice.
+
+Experienced analysts often have implicit expectation about the outcome
+and rely on a few ``directional signs'' to check when the outcome
+deviate from those expectation. However, these expectations are rarely
+made explicit within the analysis workflow. This makes it challenging
+for consumers of the analysis to evaluate the results, since it becomes
+difficult to disentangle whether discrepancies arise from differing
+expectations or from the use of statistical technique, without running
+the analysis themselves. Non-expert analysts, lacking prior knowledge or
+instinct, may not have clear expectations of the results. This can lead
+to reduced confidence of the analysis and makes it more difficult and
+time-consuming to diagnose the cause of the deviation when the results
+don't align with expectations.
+
+By explicitly formulating these expectations, an analysis plan can guide
+the analysis process, facilitate the communication and comparison with
+other analyses and evaluate the validity of the results.
 
 \begin{itemize}
 \tightlist
@@ -243,6 +255,8 @@ expectations can serve as unit tests to diagnose the analysis process.
 
   \begin{itemize}
   \tightlist
+  \item
+    and can be used to guide the analysis process
   \item
     with simulation, the unit tests can be used to construct the
     ``result universe''
