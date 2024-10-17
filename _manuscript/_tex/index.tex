@@ -166,6 +166,20 @@ This is the abstract
 
 {[}background - In a data analysis workflow{]}
 
+In a data analysis workflow -\textgreater{} going back to diagnose the
+descripency between the expectation and the result is often
+time-consuming and challenging.
+
+For consumers of data analysis, it is often difficult to evaluate the
+analysis outcome. Not always have the script to run, even difficult when
+different expectations are held.
+
+We propose here a concept called analysis plan to make the expectation
+of the analysis process explicit. It can help to guide the analysis
+process, to communicate and compare the analysis process to others, and
+to evaluate the analysis process. (think more closer here how our
+approach help to solve the problem)
+
 For expert analysts, the expectation of the analysis process is often
 implicit. They may have a mental model of the analysis process and the
 expected results. However, for non-expert analysts, the expectation of
@@ -333,6 +347,28 @@ data, a similar strategy of devising tests to check for
   max diff test but receive a within expectation mean.
 \end{itemize}
 
+\section{Method}\label{method}
+
+\subsection{Toy example revisited}\label{toy-example-revisited}
+
+\begin{itemize}
+\item
+  provide interpretation at different scenarios:
+
+  \begin{enumerate}
+  \def\labelenumi{\arabic{enumi})}
+  \tightlist
+  \item
+    one test is flagged, the prediction is as expected:
+  \item
+    multiple tests are flagged, the prediction is unexpected,
+  \item
+    no test is flagged, the prediction is unexpected,
+  \item
+    no test is flagged, the prediction is as expected
+  \end{enumerate}
+\end{itemize}
+
 \section{Applications}\label{sec-examples}
 
 Three examples are presented to illustrate how the concept of analysis
@@ -418,6 +454,16 @@ the effect of increasing sample size for a fixed correlation structure.}
 \textsubscript{Source:
 \href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
 Notebook}}
+
+\section{Discussion}\label{discussion}
+
+\begin{itemize}
+\item
+  how to systematically simulate data is still unknown, sensitivity of
+  the simulation to the resutls
+\item
+  currently no automated way to generate unit tests
+\end{itemize}
 
 \section{Conclusion}\label{sec-conclusion}
 

@@ -28,6 +28,12 @@ pm10 <- read_csv(here::here("data", "pm10.csv")) |>
 
 [background - In a data analysis workflow] 
 
+In a data analysis workflow -> going back to diagnose the descripency between the expectation and the result is often time-consuming and challenging.
+
+For consumers of data analysis, it is often difficult to evaluate the analysis outcome. Not always have the script to run, even difficult when different expectations are held.
+
+We propose here a concept called analysis plan to make the expectation of the analysis process explicit. It can help to guide the analysis process, to communicate and compare the analysis process to others, and to evaluate the analysis process. (think more closer here how our approach help to solve the problem)
+
 For expert analysts, the expectation of the analysis process is often implicit. They may have a mental model of the analysis process and the expected results. However, for non-expert analysts, the expectation of the analysis process may not be clear. They may not know what to expect from the analysis process, or what to look for when an analysis process fails the expectation. An analysis plan can help to make the expectation of the analysis process explicit. It can help to guide the analysis process, to communicate and compare the analysis process to others, and to evaluate the analysis process.
 
 In this paper, a concept called analysis plan is proposed to describe the logical structure of a data analysis. An analysis plan is a set of analysis steps plus their expected outcomes. It is a formal representation of the analysis process and can be used to guide the analysis process, to communicate and compare the analysis process to others, and to evaluate the analysis process. The concept of analysis plan is illustrated with examples. The implications of the concept for data analysis practice is discussed.
@@ -79,6 +85,17 @@ In a data analysis, it is not practical to check every entry of the data, a simi
 
 - The combination of unit tests are not unique
 - The unit tests provide guidance for diagnosing the results, but are not red flags: c(2000, 2000, 5000, 8000, 8000) will likely to fail the max diff test but receive a within expectation mean.
+
+# Method 
+
+## Toy example revisited 
+
+* provide interpretation at different scenarios:
+    
+  1) one test is flagged, the prediction is as expected: 
+  2) multiple tests are flagged, the prediction is unexpected, 
+  3) no test is flagged, the prediction is unexpected, 
+  4) no test is flagged, the prediction is as expected
 
 
 # Applications {#sec-examples}
@@ -231,6 +248,12 @@ p3 <- p0 +
   plot_layout(guides = 'collect') &
   theme(legend.position = 'bottom') 
 ```
+
+# Discussion
+
+* how to systematically simulate data is still unknown, sensitivity of the simulation to the resutls 
+
+* currently no automated way to generate unit tests
 
 
 # Conclusion {#sec-conclusion}
