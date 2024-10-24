@@ -349,6 +349,50 @@ data, a similar strategy of devising tests to check for
 
 \section{Method}\label{method}
 
+\begin{itemize}
+\item
+  multiple tests can be generated to diagnose different aspects of an
+  analysis
+\item
+  good tests
+
+  \begin{enumerate}
+  \def\labelenumi{\arabic{enumi})}
+  \tightlist
+  \item
+    are responsive to an unexpected result - accuracy,
+  \item
+    motivate actions of analysts to investigate the results. This points
+    towards a smaller set of independent tests
+  \end{enumerate}
+\item
+  Since both the plan/ outcome expectations can be phrased as unit
+  tests, which output binary outcomes, consider using the plan
+  expectations as predictors of the outcome expectations. This allows to
+  generate the confusion matrix of predicting the outcome with the plan
+  expectation.
+\item
+  For an analysis, ideally, good plan expectations should maximize the
+  detection of unexpected outcomes while minimize the false positive
+  discovery, which suggest the use of precision and recall (REF) for
+  evaluating the performance of the plan expectations.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    precision: the proportion of unexpected results (TP) out of all the
+    predicted unexpected results (TP + FP)
+  \item
+    recall: the proportion of unexpected results (TP) out of all the
+    actual unexpected results (TP + FN)
+  \end{itemize}
+\item
+  A logic regression (ref) is used to model the relationship between the
+  plan and outcome expectations. (justify the use of Logic regression)
+\item
+  on independence of the tests
+\end{itemize}
+
 \subsection{Toy example revisited}\label{toy-example-revisited}
 
 \begin{itemize}
