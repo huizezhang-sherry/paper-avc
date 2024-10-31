@@ -161,6 +161,14 @@
 This is the abstract
 \end{abstract}
 
+\renewcommand*\contentsname{Table of contents}
+{
+\hypersetup{linkcolor=}
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+
+\newpage
 
 \section{Introduction}\label{introduction}
 
@@ -210,7 +218,19 @@ Section~\ref{sec-examples} provides examples of analysis plan {[}more
 details{]}. (need another section here or before examples?)
 Section~\ref{sec-conclusion} concludes the paper.
 
+\section{Literature review}\label{literature-review}
+
+\subsection{Diagnosing unexpected outcomes in data
+analysis}\label{diagnosing-unexpected-outcomes-in-data-analysis}
+
+\subsection{Unit tests}\label{unit-tests}
+
+\subsection{Data quality checks}\label{data-quality-checks}
+
 \section{Analysis plan}\label{sec-plan}
+
+\subsection{Framing checks into unit
+tests}\label{framing-checks-into-unit-tests}
 
 Q: Whether we should formulate these concept with math notation?? A:
 only if it helps
@@ -348,6 +368,9 @@ data, a similar strategy of devising tests to check for
 \end{itemize}
 
 \section{Method}\label{method}
+
+\subsection{A workflow to assess the quality of unit
+tests}\label{a-workflow-to-assess-the-quality-of-unit-tests}
 
 \begin{itemize}
 \item
@@ -504,7 +527,12 @@ Notebook}}
 \begin{itemize}
 \item
   how to systematically simulate data is still unknown, sensitivity of
-  the simulation to the resutls
+  the simulation to the results
+\item
+  plotting is a critical way to check data and they can still be frame
+  into a unit test. it is a open problem to how to encode the
+  visualization into the unit tests. Maybe a procedure like confirm plot
+  (this looks alright to you) and then press the button to continue
 \item
   currently no automated way to generate unit tests
 \end{itemize}

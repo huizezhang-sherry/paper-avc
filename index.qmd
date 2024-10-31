@@ -7,6 +7,7 @@ documentclass: jds
 format:
   pdf:
    keep-tex: true
+   toc: true
 preamble: >
   \usepackage{amsfonts,amsmath,amssymb,amsthm}
 editor_options: 
@@ -23,6 +24,8 @@ pm10 <- read_csv(here::here("data", "pm10.csv")) |>
   filter(!is.na(pm10)) |>    
   mutate(season = as.factor(season))  
 ```
+
+\newpage
 
 # Introduction
 
@@ -42,7 +45,17 @@ The analysis plan described in this paper should be differentiated from the pre-
 
 The rest of the paper is organized as follows: @sec-plan describes the concept of analysis plan in detail. @sec-examples provides examples of analysis plan [more details]. (need another section here or before examples?) @sec-conclusion concludes the paper.
 
+# Literature review
+
+## Diagnosing unexpected outcomes in data analysis
+
+## Unit tests
+
+## Data quality checks
+
 # Analysis plan {#sec-plan}
+
+## Framing checks into unit tests
 
 Q: Whether we should formulate these concept with math notation?? A: only if it helps 
 
@@ -87,6 +100,8 @@ In a data analysis, it is not practical to check every entry of the data, a simi
 - The unit tests provide guidance for diagnosing the results, but are not red flags: c(2000, 2000, 5000, 8000, 8000) will likely to fail the max diff test but receive a within expectation mean.
 
 # Method 
+
+## A workflow to assess the quality of unit tests
 
 - multiple tests can be generated to diagnose different aspects of an analysis 
 - good tests 
@@ -268,7 +283,9 @@ p3 <- p0 +
 
 # Discussion
 
-* how to systematically simulate data is still unknown, sensitivity of the simulation to the resutls 
+* how to systematically simulate data is still unknown, sensitivity of the simulation to the results 
+
+* plotting is a critical way to check data and they can still be frame into a unit test. it is a open problem to how to encode the visualization into the unit tests. Maybe a procedure like confirm plot (this looks alright to you) and then press the button to continue
 
 * currently no automated way to generate unit tests
 
