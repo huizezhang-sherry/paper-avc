@@ -158,7 +158,23 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-This is the abstract
+Unexpected results in data analysis can prompt researchers to examine
+data quality and analysis steps. While some researchers can typically
+diagnose issues effectively with a few checks, others may struggle to
+identify appropriate checks to diagnose the problem. {[}an example of
+check{]} These checks are often informal and difficult to trace and
+discuss in publications, resulting in others questioning the
+trustworthiness of the analysis. To address this, we formalize the
+informal checks into an \emph{analysis plan} that encompasses the
+analysis steps and (the unit tests): one test for whether the result
+meets expectations and multiple tests for checking the analysis. We then
+present a procedure to assess the quality of these unit tests based on
+their accuracy and redundancy on simulated versions of the original
+data. The accuracy is assessed using binary classification metrics,
+\emph{i.e.}, precision and recall, while redundancy is calculated using
+mutual information. This procedure can be used to conduct a sensitivity
+analysis, compare different analysis plans, and to identify the optimal
+cutoff point for the unit tests.
 \end{abstract}
 
 \renewcommand*\contentsname{Table of contents}
@@ -172,45 +188,41 @@ This is the abstract
 
 \section{Introduction}\label{introduction}
 
-{[}background - In a data analysis workflow{]}
+In a data analysis, an experienced researcher can often quickly assess
+whether a result meets their expectation, while others may be unsure of
+what to anticipate from the analysis or how to recognize when results
+diverge form expected norms. (These expectations are often based on
+prior knowledge, domain expertise, or common sense and they can often be
+framed into a Boolean question that can be answered by a unit test. For
+example, in a linear regression model, one may expect the p-value of the
+coefficient to be less than 0.05. On top of the expectation on the final
+results, researchers may also have expectations on the intermediate
+steps of the analysis process. For example, one may expect the data
+doesn't contain outliers, etc. These expectations are often checked
+early on to prevent an unexpected propagate through the analysis
+process.)
 
-In a data analysis workflow -\textgreater{} going back to diagnose the
-descripency between the expectation and the result is often
-time-consuming and challenging.
+This expectation-setting process is often implicit and rarely documented
+or discussed in publications. (There are most publication requires open
+source code for publication, however, it is no instruction or guidance
+on checking \ldots). Yet, making them explicit is crucial for 1) helping
+junior researchers interpret results and diagnose the unexpected, 2)
+providing checkpoints that support independent replication or
+application of methods to new data, 3) aligning assumptino across
+researchers from different backgrounds.
 
-For consumers of data analysis, it is often difficult to evaluate the
-analysis outcome. Not always have the script to run, even difficult when
-different expectations are held.
-
-We propose here a concept called analysis plan to make the expectation
-of the analysis process explicit. It can help to guide the analysis
-process, to communicate and compare the analysis process to others, and
-to evaluate the analysis process. (think more closer here how our
-approach help to solve the problem)
-
-For expert analysts, the expectation of the analysis process is often
-implicit. They may have a mental model of the analysis process and the
-expected results. However, for non-expert analysts, the expectation of
-the analysis process may not be clear. They may not know what to expect
-from the analysis process, or what to look for when an analysis process
-fails the expectation. An analysis plan can help to make the expectation
-of the analysis process explicit. It can help to guide the analysis
-process, to communicate and compare the analysis process to others, and
-to evaluate the analysis process.
-
-In this paper, a concept called analysis plan is proposed to describe
-the logical structure of a data analysis. An analysis plan is a set of
-analysis steps plus their expected outcomes. It is a formal
-representation of the analysis process and can be used to guide the
-analysis process, to communicate and compare the analysis process to
-others, and to evaluate the analysis process. The concept of analysis
-plan is illustrated with examples. The implications of the concept for
-data analysis practice is discussed.
-
-The analysis plan described in this paper should be differentiated from
-the pre-specifies analysis plan document often used in biostatistics to
-specifies the hypothesis, data collection mechanism, statistical
-procedures etc of randomized experiments.
+In this paper, we formalize these informal checks into an \emph{analysis
+plan} comprising the analysis steps along with the associated unit
+tests. This formalization allows us to examine assumptions made about
+the data during analysis and to compare different unit tests in
+diagnosing unexpected outcomes. We then introduce a procedure to assess
+the quality of these unit tests based on their accuracy and redundancy
+across simulated version of the original data. The accuracy is assessed
+using binary classification metrics -- precision and recall -- while
+redundancy is measured using mutual information. We illustrate these
+concepts with a simple step count example and a scenario of diagnosing
+unexpected regression results when studying the effect of PM10 on
+mortality.
 
 The rest of the paper is organized as follows: Section~\ref{sec-plan}
 describes the concept of analysis plan in detail.
@@ -223,9 +235,17 @@ Section~\ref{sec-conclusion} concludes the paper.
 \subsection{Diagnosing unexpected outcomes in data
 analysis}\label{diagnosing-unexpected-outcomes-in-data-analysis}
 
+TODO: what if the expectation is ``wrong''
+
 \subsection{Unit tests}\label{unit-tests}
 
 \subsection{Data quality checks}\label{data-quality-checks}
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{pointblank}, \texttt{assertthat}
+\end{itemize}
 
 \section{Analysis plan}\label{sec-plan}
 
@@ -234,15 +254,6 @@ tests}\label{framing-checks-into-unit-tests}
 
 Q: Whether we should formulate these concept with math notation?? A:
 only if it helps
-
-TODO: more about analysis plan itself here
-
-TODO: what if the expectation is ``wrong''
-
-The whole point being how can be build trust in other's analysis. Some
-provides scripts to run the analysis but that's not enough. We need to
-know what to expect from the analysis and that is often not explicitly
-specified.
 
 An analysis plan is a set of analysis steps combined with expectations.
 Expectations represent our belief about certain aspects of the analysis,
