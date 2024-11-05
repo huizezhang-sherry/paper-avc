@@ -31,7 +31,7 @@ pm10 <- read_csv(here::here("data", "pm10.csv")) |>
 
 In a data analysis, an experienced researcher can often quickly assess whether a result meets their expectation, while others may be unsure of what to anticipate from the analysis or how to recognize when results diverge form expected norms. (These expectations are often based on prior knowledge, domain expertise, or common sense and they can often be framed into a Boolean question that can be answered by a unit test. For example, in a linear regression model, one may expect the p-value of the coefficient to be less than 0.05. On top of the expectation on the final results, researchers may also have expectations on the intermediate steps of the analysis process. For example, one may expect the data doesn't contain outliers, etc. These expectations are often checked early on to prevent an unexpected propagate through the analysis process.)
 
-This expectation-setting process is often implicit and rarely documented or discussed in publications. (There are most publication requires open source code for publication, however, it is no instruction or guidance on checking ...).  Yet, making them explicit is crucial for 1) helping junior researchers interpret results and diagnose the unexpected, 2) providing checkpoints that support independent replication or application of methods to new data, 3) aligning assumptino across researchers from different backgrounds.
+This expectation-setting process is often implicit and rarely documented or discussed in publications. (There are most publication requires open source code for publication, however, it is no instruction or guidance on checking ...).  Yet, making them explicit is crucial for 1) helping junior researchers interpret results and diagnose the unexpected, 2) providing checkpoints that support independent replication or application of methods to new data, 3) aligning assumption across researchers from different backgrounds.
 
 In this paper, we formalize these informal checks into an *analysis plan* comprising the analysis steps along with the associated unit tests. This formalization allows us to examine assumptions made about the data during analysis and to compare different unit tests in diagnosing unexpected outcomes. We then introduce a procedure to assess the quality of these unit tests based on their accuracy and redundancy across simulated version of the original data. The accuracy is assessed using binary classification metrics -- precision and recall -- while redundancy is measured using mutual information. We illustrate these concepts with a simple step count example and a scenario of diagnosing unexpected regression results when studying the effect of PM10 on mortality.
 
@@ -41,13 +41,30 @@ The rest of the paper is organized as follows: @sec-plan describes the concept o
 
 ## Diagnosing unexpected outcomes in data analysis
 
+[@peng_diagnosing_2021]
+
 TODO: what if the expectation is "wrong"
+
+## Data analysis checks in statistical software
+  
+  * The `assertr` package [@assertr] provides a set of functions to check the quality of data, including the presence of missing values, the distribution of variables, and the relationship between variables. 
+  * Similarly, the `pointblank` package [@pointblank] is a data validation tool that allows users to define data quality checks. 
+  
+  For model checks, 
+  
+  * the `performance` package [@performance] provides a set of functions to assess the performance of a model, including residual analysis, goodness-of-fit tests. 
+  * The `yardstick` package [@yardstick] provides the calculation of model performance metrics in the `tidymodels` [@tidymodels] ecosystem. 
 
 ## Unit tests
 
-## Data quality checks
+Why develop unit tests in software engineering? Because it is difficult to predict the outcome of a program, especially when the program is complex. Because the loss associated with a program failure is costly. 
 
-- `pointblank`, `assertthat`
+Software testing relies on "oracles" to provide the expected output necessary for verifying test results. For example, to test whether the program correctly calculates 1 + 1, one need to supply the correct answer, 2. However, establishing this "correct" output can sometimes be challenging, where obtaining a solution may be difficult without the program itself. This situation leads to the oracle problem [@barr2014oracle]. In data analysis, the similar oracle problem can happen, as the "truth" of an outcome, the expectation, depends on the underlying theory or interpretation. For example, in a linear regression model, the significance of a coefficient may be expected or unexpected based on the theory, making it challenging for researcher with a different theory to assess the results and the analysis.
+
+Existing tools for checks in data analysis including those check for data quality and model diagnostics. In software development, 
+
+* the `testthat` package [@testthat] provides the infrastructure for testing R code. It allows users to write unit tests for functions and packages.
+* The `assertthat` package [@assertthat] helps to write assertion statements that are supposed to be true at a certain point in the code for defensive programming.  
 
 # Analysis plan {#sec-plan}
 
