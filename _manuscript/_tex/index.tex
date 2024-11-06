@@ -242,6 +242,9 @@ TODO: what if the expectation is ``wrong''
 \subsection{Data analysis checks in statistical
 software}\label{data-analysis-checks-in-statistical-software}
 
+In data analysis, checks are often performed to ensure the quality of
+the data and the validity of the model. For data checks,
+
 \begin{itemize}
 \tightlist
 \item
@@ -268,11 +271,20 @@ For model checks,
   \citep{tidymodels} ecosystem.
 \end{itemize}
 
+These checks test on specific aspect of the data or the model but
+doesn't reflect the underlying assumption of the data analysts about the
+data or the problem context. It may be obvious to see the assumption if
+someone is testing for data quality on whether a column in the data
+frame is between two values. In a much complex analysis, it is difficult
+to trace the assumptions made by the data analysts. Currently, most of
+these assumptions are not documented or discussed in the analysis
+process, or at least in a machine readable format.
+
 \subsection{Unit tests}\label{unit-tests}
 
 Why develop unit tests in software engineering? Because it is difficult
 to predict the outcome of a program, especially when the program is
-complex.
+complex. Because the loss associated with a program failure is costly.
 
 Software testing relies on ``oracles'' to provide the expected output
 necessary for verifying test results. For example, to test whether the
@@ -438,48 +450,56 @@ data, a similar strategy of devising tests to check for
 \subsection{A workflow to assess the quality of unit
 tests}\label{a-workflow-to-assess-the-quality-of-unit-tests}
 
+In real-world applications, it is rare to create a set of unit tests can
+fully guarantee expected results. On one hand, there is the cost of
+effort involved in manually developing all these tests; on the other,
+there is the inherent complexity of the problem. (can we - if we're
+thriving for detecting 95\% of the cause?). However, the quality of unit
+tests can be evaluated by simulated data. One set of tests is considered
+better than another if a small set of tests can reliably detect
+unexpected outcomes, which brings two criteria in the evaluation metric:
+accuracy and parsimony.
+
+Accuracy refers to a set of tests' ability to accurately detect
+unexpected outcomes while minimizing false positives and false
+negatives. A false positive can indicate (caution or skepticism on
+checking the data), whereas a false negative suggests the tests may lack
+sensitivity to unexpected outcomes. Since both plan and outcome
+expectations can be framed as unit tests with binary outcomes, one
+approach is to predict the outcome expectation based on the plan
+expectation. Performance of the tests can then be evaluated using
+precision and recall metrics from the confusion matrix:
+
+\begin{itemize}
+\tightlist
+\item
+  precision: the proportion of correctly identified unexpected results
+  (true positives) out of all the predicted unexpected results (true
+  positives + false positives)
+\item
+  recall: the proportion of correctly identified unexpected results
+  (true positives) out of all the actual unexpected results (true
+  positives + false negatives)
+\end{itemize}
+
+The second criteria is parsimony in the tests. While tests may score
+high on accuracy, they may be less effective at explaining the reasons
+behind unexpected results. This could happen if a set of tests are all
+tangentially related to the cause of the unexpected results, but none
+addressing the root cause. It may also occur if the tests are correlated
+with one another, leading to redundancy.
+
 \begin{itemize}
 \item
-  multiple tests can be generated to diagnose different aspects of an
-  analysis
+  explain mutual information
 \item
-  good tests
-
-  \begin{enumerate}
-  \def\labelenumi{\arabic{enumi})}
-  \tightlist
-  \item
-    are responsive to an unexpected result - accuracy,
-  \item
-    motivate actions of analysts to investigate the results. This points
-    towards a smaller set of independent tests
-  \end{enumerate}
+  explain logic regression
 \item
-  Since both the plan/ outcome expectations can be phrased as unit
-  tests, which output binary outcomes, consider using the plan
-  expectations as predictors of the outcome expectations. This allows to
-  generate the confusion matrix of predicting the outcome with the plan
-  expectation.
-\item
-  For an analysis, ideally, good plan expectations should maximize the
-  detection of unexpected outcomes while minimize the false positive
-  discovery, which suggest the use of precision and recall (REF) for
-  evaluating the performance of the plan expectations.
-
-  \begin{itemize}
-  \tightlist
-  \item
-    precision: the proportion of unexpected results (TP) out of all the
-    predicted unexpected results (TP + FP)
-  \item
-    recall: the proportion of unexpected results (TP) out of all the
-    actual unexpected results (TP + FN)
-  \end{itemize}
+  explain combining precision, recall, and independence together through
+  ``means''
 \item
   A logic regression (ref) is used to model the relationship between the
   plan and outcome expectations. (justify the use of Logic regression)
-\item
-  on independence of the tests
 \end{itemize}
 
 \subsection{Toy example revisited}\label{toy-example-revisited}
@@ -600,7 +620,9 @@ Notebook}}
   visualization into the unit tests. Maybe a procedure like confirm plot
   (this looks alright to you) and then press the button to continue
 \item
-  currently no automated way to generate unit tests
+  currently no automated way to generate unit tests. It is interesting
+  to see the automation of generating unit tests, although it requires
+  the inputs from experts across a wide array of common scenarios.
 \end{itemize}
 
 \section{Conclusion}\label{sec-conclusion}

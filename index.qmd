@@ -47,6 +47,8 @@ TODO: what if the expectation is "wrong"
 
 ## Data analysis checks in statistical software
   
+  In data analysis, checks are often performed to ensure the quality of the data and the validity of the model. For data checks,  
+  
   * The `assertr` package [@assertr] provides a set of functions to check the quality of data, including the presence of missing values, the distribution of variables, and the relationship between variables. 
   * Similarly, the `pointblank` package [@pointblank] is a data validation tool that allows users to define data quality checks. 
   
@@ -54,6 +56,8 @@ TODO: what if the expectation is "wrong"
   
   * the `performance` package [@performance] provides a set of functions to assess the performance of a model, including residual analysis, goodness-of-fit tests. 
   * The `yardstick` package [@yardstick] provides the calculation of model performance metrics in the `tidymodels` [@tidymodels] ecosystem. 
+
+These checks test on specific aspect of the data or the model but doesn't reflect the underlying assumption of the data analysts about the data or the problem context. It may be obvious to see the assumption if someone is testing for data quality on whether a column in the data frame is between two values. In a much complex analysis, it is difficult to trace the assumptions made by the data analysts. Currently, most of these assumptions are not documented or discussed in the analysis process, or at least in a machine readable format. 
 
 ## Unit tests
 
@@ -112,21 +116,21 @@ In a data analysis, it is not practical to check every entry of the data, a simi
 
 ## A workflow to assess the quality of unit tests
 
-- multiple tests can be generated to diagnose different aspects of an analysis 
-- good tests 
-    1) are responsive to an unexpected result - accuracy, 
-    2) motivate actions of analysts to investigate the results. This points towards a smaller set of independent tests
+In real-world applications, it is rare to create a set of unit tests can fully guarantee expected results. On one hand, there is the cost of effort involved in manually developing all these tests; on the other, there is the inherent complexity of the problem. (can we - if we're thriving for detecting 95% of the cause?). However, the quality of unit tests can be evaluated by simulated data. One set of tests is considered better than another if a small set of tests can reliably detect unexpected outcomes, which brings two criteria in the evaluation metric: accuracy and parsimony.
 
-- Since both the plan/ outcome expectations can be phrased as unit tests, which output binary outcomes, consider using the plan expectations as predictors of the outcome expectations. This allows to generate the confusion matrix of predicting the outcome with the plan expectation. 
+Accuracy refers to a set of tests' ability to accurately detect unexpected outcomes while minimizing false positives and false negatives. A false positive can indicate (caution or skepticism on checking the data), whereas a false negative suggests the tests may lack sensitivity to unexpected outcomes. Since both plan and outcome expectations can be framed as unit tests with binary outcomes, one approach is to predict the outcome expectation based on the plan expectation. Performance of the tests can then be evaluated using precision and recall metrics from the confusion matrix: 
 
-- For an analysis, ideally, good plan expectations should maximize the detection of unexpected outcomes while minimize the false positive discovery, which suggest the use of precision and recall (REF) for evaluating the performance of the plan expectations.
+  * precision: the proportion of correctly identified unexpected results (true positives) out of all the predicted unexpected results (true positives + false positives)
+  * recall: the proportion of correctly identified unexpected results (true positives) out of all the actual unexpected results (true positives + false negatives)
 
-  * precision: the proportion of unexpected results (TP) out of all the predicted unexpected results (TP + FP)
-  * recall: the proportion of unexpected results (TP) out of all the actual unexpected results (TP + FN)
+The second criteria is parsimony in the tests. While tests may score high on accuracy, they may be less effective at explaining the reasons behind unexpected results. This could happen if a set of tests are all tangentially related to the cause of the unexpected results, but none addressing the root cause. It may also occur if the tests are correlated with one another, leading to redundancy.
+
+
+- explain mutual information
+- explain logic regression 
+- explain combining precision, recall, and independence together through "means"
 
 * A logic regression (ref) is used to model the relationship between the plan and outcome expectations. (justify the use of Logic regression)
-
-* on independence of the tests
 
 
 ## Toy example revisited 
@@ -296,7 +300,7 @@ p3 <- p0 +
 
 * plotting is a critical way to check data and they can still be frame into a unit test. it is a open problem to how to encode the visualization into the unit tests. Maybe a procedure like confirm plot (this looks alright to you) and then press the button to continue
 
-* currently no automated way to generate unit tests
+* currently no automated way to generate unit tests. It is interesting to see the automation of generating unit tests, although it requires the inputs from experts across a wide array of common scenarios.  
 
 
 # Conclusion {#sec-conclusion}
