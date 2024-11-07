@@ -188,6 +188,13 @@ cutoff point for the unit tests.
 
 \section{Introduction}\label{introduction}
 
+\begin{itemize}
+\tightlist
+\item
+  emphasize trustworthy data science since it is the theme of the
+  special issue
+\end{itemize}
+
 In a data analysis, an experienced researcher can often quickly assess
 whether a result meets their expectation, while others may be unsure of
 what to anticipate from the analysis or how to recognize when results
@@ -219,10 +226,16 @@ diagnosing unexpected outcomes. We then introduce a procedure to assess
 the quality of these unit tests based on their accuracy and redundancy
 across simulated version of the original data. The accuracy is assessed
 using binary classification metrics -- precision and recall -- while
-redundancy is measured using mutual information. We illustrate these
-concepts with a simple step count example and a scenario of diagnosing
-unexpected regression results when studying the effect of PM10 on
-mortality.
+redundancy is measured using mutual information. The workflow provides
+numerical guarantee of the consistency of the expectation and the data
+for the analysis plan. This means that given the assumption of the data
+generating mechanism, the analysis will provide the outcome we expect.
+In data analysis, analysts are not necessarily collecting the data and
+they can only make reasonable assumption about the quality of the data.
+This method we propose provides a numerical guarantee, based on
+simulation, that the analysis will produce the outcome we expect, given
+the assumption of the data generating mechanism. This provides
+transparency of the analysis and build trustworthy data analysis.
 
 The rest of the paper is organized as follows: Section~\ref{sec-plan}
 describes the concept of analysis plan in detail.
@@ -253,8 +266,8 @@ provide data validation tools to allow users to define data quality
 checks. In contrast, packages provide model checks tools like
 \texttt{performance} \citep{performance} and \texttt{yardstick}
 \citep{yardstick}, from the \texttt{tidymodels} \citep{tidymodels}
-ecosystem, offers goodness-of-fit, residual analysis, and performance
-metrics.
+ecosystem, offers goodness-of-fit, residual analysis, and model
+performance metrics.
 
 These packages provide the tools to conduct diagnostics but still don't
 reflect the mental process of how data analysts diagnose the unexpected
@@ -279,19 +292,6 @@ analysis process.
 Why develop unit tests in software engineering? Because it is difficult
 to predict the outcome of a program, especially when the program is
 complex. Because the loss associated with a program failure is costly.
-
-Software testing relies on ``oracles'' to provide the expected output
-necessary for verifying test results. For example, to test whether the
-program correctly calculates 1 + 1, one need to supply the correct
-answer, 2. However, establishing this ``correct'' output can sometimes
-be challenging, where obtaining a solution may be difficult without the
-program itself. This situation leads to the oracle problem
-\citep{barr2014oracle}. In data analysis, the similar oracle problem can
-happen, as the ``truth'' of an outcome, the expectation, depends on the
-underlying theory or interpretation. For example, in a linear regression
-model, the significance of a coefficient may be expected or unexpected
-based on the theory, making it challenging for researcher with a
-different theory to assess the results and the analysis.
 
 Existing tools for checks in data analysis including those check for
 data quality and model diagnostics. In software development,
@@ -617,6 +617,27 @@ Notebook}}
   currently no automated way to generate unit tests. It is interesting
   to see the automation of generating unit tests, although it requires
   the inputs from experts across a wide array of common scenarios.
+\item
+  There are cost and benefit on what granularity to set expectation.
+  Setting them on every step of the analysis requires more work from the
+  analysts while for complex analysis, the diagnostics may require
+  divide the analysis into different components and diagnose it in a
+  hierarchical structure. The method proposed in this paper should be
+  applicable for both fine and coarse analysis.
+\item
+  (only mention it) Software testing relies on ``oracles'' to provide
+  the expected output necessary for verifying test results. For example,
+  to test whether the program correctly calculates 1 + 1, one need to
+  supply the correct answer, 2. However, establishing this ``correct''
+  output can sometimes be challenging, where obtaining a solution may be
+  difficult without the program itself. This situation leads to the
+  oracle problem \citep{barr2014oracle}. In data analysis, the similar
+  oracle problem can happen, as the ``truth'' of an outcome, the
+  expectation, depends on the underlying theory or interpretation. For
+  example, in a linear regression model, the significance of a
+  coefficient may be expected or unexpected based on the theory, making
+  it challenging for researcher with a different theory to assess the
+  results and the analysis.
 \end{itemize}
 
 \section{Conclusion}\label{sec-conclusion}
