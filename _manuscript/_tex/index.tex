@@ -334,14 +334,6 @@ temporal data to be ordered with no gaps and duplicates, or expect that
 temperature will be a significant covariate in the linear regression
 model of PM10 on mortality.
 
-(might be useful) Analysis plans can be constructed at various
-granularities, at the highest level, one may only has a plan of the
-specific method used for analysing data and the expected outcome. This
-provides little guidance when a deviation from expectation occurs. At
-the lowest level, one may have a plan for each data entry and every data
-handling steps. This provides too much detail and may not be practical
-in practice.
-
 Experienced analysts often have implicit expectation about the outcome
 and rely on a few ``directional signs'' to check when the outcome
 deviate from those expectation. However, these expectations are rarely
@@ -370,10 +362,6 @@ to evaluate the outcomes based on their own plan expectations and gain a
 broader perspective on how the actual results produced by analysts fit
 within this spectrum of possibilities, promoting transparency and trust
 in analysis.
-
-Furthermore, by generating multiple versions of the data, we can emulate
-various scenarios within the same context for students to exercise
-judgement when conducting data analysis in a classroom setting.
 
 \subsection{A toy example}\label{a-toy-example}
 
@@ -543,60 +531,11 @@ adding temperature to the model. Analysts may also expect certain
 correlation structure between PM10, temperature, and mortality, and the
 distribution of each variable.
 
-To build the result universe, datasets can be simulated to either meet
-and fail these plan expectations, allowing the analysts to observe the
-significance of PM10 coefficient. Here, sample sizes of 50, 100, 500,
-and 1000 are considered. Two model specifications are included: 1)
-linear model with PM10 as the only covariate
-(\(\text{mortality} \sim \text{PM10}\)), 2) linear model with PM10 and
-temperature as covariates
-(\(\text{mortality} \sim \text{PM10} + \text{temp}\)). A grid-based
-approach is used to simulate correlation structure. Reasonable ranges of
-correlation between the three variables are
-\(\text{cor}(\text{mortality}, \text{PM10}) \in [-0.01, 0]\),
-\(\text{cor}(\text{mortality}, \text{temperature}) \in [-0.6, -0.2]\),
-and \(\text{cor}(\text{PM10}, \text{temperature}) \in [0.2, 0.6]\).
-
 \begin{itemize}
+\tightlist
 \item
   add a paragraph to describe the simulation process
-\item
-  add a fourth panel to describe the comparison of a right/ wrong
-  expectation, i.e.~correlation on PM10 and mortality
 \end{itemize}
-
-Figure~\ref{fig-result-universe} shows that result universe of the
-linear regression model and how a change of decision in one of the plan
-expectations above affect the outcome expectation. Panel a) is colored
-by the outcome expectation -- whether a significant p-value is found in
-the PM10 coefficient. Panel b) shows the effect of adding temperature to
-the model and the results show that the significance of PM10 coefficient
-can be achieved by adding temperature to the model for a sample size of
-500. Panel c) shows that increasing sample size from 50 to 100 enhances
-the significance of p-value for PM10 and the significance remains with
-further increases in sample size. {[}note: weave the ``actual data''
-into the example linear regression model{]}
-
-\textsubscript{Source:
-\href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
-Notebook}}
-
-\phantomsection\label{cell-fig-result-universe}
-\begin{figure}[H]
-
-\centering{
-
-\includegraphics{index_files/figure-pdf/fig-result-universe-1.pdf}
-
-}
-
-\caption{\label{fig-result-universe}The result universe of linear
-regression model to study the effect of PM10 on mortality: a) colored by
-whether the p-value of PM10is significant (less than 0.05), b) the
-effect of adding temperature to the model for a sample size of 500, c)
-the effect of increasing sample size for a fixed correlation structure.}
-
-\end{figure}%
 
 \textsubscript{Source:
 \href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
@@ -618,12 +557,14 @@ Notebook}}
   to see the automation of generating unit tests, although it requires
   the inputs from experts across a wide array of common scenarios.
 \item
-  There are cost and benefit on what granularity to set expectation.
-  Setting them on every step of the analysis requires more work from the
-  analysts while for complex analysis, the diagnostics may require
-  divide the analysis into different components and diagnose it in a
-  hierarchical structure. The method proposed in this paper should be
-  applicable for both fine and coarse analysis.
+  There are cost and benefit on setting expectation on different
+  granularity. At the lowest level, one may have a plan for each data
+  entry and every data handling steps. This requires more work from the
+  analysts and may not be practical in practice. For more complex
+  analyses, analysts may divide the analysis into sections and set
+  expectations for each. They can then focus on the specific sections
+  flagged by the tests and sub-divide the sections to set expectation
+  and diagnose the analysis in a hierarchical manner.
 \item
   (only mention it) Software testing relies on ``oracles'' to provide
   the expected output necessary for verifying test results. For example,

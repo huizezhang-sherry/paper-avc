@@ -72,13 +72,9 @@ Q: Whether we should formulate these concept with math notation?? A: only if it 
 
 An analysis plan is a set of analysis steps combined with expectations. Expectations represent our belief about certain aspects of the analysis, independent of the analysis itself. It can be divided into two types: *outcome expectation* and *plan expectation*. Outcome expectation refers to what we anticipate from the main result of the analysis based on prior knowledge. They shape how we interpret the results and assess whether they are consistent with existing knowledge or indicate the need for updates [@grolemund_cognitive_2014]. For example, in public health, prior research shows the average increase in mortality rate per unit increase in PM10 is about 0.50% [@liu2019ambient]. This serves as an expectation for similar future studies. Plan expectations concern the intermediate steps within the analysis rather than the final outcome. They serve as checkpoints to detect deflection in the analysis process For example, we may expect temporal data to be ordered with no gaps and duplicates, or expect that temperature will be a significant covariate in the linear regression model of PM10 on mortality.
 
-(might be useful) Analysis plans can be constructed at various granularities, at the highest level, one may only has a plan of the specific method used for analysing data and the expected outcome. This provides little guidance when a deviation from expectation occurs. At the lowest level, one may have a plan for each data entry and every data handling steps. This provides too much detail and may not be practical in practice. 
-
 Experienced analysts often have implicit expectation about the outcome and rely on a few "directional signs" to check when the outcome deviate from those expectation. However, these expectations are rarely made explicit within the analysis workflow. This makes it challenging for consumers of  the analysis to evaluate the results, since it becomes difficult to disentangle whether discrepancies arise from differing expectations or from the use of statistical technique, without running the analysis themselves. Non-expert analysts, lacking prior knowledge or instinct, may not have clear expectations of the results. This can lead to reduced confidence of the analysis and makes it more difficult and time-consuming to diagnose the cause of the deviation when the results don't align with expectations. By explicitly formulating these expectations, an analysis plan can guide the analysis process, facilitate the communication and evaluate the validity of the results.
 
 The expectations can be thought of as a set of unit tests used to validate the results of data analysis. By specifying a range of values for these tests, multiple versions of the dataset can be generated to satisfy different sets of plan expectations. This allows us to present what we called the "result universe" -- the complete set of possible results that can be obtained from one data analysis process. By visualizing the result universe, data analysis consumers can observe how changes in expectations affect the results and the range of alternative outcomes that could arise under different conditions. This enables them to evaluate the outcomes based on their own plan expectations and gain a broader perspective on how the actual results produced by analysts fit within this spectrum of possibilities, promoting transparency and trust in analysis.  
-
-Furthermore, by generating multiple versions of the data, we can emulate various scenarios within the same context for students to exercise judgement when conducting data analysis in a classroom setting. 
 
 ## A toy example
 
@@ -144,13 +140,7 @@ Three examples are presented to illustrate how the concept of analysis plan can 
 
 Consider a linear regression model to study the effect of PM10 on mortality (provide context of using PM10 to study mortality). Analysts may expect a significant (p-value $\le$ 0.05) PM10 coefficient in the linear model from the literature. This is the *outcome expectation*. There are multiple factors that can affect the outcome expectation of linear regression, which here is called *plan expectation*, for example, 1) sample size, 2) model specification, and 3) correlation structure between variables. Adequate sample size is required to achieve the desired power to detect the significance of PM10 on mortality. Temperature is often an important confounder to consider in such study (add reference). From some domain knowledge, an analyst may expect that the significance of PM10 coefficient can be attained by adding temperature to the model. Analysts may also expect certain correlation structure between PM10, temperature, and mortality, and the distribution of each variable. 
 
-To build the result universe, datasets can be simulated to either meet and fail these plan expectations, allowing the analysts to observe the significance of PM10 coefficient. Here, sample sizes of 50, 100, 500, and 1000 are considered. Two model specifications are included: 1) linear model with PM10 as the only covariate ($\text{mortality} \sim \text{PM10}$), 2) linear model with PM10 and temperature as covariates ($\text{mortality} \sim \text{PM10} + \text{temp}$). A grid-based approach is used to simulate correlation structure. Reasonable ranges of correlation between the three variables are $\text{cor}(\text{mortality}, \text{PM10}) \in [-0.01, 0]$, $\text{cor}(\text{mortality}, \text{temperature}) \in [-0.6, -0.2]$, and $\text{cor}(\text{PM10}, \text{temperature}) \in [0.2, 0.6]$. 
-
  * add a paragraph to describe the simulation process
-
- * add a fourth panel to describe the comparison of a right/ wrong expectation, i.e. correlation on PM10 and mortality
-
-@fig-result-universe shows that result universe of the linear regression model and how a change of decision in one of the plan expectations above affect the outcome expectation. Panel a) is colored by the outcome expectation -- whether a significant p-value is found in the PM10 coefficient. Panel b) shows the effect of adding temperature to the model and the results show that the significance of PM10 coefficient can be achieved by adding temperature to the model for a sample size of 500. Panel c) shows that increasing sample size from 50 to 100 enhances the significance of p-value for PM10 and the significance remains with further increases in sample size. [note: weave the "actual data" into the example linear regression model]
 
 ```{r sim-linear-res}
 # Generate correlation matrices 
@@ -184,106 +174,12 @@ generate_data <- function(n, mtx, seed = 123) {
          temp = qnorm(U[,3], mean = 55, sd = 16))   
   }  
 
-# test for dist fit
-# fitdist(pm10$pm10, "gamma") -> pm10_fit
-# plot(pm10_fit) # gamma is better than normal for the fit of pm10
-#fitdist(pm10$temp, "norm") -> temp_fit
-# plot(temp_fit)
-
 res <- tibble(corr_mtx = corr_mtx) |> 
   mutate(id = row_number()) |> 
   crossing(sample_size, model) |> 
   rowwise() |>   
   mutate(data = list(generate_data(n = sample_size, mtx = corr_mtx)),          
          fit = list(summary(lm(model, data))$coefficients))  
-```
-
-
-```{r}
-#| label: fig-result-universe
-#| fig-cap: "The result universe of linear regression model to study the effect of PM10 on mortality: a) colored by whether the p-value of PM10is significant (less than 0.05), b) the effect of adding temperature to the model for a sample size of 500, c) the effect of increasing sample size for a fixed correlation structure."
-#| fig.width: 12
-#| fig.height: 12
-dt <- res |>   
-  mutate(     
-    p_value = fit[2,4],     
-    coef = fit[2,1],     
-    xy_correlation = as.numeric(corr_mtx[1, 2]),     
-    xz_correlation = as.numeric(corr_mtx[1, 3]),     
-    yz_correlation = as.numeric(corr_mtx[2, 3]),     
-    fml = deparse(model) |> as.factor(),     
-    expect = ifelse(p_value < 0.05, 1, 0) |> as.factor(),     
-    ) |>    
-  ungroup() 
-
-code_tbl <- crossing(V1 = c("signifpm10", NA),           
-                     V2 = c("smallsample", NA), 
-                     V3 = c("withtemp", NA)) |>      
-  mutate(col1 = paste0(V1,"_", V2, "_", V3))   
-
-lookup_tbl <- tibble(   
-  value = crossing(x = c(1, 0), y = c(1, 0), z = c(1, 0)) |>      
-    mutate(col = paste0(x,"_", y, "_", z)) |> 
-    arrange(-x, -y, -z) |>      
-    pull(col),   
-  plan1 = unique(code_tbl$col1) )  
-
-dt2 <- dt |>    
-  mutate(T1 = ifelse(sample_size < 200, 1, 0),          
-         T2 = ifelse(fml == "mortality ~ pm10 + temp", 1, 0),          
-         pp1 = paste0(expect, "_", T1, "_", T2),) |>    
-  left_join(lookup_tbl, by = c("pp1" = "value"))      
-
-p0 <- dt |> ggplot() +   
-  geom_point(aes(x = p_value , y = coef), color = "grey", size = 0.5) +  
-  labs(x = "p-value", y = "coefficient") +   
-  theme_bw() +    
-  theme(aspect.ratio = 1, 
-        panel.grid.minor = element_blank()) 
-
-df0 <-  dt |> filter(sample_size == 500, xy_correlation == -0.005, 
-                     between(xz_correlation, -0.46, -0.43),
-                     yz_correlation == 0.4) |> arrange(expect)
-df2 <- df0 |> filter(fml == "mortality ~ pm10 + temp") # test for model spec
-
-p1 <- p0 + 
-  geom_point(aes(x = p_value , y = coef, color = expect), size = 0.3) +  
-  scale_color_brewer(palette = "Dark2", direction = -1) +
-  labs(title = "Coefficient vs. p-value") + 
-  theme(legend.position = 'none')
-
-p2 <- p0 + 
-  geom_point(data = df0, aes(x = p_value, y = coef, color = expect), size = 2) +
-  geom_path(data = df0, aes(x = p_value, y = coef), color = "black",
-            arrow = arrow(type = "open", angle = 30, 
-                          length = unit(0.1, "inches"))) +
-  ggrepel::geom_label_repel(
-    data = df0, aes(x = p_value, y = coef, label = fml, color = expect)
-    ) +
-  scale_color_brewer(palette = "Dark2", direction = -1) +
-  labs(title = "Effect of adding temperature") 
-
-df00 <-  dt |> filter(xy_correlation == -0.005, 
-                     between(xz_correlation, -0.46, -0.43),
-                     yz_correlation == 0.4) |> arrange(expect)
-df <- df00 |> filter((fml == "mortality ~ pm10 + temp"))
-
-
-p3 <- p0 + 
-  geom_point(data = df, aes(x = p_value, y = coef, color = expect), size = 2) +
-  geom_path(data = df, aes(x = p_value, y = coef), color = "black",
-            arrow = arrow(type = "open", angle = 30, 
-                          length = unit(0.1, "inches"))) +
-  ggrepel::geom_label_repel(
-    data = df, aes(x = p_value, y = coef, label = sample_size, color = expect)
-    ) +
-  scale_color_brewer(palette = "Dark2", direction = -1) +
-  labs(title = "Effect of sample size") 
-
-(p1 | p2) / (p3 | plot_spacer()) + 
-  plot_annotation(tag_levels = "a") + 
-  plot_layout(guides = 'collect') &
-  theme(legend.position = 'bottom') 
 ```
 
 # Discussion
@@ -294,7 +190,7 @@ p3 <- p0 +
 
 * currently no automated way to generate unit tests. It is interesting to see the automation of generating unit tests, although it requires the inputs from experts across a wide array of common scenarios.  
 
-* There are cost and benefit on what granularity to set expectation. Setting them on every step of the analysis requires more work from the analysts while for complex analysis, the diagnostics may require divide the analysis into different components and diagnose it in a hierarchical structure. The method proposed in this paper should be applicable for both fine and coarse analysis.
+* There are cost and benefit on setting expectation on different granularity. At the lowest level, one may have a plan for each data entry and every data handling steps. This requires more work from the analysts and may not be practical in practice. For more complex analyses, analysts may divide the analysis into sections and set expectations for each. They can then focus on the specific sections flagged by the tests and sub-divide the sections to set expectation and diagnose the analysis in a hierarchical manner.
 
 * (only mention it) Software testing relies on "oracles" to provide the expected output necessary for verifying test results. For example, to test whether the program correctly calculates 1 + 1, one need to supply the correct answer, 2. However, establishing this "correct" output can sometimes be challenging, where obtaining a solution may be difficult without the program itself. This situation leads to the oracle problem [@barr2014oracle]. In data analysis, the similar oracle problem can happen, as the "truth" of an outcome, the expectation, depends on the underlying theory or interpretation. For example, in a linear regression model, the significance of a coefficient may be expected or unexpected based on the theory, making it challenging for researcher with a different theory to assess the results and the analysis. 
 
