@@ -235,50 +235,44 @@ Section~\ref{sec-conclusion} concludes the paper.
 \subsection{Diagnosing unexpected outcomes in data
 analysis}\label{diagnosing-unexpected-outcomes-in-data-analysis}
 
-\citep{peng_diagnosing_2021}
+\citep{peng_diagnosing_2021} describes three pedagogical exercises of
+introducing diagnosing unexpected outcome into a classroom setting.
 
 TODO: what if the expectation is ``wrong''
 
 \subsection{Data analysis checks in statistical
 software}\label{data-analysis-checks-in-statistical-software}
 
-In data analysis, checks are often performed to ensure the quality of
-the data and the validity of the model. For data checks,
+Currently, little has been done on how to computationally incorporate
+this diagnostic approach into data analysis workflow or software. Most
+of the diagnostic tools focus on defining user-specified rules, such as
+data quality checks or producing metrics to summarize model performance,
+as in model diagnostics. For example, the \texttt{assertr} package
+\citep{assertr} and the \texttt{pointblank} package \citep{pointblank}
+provide data validation tools to allow users to define data quality
+checks. In contrast, packages provide model checks tools like
+\texttt{performance} \citep{performance} and \texttt{yardstick}
+\citep{yardstick}, from the \texttt{tidymodels} \citep{tidymodels}
+ecosystem, offers goodness-of-fit, residual analysis, and performance
+metrics.
 
-\begin{itemize}
-\tightlist
-\item
-  The \texttt{assertr} package \citep{assertr} provides a set of
-  functions to check the quality of data, including the presence of
-  missing values, the distribution of variables, and the relationship
-  between variables.
-\item
-  Similarly, the \texttt{pointblank} package \citep{pointblank} is a
-  data validation tool that allows users to define data quality checks.
-\end{itemize}
-
-For model checks,
-
-\begin{itemize}
-\tightlist
-\item
-  the \texttt{performance} package \citep{performance} provides a set of
-  functions to assess the performance of a model, including residual
-  analysis, goodness-of-fit tests.
-\item
-  The \texttt{yardstick} package \citep{yardstick} provides the
-  calculation of model performance metrics in the \texttt{tidymodels}
-  \citep{tidymodels} ecosystem.
-\end{itemize}
-
-These checks test on specific aspect of the data or the model but
-doesn't reflect the underlying assumption of the data analysts about the
-data or the problem context. It may be obvious to see the assumption if
-someone is testing for data quality on whether a column in the data
-frame is between two values. In a much complex analysis, it is difficult
-to trace the assumptions made by the data analysts. Currently, most of
-these assumptions are not documented or discussed in the analysis
-process, or at least in a machine readable format.
+These packages provide the tools to conduct diagnostics but still don't
+reflect the mental process of how data analysts diagnose the unexpected
+output. For example, when an unexpected output occurs, an analyst may
+check on whether a column in the data frame is between two values for
+data quality. However, it is not documented what motivates the analyst
+to conduct this check -- whether it also applies to other researchers
+analyzing new data in the same contexts, whether it is a common practice
+in the field, or whether it is a reaction to this particular data or
+scenario. Currently, most of these assumptions are not discussed in the
+publication or captured by tools themselves. While one might be able to
+infer some of the mental process of the analysts from external sources,
+such as talking to them or watching screencast videos produced by the
+analysts e.g.~TidyTuesday screencast videos, these insights are not
+systematically documented or made machine-readable. This gap highlights
+the need for tools that provide higher level documentation of reasoning
+behind the checks, facilitating a more transparent and interpretable
+analysis process.
 
 \subsection{Unit tests}\label{unit-tests}
 
