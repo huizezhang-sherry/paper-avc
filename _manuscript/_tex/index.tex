@@ -349,83 +349,68 @@ don't align with expectations. By explicitly formulating these
 expectations, an analysis plan can guide the analysis process,
 facilitate the communication and evaluate the validity of the results.
 
-The expectations can be thought of as a set of unit tests used to
-validate the results of data analysis. By specifying a range of values
-for these tests, multiple versions of the dataset can be generated to
-satisfy different sets of plan expectations. This allows us to present
-what we called the ``result universe'' -- the complete set of possible
-results that can be obtained from one data analysis process. By
-visualizing the result universe, data analysis consumers can observe how
-changes in expectations affect the results and the range of alternative
-outcomes that could arise under different conditions. This enables them
-to evaluate the outcomes based on their own plan expectations and gain a
-broader perspective on how the actual results produced by analysts fit
-within this spectrum of possibilities, promoting transparency and trust
-in analysis.
-
 \subsection{A toy example}\label{a-toy-example}
 
-Let's think about a 5-day step count. You make a resolution to walk on
-average 5000 steps a day (your expectation) and using an app to record
-your step count. After 5 days, the app tells you've walked on average
-8000 steps.
+Consider a 30-day step count goal. Suppose you resolve to walk at least
+8,000 steps each day, using an app to record your daily step count. Your
+target average is 9,000 steps per day, with some ``lows'' day, where you
+walk around 4,000 steps and ``high'' days where you reach about 12,000
+steps. After 30 days, you check how many times your step count fall
+below 8,000 and aim for no more than five days under this threshold.
 
-It is easy to come up with reasons why an 8000 average step is resulted
-based on common sense:
+To simulation this data, three normal distributions with different means
+are used for the daily step counts: \(\mathcal{N}(4000, 200)\) for low
+days, \(\mathcal{N}(12000, 200)\) for high days, and
+\(\mathcal{N}(9000, 300)\) for typical days. The number of low and high
+days can be simulated from a Poisson distribution with \(\lambda = 4\).
+Figure~\ref{fig-step-count} displays the number of days with fewer than
+8,000 steps across 300 simulated 30-day periods.
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  you may run a 10k on day 1, resulting a high step count on the day
-  (outlier on the right).
-\item
-  you left your phone at home on day 3, resulting a zero or minimal step
-  count on the day (outlier on the left).
-\item
-  you may realise the step count may increase since you were in a hiking
-  trip in the last five days (average shift).
-\end{enumerate}
+In this scenario, the outcome expectation is that the number of days
+with a step count below 8,000 will be no more than five. To diagnose
+potential reasons why this outcome expectation might fail, we can
+establish a few plan expectations. For example, if the average step
+count is too low, this may suggest there are too many low days,
+potentially lead to an unexpected outcome. Similarly, we can also check
+the quantile of the step count, if more than a third of the days fall
+below 8,000, this could indicate an excess of low-count days.
+Additionally, we may may expect the standard deviation of the step count
+not to be overly large.
 
-Based on these reasons, you may devise a set of unit tests to check the
-step count data, i.e.~check the maximum and minimum step count, check
-the difference between each day.
-
-\begin{itemize}
-\tightlist
-\item
-  If the daily count looks like c(4000, 5000, 5500, 5500, 20000), the
-  maximum check will flag the data for investigate the maximum. The
-  difference between days test will also flag the data
-\item
-  If the daily count looks like c(20000, 20000, 20000, 20000, 20000),
-  the maximum check will flag the data for investigate the maximum.
-\end{itemize}
-
-Some part of the space is impossible: c(0, 4000, 5000, 5500, 5500) is
-flagged by the minimal tests but won't cause an average of 8000 average
-step.
-
-The statistical procedure of averaging 5 numbers ``around 5000'' to get
-a mean of 5000 is \emph{consistent} meaning if all the numbers are
-around 5000, we are guaranteed to get a mean around 5000. We could
-devise 5 unit tests to check each number. Since you're more familiar
-with your daily life, you may realise the step count may increase since
-you were in a hiking trip in the last two days. This may prompt you to
-check the step count.
-
-In a data analysis, it is not practical to check every entry of the
-data, a similar strategy of devising tests to check for
+These considerations yield the following three unit tests as plan
+expectations:
 
 \begin{itemize}
 \tightlist
 \item
-  The combination of unit tests are not unique
+  test1: the test fails if the mean step count is below 8,200
 \item
-  The unit tests provide guidance for diagnosing the results, but are
-  not red flags: c(2000, 2000, 5000, 8000, 8000) will likely to fail the
-  max diff test but receive a within expectation mean.
+  test2: the test fails if the 30th percentile of the step counts is
+  below 8,200
+\item
+  test3: the test fails if the standard deviation of the step
+  countsexceeds 2,500.
 \end{itemize}
+
+\phantomsection\label{cell-fig-step-count}
+\begin{figure}[H]
+
+\centering{
+
+\includegraphics{index_files/figure-pdf/fig-step-count-1.pdf}
+
+}
+
+\caption{\label{fig-step-count}Number of days with fewer than 8,000
+steps across 300 simulated 30-day periods. The orange bars indicate
+instances where the count exeeds five days, representing an unexpected
+outcome in this scenario.}
+
+\end{figure}%
+
+\textsubscript{Source:
+\href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
+Notebook}}
 
 \section{Method}\label{method}
 
