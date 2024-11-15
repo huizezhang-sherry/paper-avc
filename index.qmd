@@ -171,13 +171,17 @@ To combine precision, recall, and independence into a single metric, various mat
 
 ## Toy example revisited 
 
-* provide interpretation at different scenarios:
+In the step count example, we can use the logic regression model to evaluate the quality of the unit tests. The logic regression model is fitted to the three unit tests (test1, test2, test3) and the outcome expectation (unexpect) as the response variable. The model is then used to predict the outcome expectation based on the unit tests. The prediction is then compared to the actual outcome expectation to calculate the precision and recall of the tests. The independence of the tests is also calculated to assess the redundancy of the tests. @fig-logic-reg presents the suggested logic regression model as a combination of test 1 and test 3 with an OR operator. 
 
-  1) one test is flagged, the prediction is as expected:
-  2) multiple tests are flagged, the prediction is unexpected,
-  3) no test is flagged, the prediction is unexpected,
-  4) no test is flagged, the prediction is as expected
+@tbl-logic-reg presents the calculated precision, recall, and independence for the three individual tests and the combined test rule (test1 OR test3) from the logic regression. The harmonic and arithmetic means are included to evaluate the quality of the unit tests in diagnosing unexpected step counts. The results show that the combined test rule (test1 OR test3) has the highest precision, recall, and independence, suggesting that it is the most effective test for diagnosing unexpected step counts. We also include the metric calculated from fitting a regression tree model to the data to compare the performance of the logic regression model. The regression tree produces a similar model of first split on test1 and then split on test3, and results in the same accuracy and overall score as the logic regression model.
 
+<!-- * provide interpretation at different scenarios: -->
+  
+  <!--   1) one test is flagged, the prediction is as expected:  -->
+  <!--   2) multiple tests are flagged, the prediction is unexpected,  -->
+  <!--   3) no test is flagged, the prediction is unexpected,  -->
+  <!--   4) no test is flagged, the prediction is as expected -->
+  
 ```{r}
 #| label: fig-logic-reg
 #| fig-cap: Logic regression model fitted to the three unit tests (test1, test2, test3) and the outcome expectation (unexpect) as the response variable. The model suggests using an OR rule to combine test1 and test3 to predict the outcome expectation.
@@ -186,11 +190,22 @@ plot(fit)
 ```
 
 ```{r}
+fit_regtree <- rpart(unexpect ~ ., data = step_count |> dplyr::select(unexpect:test3), method = "class", 
+                     control = rpart.control(cp = 0.01)) 
+pred_vec <- predict(fit_regtree) |> as_tibble() |> mutate(.fitted = ifelse(`0` > `1`, 0, 1)) |> dplyr::select(.fitted)
+regtree_df <- step_count |> dplyr::select(unexpect) |> bind_cols(pred_vec) |> 
+  calc_miscla_rate(unexpect, .fitted) |> 
+  mutate(overlapping = multiinformation(step_count[,c(9, 11)])/nrow(step_count), 
+         independence = 1 - overlapping) |> 
+  calc_metrics(metrics = c("harmonic", "arithmetic"))
+```
+
+```{r}
 #| label: tbl-logic-reg
 list(tibble(.fitted = step_count$test1, unexpect = step_count$unexpect),
      tibble(.fitted = step_count$test2, unexpect = step_count$unexpect),
      tibble(.fitted = step_count$test3, unexpect = step_count$unexpect)
-     ) |>
+) |>
   map_dfr(~.x |> calc_miscla_rate(unexpect, .fitted) |> 
             mutate(independence = 1) |> 
             calc_metrics(metrics = c("harmonic", "arithmetic")), .id = "tests") |> 
@@ -200,10 +215,14 @@ list(tibble(.fitted = step_count$test1, unexpect = step_count$unexpect),
               calc_independence() |> 
               calc_metrics(metrics = c("harmonic", "arithmetic")) |> 
               mutate(tests = "test1 OR test3") |> 
-              dplyr::select(-overlapping)) |>
+              dplyr::select(-overlapping)) |> 
+  bind_rows(regtree_df |> 
+              dplyr::select(-overlapping) |> 
+              mutate(tests = "regression tree")) |>
   kable(digits = 3, 
         caption = "Accuracy (precision and recall) and parsimony (independence) metrics for each individual unit test and for the combined test rule (test1 OR test3) derived from the logic regression model. The harmonic and arithmetic means of the three metrics are included to evaluate the quality of the unit tests in  diagnosing unexpected step counts (more than five days with fewer than 8,000 steps).")
 ```
+
 
 
 
