@@ -20,6 +20,11 @@ library(tidyverse)
 library(patchwork)
 library(MASS)
 library(ggh4x)
+library(adtoolbox)
+library(broom)
+library(knitr)
+library(rpart)
+library(infotheo)
 pm10 <- read_csv(here::here("data", "pm10.csv")) |> 
   filter(!is.na(pm10)) |>    
   mutate(season = as.factor(season))  
@@ -135,31 +140,71 @@ step_count |>
 
 ## A workflow to assess the quality of unit tests
 
-In real-world applications, it is rare to create a set of unit tests can fully guarantee expected results. On one hand, there is the cost of effort involved in manually developing all these tests; on the other, there is the inherent complexity of the problem. (can we - if we're thriving for detecting 95% of the cause?). However, the quality of unit tests can be evaluated by simulated data. One set of tests is considered better than another if a small set of tests can reliably detect unexpected outcomes, which brings two criteria in the evaluation metric: accuracy and parsimony.
+In real-world applications, it is rare to create a set of unit tests can fully guarantee expected results. On one hand, there is the cost of effort involved in manually developing all these tests; on the other, there is the inherent complexity of the problem. (can we - if we're thriving for detecting 95% of the cause?). However, the quality of unit tests can be evaluated by simulated data. One set of tests is considered better than another if a small set of tests can reliably detect unexpected outcomes, which brings two criteria in the evaluation metric: accuracy and parsimony. @fig-metric-calc illustrates the workflow for calculating the metrics.
 
-Accuracy refers to a set of tests' ability to accurately detect unexpected outcomes while minimizing false positives and false negatives. A false positive can indicate (caution or skepticism on checking the data), whereas a false negative suggests the tests may lack sensitivity to unexpected outcomes. Since both plan and outcome expectations can be framed as unit tests with binary outcomes, one approach is to predict the outcome expectation based on the plan expectation. Performance of the tests can then be evaluated using precision and recall metrics from the confusion matrix: 
+```{r}
+#| label: fig-metric-calc
+#| fig-cap: "this is the cap"
+knitr::include_graphics(here::here("figures", "metric-calc.png"))
+```
+
+
+Accuracy refers to a set of tests' ability to accurately detect unexpected outcomes while minimizing false positives and false negatives. A false positive can indicate (caution or skepticism on checking the data), whereas a false negative suggests the tests may lack sensitivity to unexpected outcomes. To model the relationship between the plan and outcome expectation (binary-binary), a logic regression model is used [@ruczinski_logic_2003]. Originally developed for SNP microarray data, logic regression constructs Boolean combinations of binary variables to solve regression problems [more introduction on logic regression]. Compared to other tree-based methods or machine learning methods for binary-binary prediction, logic regression produces Boolean combinations, or meta rules, that combines unit tests to solve the prediction problem. [need rewrite here]. The performance of the tests can be evaluated using precision and recall metrics derived from the confusion matrix of the logic regression prediction
 
   * precision: the proportion of correctly identified unexpected results (true positives) out of all the predicted unexpected results (true positives + false positives)
   * recall: the proportion of correctly identified unexpected results (true positives) out of all the actual unexpected results (true positives + false negatives)
 
-The second criteria is parsimony in the tests. While tests may score high on accuracy, they may be less effective at explaining the reasons behind unexpected results. This could happen if a set of tests are all tangentially related to the cause of the unexpected results, but none addressing the root cause. It may also occur if the tests are correlated with one another, leading to redundancy.
+The second criteria is parsimony in the tests. While tests may score high on accuracy, they may be less effective at explaining the reasons behind unexpected results. This could happen if a set of tests are all tangentially related to the cause of the unexpected results, but none addressing the root cause. It may also occur if the tests are correlated with one another, leading to redundancy. 
 
+To quantify redundancy, the concept of mutual information is used. Mutual information $I(x, y)$ measures the amount of information shared between two random variables and is defined as the KL-distance $D(p \parallel q)$ between the joint distribution of the two variables and the product of the marginal distributions: 
 
-- explain mutual information
-- explain logic regression 
-- explain combining precision, recall, and independence together through "means"
+$$I(x,y) = D\big(p(x,y) \parallel p(x)p(y)\big) = \sum_x \sum_y p(x,y) \log \frac{p(x,y)}{p(x)p(y)}$$
 
-* A logic regression (ref) is used to model the relationship between the plan and outcome expectations. (justify the use of Logic regression)
+This concept extends naturally to multiple variables through total correlation [ref], $C(X_1, X_2, \cdots, X_n)$, which captures redundancy across a set of $n$ variables:
+
+$$C(X_1, X_2, \cdots, X_n) = \sum_{x_1} \sum_{x_2} \cdots \sum_{x_n} p(x_1, x_2, \cdots, x_n) \log \frac{p(x_1, x_2, \cdots, x_n)}{p(x_1)p(x_2) \cdots p(x_n)}$$
+
+A high mutual information value indicates redundancy among the tests, while a low value suggests that the tests are independent and provide unique information to diagnose the unexpected outcome. To standardize this measure, the total correlation *per observation* is calculated, and an independence score, ranging between 0 and 1, is defined as 1 - mutual information. 
+
+To combine precision, recall, and independence into a single metric, various mathematical means, such as arithmetic mean, harmonic mean, and quadratic mean, can be used. The differences among these means are minimal when the three metrics are similar. However, as the differences among the metrics increases, the harmonic mean tends to produce the smallest overall score, as it penalizes low values, while the quadratic mean tends to produce the largest score by rewarding higher values more. For simple interpretation of the score, the arithmetic mean is preferred, while in applications where the difference between precision, recall, and independence need to be penalized or rewarded more, the harmonic and quadratic mean should be considered. 
 
 
 ## Toy example revisited 
 
 * provide interpretation at different scenarios:
-    
-  1) one test is flagged, the prediction is as expected: 
-  2) multiple tests are flagged, the prediction is unexpected, 
-  3) no test is flagged, the prediction is unexpected, 
+
+  1) one test is flagged, the prediction is as expected:
+  2) multiple tests are flagged, the prediction is unexpected,
+  3) no test is flagged, the prediction is unexpected,
   4) no test is flagged, the prediction is as expected
+
+```{r}
+#| label: fig-logic-reg
+#| fig-cap: Logic regression model fitted to the three unit tests (test1, test2, test3) and the outcome expectation (unexpect) as the response variable. The model suggests using an OR rule to combine test1 and test3 to predict the outcome expectation.
+fit <- step_count |> fit_logic_reg(unexpect, test1:test3, seed = 1, nleaves = 4)
+plot(fit)
+```
+
+```{r}
+#| label: tbl-logic-reg
+list(tibble(.fitted = step_count$test1, unexpect = step_count$unexpect),
+     tibble(.fitted = step_count$test2, unexpect = step_count$unexpect),
+     tibble(.fitted = step_count$test3, unexpect = step_count$unexpect)
+     ) |>
+  map_dfr(~.x |> calc_miscla_rate(unexpect, .fitted) |> 
+            mutate(independence = 1) |> 
+            calc_metrics(metrics = c("harmonic", "arithmetic")), .id = "tests") |> 
+  mutate(tests = c("test1", "test2", "test3")) |>
+  bind_rows(augment(fit) |> 
+              calc_miscla_rate(unexpect, .fitted) |> 
+              calc_independence() |> 
+              calc_metrics(metrics = c("harmonic", "arithmetic")) |> 
+              mutate(tests = "test1 OR test3") |> 
+              dplyr::select(-overlapping)) |>
+  kable(digits = 3, 
+        caption = "Accuracy (precision and recall) and parsimony (independence) metrics for each individual unit test and for the combined test rule (test1 OR test3) derived from the logic regression model. The harmonic and arithmetic means of the three metrics are included to evaluate the quality of the unit tests in  diagnosing unexpected step counts (more than five days with fewer than 8,000 steps).")
+```
+
 
 
 # Applications {#sec-examples}
