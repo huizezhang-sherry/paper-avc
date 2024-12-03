@@ -8,6 +8,7 @@ format:
   pdf:
    keep-tex: true
    toc: true
+   notebook-links: false
 preamble: >
   \usepackage{amsfonts,amsmath,amssymb,amsthm}
 editor_options: 
@@ -34,40 +35,40 @@ pm10 <- read_csv(here::here("data", "pm10.csv")) |>
 
 # Introduction
 
-- emphasize trustworthy data science since it is the theme of the special issue
+-   emphasize trustworthy data science since it is the theme of the special issue
 
 In a data analysis, an experienced researcher can often quickly assess whether a result meets their expectation, while others may be unsure of what to anticipate from the analysis or how to recognize when results diverge form expected norms. (These expectations are often based on prior knowledge, domain expertise, or common sense and they can often be framed into a Boolean question that can be answered by a unit test. For example, in a linear regression model, one may expect the p-value of the coefficient to be less than 0.05. On top of the expectation on the final results, researchers may also have expectations on the intermediate steps of the analysis process. For example, one may expect the data doesn't contain outliers, etc. These expectations are often checked early on to prevent an unexpected propagate through the analysis process.)
 
-This expectation-setting process is often implicit and rarely documented or discussed in publications. (There are most publication requires open source code for publication, however, it is no instruction or guidance on checking ...).  Yet, making them explicit is crucial for 1) helping junior researchers interpret results and diagnose the unexpected, 2) providing checkpoints that support independent replication or application of methods to new data, 3) aligning assumption across researchers from different backgrounds. 
+This expectation-setting process is often implicit and rarely documented or discussed in publications. (There are most publication requires open source code for publication, however, it is no instruction or guidance on checking ...). Yet, making them explicit is crucial for 1) helping junior researchers interpret results and diagnose the unexpected, 2) providing checkpoints that support independent replication or application of methods to new data, 3) aligning assumption across researchers from different backgrounds.
 
 In this paper, we formalize these informal checks into an *analysis plan* comprising the analysis steps along with the associated unit tests. This formalization allows us to examine assumptions made about the data during analysis and to compare different unit tests in diagnosing unexpected outcomes. We then introduce a procedure to assess the quality of these unit tests based on their accuracy and redundancy across simulated version of the original data. The accuracy is assessed using binary classification metrics -- precision and recall -- while redundancy is measured using mutual information. The workflow provides numerical guarantee of the consistency of the expectation and the data for the analysis plan. This means that given the assumption of the data generating mechanism, the analysis will provide the outcome we expect. In data analysis, analysts are not necessarily collecting the data and they can only make reasonable assumption about the quality of the data. This method we propose provides a numerical guarantee, based on simulation, that the analysis will produce the outcome we expect, given the assumption of the data generating mechanism. This provides transparency of the analysis and build trustworthy data analysis.
 
-The rest of the paper is organized as follows: @sec-plan describes the concept of analysis plan in detail. @sec-examples provides examples of analysis plan [more details]. (need another section here or before examples?) @sec-conclusion concludes the paper.
+The rest of the paper is organized as follows: @sec-plan describes the concept of analysis plan in detail. @sec-examples provides examples of analysis plan \[more details\]. (need another section here or before examples?) @sec-conclusion concludes the paper.
 
 # Literature review
 
 ## Diagnosing unexpected outcomes in data analysis
 
-[@peng_diagnosing_2021] describes three pedagogical exercises of introducing diagnosing unexpected outcome into a classroom setting. 
+[@peng_diagnosing_2021] describes three pedagogical exercises of introducing diagnosing unexpected outcome into a classroom setting.
 
 TODO: what if the expectation is "wrong"
 
 ## Data analysis checks in statistical software
-  
-Currently, little has been done on how to computationally incorporate this diagnostic approach into data analysis workflow or software. Most of the diagnostic tools focus on defining user-specified rules, such as data quality checks or producing metrics to summarize model performance, as in model diagnostics. For example, the `assertr` package [@assertr] and the `pointblank` package [@pointblank] provide data validation tools to allow users to define data quality checks. In contrast, packages provide model checks tools like `performance` [@performance] and `yardstick` [@yardstick], from the `tidymodels` [@tidymodels] ecosystem, offers goodness-of-fit, residual analysis, and model performance metrics. 
 
-These packages provide the tools to conduct diagnostics but still don't reflect the mental process of how data analysts diagnose the unexpected output. For example, when an unexpected output occurs, an analyst may check on whether a column in the data frame is between two values for data quality. However, it is not documented what motivates the analyst to conduct this check -- whether it also applies to other researchers analyzing new data in the same contexts, whether it is a common practice in the field, or whether it is a reaction to this particular data or scenario. Currently, most of these assumptions are not discussed in the publication or captured by tools themselves. While one might be able to infer some of the mental process of the analysts from external sources, such as talking to them or watching screencast videos produced by the analysts e.g. TidyTuesday screencast videos, these insights are not systematically documented or made machine-readable. This gap highlights the need for tools that provide higher level documentation of reasoning behind the checks, facilitating a more transparent and interpretable analysis process. 
+Currently, little has been done on how to computationally incorporate this diagnostic approach into data analysis workflow or software. Most of the diagnostic tools focus on defining user-specified rules, such as data quality checks or producing metrics to summarize model performance, as in model diagnostics. For example, the `assertr` package [@assertr] and the `pointblank` package [@pointblank] provide data validation tools to allow users to define data quality checks. In contrast, packages provide model checks tools like `performance` [@performance] and `yardstick` [@yardstick], from the `tidymodels` [@tidymodels] ecosystem, offers goodness-of-fit, residual analysis, and model performance metrics.
+
+These packages provide the tools to conduct diagnostics but still don't reflect the mental process of how data analysts diagnose the unexpected output. For example, when an unexpected output occurs, an analyst may check on whether a column in the data frame is between two values for data quality. However, it is not documented what motivates the analyst to conduct this check -- whether it also applies to other researchers analyzing new data in the same contexts, whether it is a common practice in the field, or whether it is a reaction to this particular data or scenario. Currently, most of these assumptions are not discussed in the publication or captured by tools themselves. While one might be able to infer some of the mental process of the analysts from external sources, such as talking to them or watching screencast videos produced by the analysts e.g. TidyTuesday screencast videos, these insights are not systematically documented or made machine-readable. This gap highlights the need for tools that provide higher level documentation of reasoning behind the checks, facilitating a more transparent and interpretable analysis process.
 
 ## Unit tests
 
-Why develop unit tests in software engineering? Because it is difficult to predict the outcome of a program, especially when the program is complex. Because the loss associated with a program failure is costly. 
+Why develop unit tests in software engineering? Because it is difficult to predict the outcome of a program, especially when the program is complex. Because the loss associated with a program failure is costly.
 
-Existing tools for checks in data analysis including those check for data quality and model diagnostics. In software development, 
+Existing tools for checks in data analysis including those check for data quality and model diagnostics. In software development,
 
-* the `testthat` package [@testthat] provides the infrastructure for testing R code. It allows users to write unit tests for functions and packages.
-* The `assertthat` package [@assertthat] helps to write assertion statements that are supposed to be true at a certain point in the code for defensive programming.  
+-   the `testthat` package [@testthat] provides the infrastructure for testing R code. It allows users to write unit tests for functions and packages.
+-   The `assertthat` package [@assertthat] helps to write assertion statements that are supposed to be true at a certain point in the code for defensive programming.
 
-# Analysis plan {#sec-plan}
+# xxxxx (not analysis plan) {#sec-plan}
 
 ## Framing checks into unit tests
 
@@ -77,23 +78,27 @@ Q: Whether we should formulate these concept with math notation?? A: only if it 
 
 An analysis plan is a set of analysis steps combined with expectations. Expectations represent our belief about certain aspects of the analysis, independent of the analysis itself. It can be divided into two types: *outcome expectation* and *plan expectation*. Outcome expectation refers to what we anticipate from the main result of the analysis based on prior knowledge. They shape how we interpret the results and assess whether they are consistent with existing knowledge or indicate the need for updates [@grolemund_cognitive_2014]. For example, in public health, prior research shows the average increase in mortality rate per unit increase in PM10 is about 0.50% [@liu2019ambient]. This serves as an expectation for similar future studies. Plan expectations concern the intermediate steps within the analysis rather than the final outcome. They serve as checkpoints to detect deflection in the analysis process For example, we may expect temporal data to be ordered with no gaps and duplicates, or expect that temperature will be a significant covariate in the linear regression model of PM10 on mortality.
 
-Experienced analysts often have implicit expectation about the outcome and rely on a few "directional signs" to check when the outcome deviate from those expectation. However, these expectations are rarely made explicit within the analysis workflow. This makes it challenging for consumers of  the analysis to evaluate the results, since it becomes difficult to disentangle whether discrepancies arise from differing expectations or from the use of statistical technique, without running the analysis themselves. Non-expert analysts, lacking prior knowledge or instinct, may not have clear expectations of the results. This can lead to reduced confidence of the analysis and makes it more difficult and time-consuming to diagnose the cause of the deviation when the results don't align with expectations. By explicitly formulating these expectations, an analysis plan can guide the analysis process, facilitate the communication and evaluate the validity of the results.
+Experienced analysts often have implicit expectation about the outcome and rely on a few "directional signs" to check when the outcome deviate from those expectation. However, these expectations are rarely made explicit within the analysis workflow. This makes it challenging for consumers of the analysis to evaluate the results, since it becomes difficult to disentangle whether discrepancies arise from differing expectations or from the use of statistical technique, without running the analysis themselves. Non-expert analysts, lacking prior knowledge or instinct, may not have clear expectations of the results. This can lead to reduced confidence of the analysis and makes it more difficult and time-consuming to diagnose the cause of the deviation when the results don't align with expectations. By explicitly formulating these expectations, an analysis plan can guide the analysis process, facilitate the communication and evaluate the validity of the results.
 
 <!-- The expectations can be thought of as a set of unit tests used to validate the results of data analysis. By specifying a range of values for these tests, multiple versions of the dataset can be generated to satisfy different sets of plan expectations. This allows us to present what we called the "result universe" -- the complete set of possible results that can be obtained from one data analysis process. By visualizing the result universe, data analysis consumers can observe how changes in expectations affect the results and the range of alternative outcomes that could arise under different conditions. This enables them to evaluate the outcomes based on their own plan expectations and gain a broader perspective on how the actual results produced by analysts fit within this spectrum of possibilities, promoting transparency and trust in analysis.   -->
 
 ## A toy example
 
-Consider a 30-day step count goal. Suppose you resolve to walk at least 8,000 steps each day, using an app to record your daily step count. Your target average is 9,000 steps per day, with some "lows" day, where you walk around 4,000 steps and "high" days  where you reach about 12,000 steps. After 30 days, you check how many times your step count fall below 8,000 and aim for no more than five days under this threshold. 
+Consider a 30-day step count goal. Suppose you resolve to walk at least 8,000 steps each day, using an app to record your daily step count. Your target average is 9,000 steps per day, with some "lows" day, where you walk around 4,000 steps and "high" days where you reach about 12,000 steps. After 30 days, you check how many times your step count fall below 8,000 and aim for no more than five days under this threshold.
 
 To simulation this data, three normal distributions with different means are used for the daily step counts: $\mathcal{N}(4000, 200)$ for low days, $\mathcal{N}(12000, 200)$ for high days, and $\mathcal{N}(9000, 300)$ for typical days. The number of low and high days can be simulated from a Poisson distribution with $\lambda = 4$. @fig-step-count displays the number of days with fewer than 8,000 steps across 300 simulated 30-day periods.
 
-In this scenario, the outcome expectation is that the number of days with a step count below 8,000 will be no more than five. To diagnose potential reasons why this outcome expectation might fail, we can establish a few plan expectations. For example, if the average step count is too low, this may suggest there are too many low days, potentially lead to an unexpected outcome. Similarly, we can also check the quantile of the step count, if more than a third of the days fall below 8,000, this could indicate an excess of low-count days. Additionally, we may may expect the standard deviation of the step count not to be overly large. 
+In this scenario, the outcome expectation is that the number of days with a step count below 8,000 will be no more than five. To diagnose potential reasons why this outcome expectation might fail, we can establish a few plan expectations. For example, if the average step count is too low, this may suggest there are too many low days, potentially lead to an unexpected outcome. Similarly, we can also check the quantile of the step count, if more than a third of the days fall below 8,000, this could indicate an excess of low-count days. Additionally, we may may expect the standard deviation of the step count not to be overly large.
+
+TODO: add one or two scenarios on why step count could go up or down: 1) you take off your watch in the middle of the day, 2) have an workout
+
+TODO: phrase it as Researcher measuring someone's step count rather than measuring your own step count
 
 These considerations yield the following three unit tests as plan expectations:
 
-  - test1: the test fails if the mean step count is below 8,200
-  - test2: the test fails if the 30th percentile of the step counts is below 8,200 
-  - test3: the test fails if the standard deviation of the step countsexceeds 2,500. 
+-   test1: the test fails if the mean step count is below 8,200
+-   test2: the test fails if the 30th percentile of the step counts is below 8,200
+-   test3: the test fails if the standard deviation of the step countsexceeds 2,500.
 
 ```{r}
 #| label: fig-step-count
@@ -136,7 +141,7 @@ step_count |>
   theme(legend.position = "none")
 ```
 
-# Method 
+# Method
 
 ## A workflow to assess the quality of unit tests
 
@@ -148,45 +153,44 @@ In real-world applications, it is rare to create a set of unit tests can fully g
 knitr::include_graphics(here::here("figures", "metric-calc.png"))
 ```
 
+Accuracy refers to a set of tests' ability to accurately detect unexpected outcomes while minimizing false positives and false negatives. A false positive can indicate (caution or skepticism on checking the data), whereas a false negative suggests the tests may lack sensitivity to unexpected outcomes. To model the relationship between the plan and outcome expectation (binary-binary), a logic regression model is used [@ruczinski_logic_2003]. Originally developed for SNP microarray data, logic regression constructs Boolean combinations of binary variables to solve regression problems \[more introduction on logic regression\]. Compared to other tree-based methods or machine learning methods for binary-binary prediction, logic regression produces Boolean combinations, or meta rules, that combines unit tests to solve the prediction problem. \[need rewrite here\]. The performance of the tests can be evaluated using precision and recall metrics derived from the confusion matrix of the logic regression prediction
 
-Accuracy refers to a set of tests' ability to accurately detect unexpected outcomes while minimizing false positives and false negatives. A false positive can indicate (caution or skepticism on checking the data), whereas a false negative suggests the tests may lack sensitivity to unexpected outcomes. To model the relationship between the plan and outcome expectation (binary-binary), a logic regression model is used [@ruczinski_logic_2003]. Originally developed for SNP microarray data, logic regression constructs Boolean combinations of binary variables to solve regression problems [more introduction on logic regression]. Compared to other tree-based methods or machine learning methods for binary-binary prediction, logic regression produces Boolean combinations, or meta rules, that combines unit tests to solve the prediction problem. [need rewrite here]. The performance of the tests can be evaluated using precision and recall metrics derived from the confusion matrix of the logic regression prediction
+-   precision: the proportion of correctly identified unexpected results (true positives) out of all the predicted unexpected results (true positives + false positives)
+-   recall: the proportion of correctly identified unexpected results (true positives) out of all the actual unexpected results (true positives + false negatives)
 
-  * precision: the proportion of correctly identified unexpected results (true positives) out of all the predicted unexpected results (true positives + false positives)
-  * recall: the proportion of correctly identified unexpected results (true positives) out of all the actual unexpected results (true positives + false negatives)
+The second criteria is parsimony in the tests. While tests may score high on accuracy, they may be less effective at explaining the reasons behind unexpected results. This could happen if a set of tests are all tangentially related to the cause of the unexpected results, but none addressing the root cause. It may also occur if the tests are correlated with one another, leading to redundancy.
 
-The second criteria is parsimony in the tests. While tests may score high on accuracy, they may be less effective at explaining the reasons behind unexpected results. This could happen if a set of tests are all tangentially related to the cause of the unexpected results, but none addressing the root cause. It may also occur if the tests are correlated with one another, leading to redundancy. 
-
-To quantify redundancy, the concept of mutual information is used. Mutual information $I(x, y)$ measures the amount of information shared between two random variables and is defined as the KL-distance $D(p \parallel q)$ between the joint distribution of the two variables and the product of the marginal distributions: 
+To quantify redundancy, the concept of mutual information is used. Mutual information $I(x, y)$ measures the amount of information shared between two random variables and is defined as the KL-distance $D(p \parallel q)$ between the joint distribution of the two variables and the product of the marginal distributions:
 
 $$I(x,y) = D\big(p(x,y) \parallel p(x)p(y)\big) = \sum_x \sum_y p(x,y) \log \frac{p(x,y)}{p(x)p(y)}$$
 
-This concept extends naturally to multiple variables through total correlation [ref], $C(X_1, X_2, \cdots, X_n)$, which captures redundancy across a set of $n$ variables:
+This concept extends naturally to multiple variables through total correlation \[ref\], $C(X_1, X_2, \cdots, X_n)$, which captures redundancy across a set of $n$ variables:
 
 $$C(X_1, X_2, \cdots, X_n) = \sum_{x_1} \sum_{x_2} \cdots \sum_{x_n} p(x_1, x_2, \cdots, x_n) \log \frac{p(x_1, x_2, \cdots, x_n)}{p(x_1)p(x_2) \cdots p(x_n)}$$
 
-A high mutual information value indicates redundancy among the tests, while a low value suggests that the tests are independent and provide unique information to diagnose the unexpected outcome. To standardize this measure, the total correlation *per observation* is calculated, and an independence score, ranging between 0 and 1, is defined as 1 - mutual information. 
+A high mutual information value indicates redundancy among the tests, while a low value suggests that the tests are independent and provide unique information to diagnose the unexpected outcome. To standardize this measure, the total correlation *per observation* is calculated, and an independence score, ranging between 0 and 1, is defined as 1 - mutual information.
 
-To combine precision, recall, and independence into a single metric, various mathematical means, such as arithmetic mean, harmonic mean, and quadratic mean, can be used. The differences among these means are minimal when the three metrics are similar. However, as the differences among the metrics increases, the harmonic mean tends to produce the smallest overall score, as it penalizes low values, while the quadratic mean tends to produce the largest score by rewarding higher values more. For simple interpretation of the score, the arithmetic mean is preferred, while in applications where the difference between precision, recall, and independence need to be penalized or rewarded more, the harmonic and quadratic mean should be considered. 
+To combine precision, recall, and independence into a single metric, various mathematical means, such as arithmetic mean, harmonic mean, and quadratic mean, can be used. The differences among these means are minimal when the three metrics are similar. However, as the differences among the metrics increases, the harmonic mean tends to produce the smallest overall score, as it penalizes low values, while the quadratic mean tends to produce the largest score by rewarding higher values more. For simple interpretation of the score, the arithmetic mean is preferred, while in applications where the difference between precision, recall, and independence need to be penalized or rewarded more, the harmonic and quadratic mean should be considered.
 
+## Toy example revisited
 
-## Toy example revisited 
-
-In the step count example, we can use the logic regression model to evaluate the quality of the unit tests. The logic regression model is fitted to the three unit tests (test1, test2, test3) and the outcome expectation (unexpect) as the response variable. The model is then used to predict the outcome expectation based on the unit tests. The prediction is then compared to the actual outcome expectation to calculate the precision and recall of the tests. The independence of the tests is also calculated to assess the redundancy of the tests. @fig-logic-reg presents the suggested logic regression model as a combination of test 1 and test 3 with an OR operator. 
+In the step count example, we can use the logic regression model to evaluate the quality of the unit tests. The logic regression model is fitted to the three unit tests (test1, test2, test3) and the outcome expectation (unexpect) as the response variable. The model is then used to predict the outcome expectation based on the unit tests. The prediction is then compared to the actual outcome expectation to calculate the precision and recall of the tests. The independence of the tests is also calculated to assess the redundancy of the tests. @fig-logic-reg presents the suggested logic regression model as a combination of test 1 and test 3 with an OR operator.
 
 @tbl-logic-reg presents the calculated precision, recall, and independence for the three individual tests and the combined test rule (test1 OR test3) from the logic regression. The harmonic and arithmetic means are included to evaluate the quality of the unit tests in diagnosing unexpected step counts. The results show that the combined test rule (test1 OR test3) has the highest precision, recall, and independence, suggesting that it is the most effective test for diagnosing unexpected step counts. We also include the metric calculated from fitting a regression tree model to the data to compare the performance of the logic regression model. The regression tree produces a similar model of first split on test1 and then split on test3, and results in the same accuracy and overall score as the logic regression model.
 
+top-down and bottom up (regression tree + logic tree): more naturally useful summary of the say it is organized. (put down the plot)
+
 <!-- * provide interpretation at different scenarios: -->
-  
-  <!--   1) one test is flagged, the prediction is as expected:  -->
-  <!--   2) multiple tests are flagged, the prediction is unexpected,  -->
-  <!--   3) no test is flagged, the prediction is unexpected,  -->
-  <!--   4) no test is flagged, the prediction is as expected -->
-  
+
+<!--   1) one test is flagged, the prediction is as expected:  --> <!--   2) multiple tests are flagged, the prediction is unexpected,  --> <!--   3) no test is flagged, the prediction is unexpected,  --> <!--   4) no test is flagged, the prediction is as expected -->
+
 ```{r}
 #| label: fig-logic-reg
+#| fig.width: 6
+#| fig.heigh: 2
 #| fig-cap: Logic regression model fitted to the three unit tests (test1, test2, test3) and the outcome expectation (unexpect) as the response variable. The model suggests using an OR rule to combine test1 and test3 to predict the outcome expectation.
 fit <- step_count |> fit_logic_reg(unexpect, test1:test3, seed = 1, nleaves = 4)
-plot(fit)
+plot_logicreg(fit)
 ```
 
 ```{r}
@@ -223,51 +227,119 @@ list(tibble(.fitted = step_count$test1, unexpect = step_count$unexpect),
         caption = "Accuracy (precision and recall) and parsimony (independence) metrics for each individual unit test and for the combined test rule (test1 OR test3) derived from the logic regression model. The harmonic and arithmetic means of the three metrics are included to evaluate the quality of the unit tests in  diagnosing unexpected step counts (more than five days with fewer than 8,000 steps).")
 ```
 
-
-
-
 # Applications {#sec-examples}
 
-Three examples are presented to illustrate how the concept of analysis plan can be applied to data analysis. [toy example]. @sec-linear-reg illustrates how constructing  the result universe in a linear regression model of PM10 on mortality can help understand the impact of sample size, model specification, and variable correlation structure on data analysis. [example three]
-
+A regression example is produced to illustrate the test selection process for analyzing the effect of PM10 on mortality. The example demonstrates how the test process can be used to select cutoff value in the unit tests and how the test can be used to diagnose the unexpected results.
 
 ## Linear regression {#sec-linear-reg}
 
-Consider a linear regression model to study the effect of PM10 on mortality (provide context of using PM10 to study mortality). Analysts may expect a significant (p-value $\le$ 0.05) PM10 coefficient in the linear model from the literature. This is the *outcome expectation*. There are multiple factors that can affect the outcome expectation of linear regression, which here is called *plan expectation*, for example, 1) sample size, 2) model specification, and 3) correlation structure between variables. Adequate sample size is required to achieve the desired power to detect the significance of PM10 on mortality. Temperature is often an important confounder to consider in such study (add reference). From some domain knowledge, an analyst may expect that the significance of PM10 coefficient can be attained by adding temperature to the model. Analysts may also expect certain correlation structure between PM10, temperature, and mortality, and the distribution of each variable. 
+Consider a linear regression model to study the effect of PM10 on mortality (provide context of using PM10 to study mortality). From the literature, analysts may expect a significant (p-value $\le$ 0.05) PM10 coefficient in the linear model after considering the temperature confounding \[TODO add reference\]. This expectation can be framed into a unit test: the test fails, labelled as 1, if the p-value of the PM10 coefficient is greater than 0.05. And we have devised three unit tests to consider the 1) sample size, 2) strength of correlation between mortality and PM10, and 3) strength of correlation between mortality and temperature. \[sample size matters because ..., correlation between mortality and PM10 matters because...\]. However, it is not clear how to set the cutoff value for these tests to determine a failure. Here a list of tests are created in @tbl-tests. 
 
- * add a paragraph to describe the simulation process
+| the test fails if ... | 
+|--------------| 
+| sample size less than or equal to 200 |
+| sample size less than or equal to 400 |
+| sample size less than or equal to 600 |
+| sample size less than or equal to 800 |
+|  mortality-PM10 correlation less than -0.03 |
+|  mortality-PM10 correlation less than -0.04 |
+|  mortality-PM10 correlation less than -0.05 |
+|  mortality-PM10 correlation less than -0.06 |
+| mortality-temperature correlation greater than -0.3 | 
+| mortality-temperature correlation greater than -0.35 | 
+| mortality-temperature correlation greater than -0.4 | 
+| mortality-temperature correlation greater than -0.45 | 
 
-```{r sim-linear-res}
+: A list of unit tests created for the linear regression model of mortality on PM10 and temperature. The tests are based on the sample size, correlation between mortality and PM10, and correlation between mortality and temperature. The cutoff values for each test are specified to determine a failure. {#tbl-tests} 
+
+To generate replicate of the data, we first simulate the correlation matrix for the three variables: mortality, PM10, and temperature with the following vector:
+
+-   mortality and PM10: -0.03 to -0.1
+-   mortality and temperature: -0.2 to -0.4
+-   PM10 and temperature: 0.2 to 0.4
+
+We then use a Gaussian copula to generate a multivariate normal distribution based on the specified correlation matrix and sample size. The multivariate normal distribution is transformed using the normal CDF, followed by the inverse CDF of the assumed distributions of the three variables. Various distributions are fitted to the variables, including poisson and negative binomial for mortality; gamma, log-normal, exponential, weibull, and normal for pm10 and temperature; and beta for pm10 after rescaling the data to $[0-1]$. AIC is used to determine the best distribution fit for each variable with qq plot presented in @fig-dist-fit to evaluate the fit. The following distributions and parameters, estimated from the original data, are used to simulate the three variables:
+
+-   mortality, negative binomial distribution with size = 74 and mu = 183
+-   PM10, beta distribution with shape1 = 4.21 and shape2 = 11.67, then multiply by 100
+-   temperature, weibull distribution with shape = 3.8 and scale = 61
+
+```{r}
+#| label: fig-dist-fit
+#| fig-cap: QQ-plot of the distribution fit for mortality, PM10, and temperature based on the fitted distribution from the original data. The fitted distribution is compared to the observed data to assess the distribution fit. 
+#| fig.height: 4
+#| fig.width: 10
+aa2 <- fitdistrplus::fitdist(pm10$mortality, "nbinom")
+p1 <- tibble(fitted= rnbinom(558, size = aa2$estimate[1], mu = aa2$estimate[2]),
+       observed= pm10$mortality) %>%
+  ggplot(aes(sample = fitted)) +
+  stat_qq() +
+  stat_qq_line() + 
+  theme_bw() + 
+  theme(aspect.ratio = 1) + 
+  ggtitle("mortality: \nNB(size = 74, mu = 183)")
+
+
+aa6 <- fitdistrplus::fitdist(pm10$pm10[pm10$pm10 < 90]/100, "beta")
+p2 <- tibble(fitted = rbeta(557, shape1 = aa6$estimate[1], shape2 = aa6$estimate[2]) * 100,
+       observed = pm10$pm10[pm10$pm10 < 90]) %>%
+  ggplot(aes(sample = fitted)) +
+  stat_qq() +
+  stat_qq_line() + 
+  theme_bw() + 
+  theme(aspect.ratio = 1) + 
+  ggtitle("pm10: \n100 * beta(shp1 = 4.21, shp2 = 11.67)")
+  
+
+aa4 <- fitdistrplus::fitdist(pm10$temp, "weibull")
+p3 <- tibble(fitted= rweibull(558, aa4$estimate[1], aa4$estimate[2]),
+       observed= pm10$temp) %>%
+  ggplot(aes(sample = fitted)) +
+  stat_qq() +
+  stat_qq_line() + 
+  theme_bw() + 
+  theme(aspect.ratio = 1) + 
+  ggtitle("temperature: \nweibull(shape = 3.8, scale = 61)")
+
+p1 | p2 | p3
+```
+
+```{r}
+# cor(pm10$pm10, pm10$mortality)
+# cor(pm10$temp, pm10$mortality)
+# cor(pm10$temp, pm10$pm10)
 # Generate correlation matrices 
-corr_grid <- expand.grid(seq(-0.01, -0.001, by = 0.001), 
-                         seq(-0.6, -0.2, 0.05), seq(0.2, 0.6, 0.05))
+corr_grid <- expand.grid(seq(0.01, 0.15, by = 0.02),                         
+                         seq(0.25, 0.5, by = 0.05),                           
+                         seq(0.25, 0.45, by = 0.05))  
 
 # Function to compute correlation matrix for each combination 
 gen_corr_mtx <- function(r1, r2, r3) {   
-  cor_matrix <- matrix(c(1, r1, r2,                          
-                         r1, 1, r3,                          
-                         r2, r3, 1), nrow = 3, byrow = TRUE)          
+  # correlation between mortality and pm10 are negative - r1
+  # correlation between mortality and temp are negative - r2
+  cor_matrix <- matrix(c(1, -r1, -r2,                          
+                         -r1, 1, r3,                          
+                         -r2, r3, 1), nrow = 3, byrow = TRUE)          
   # Store the matrix in the list   
   if (all(eigen(cor_matrix)$values > 0)) return(cor_matrix) 
   }  
 
 # Plan for parallel processing
 corr_mtx <- lapply(1:nrow(corr_grid), function(i) {   
-  gen_corr_mtx(corr_grid[i, 1], corr_grid[i, 2], corr_grid[i, 3]) 
-  }) 
+  gen_corr_mtx(corr_grid[i, 1], corr_grid[i, 2], corr_grid[i, 3]) }) 
 corr_mtx <- corr_mtx[map_lgl(corr_mtx, ~!is.null(.x))]  
-sample_size <- c(50, 100, 500, 1000) 
-model <- c("mortality ~ pm10 + temp", "mortality ~ pm10") |> map(as.formula) 
+sample_size <- c(400, 600, 800) 
+model <- c("mortality ~ pm10 + temp") |> map(as.formula) 
 
-generate_data <- function(n, mtx, seed = 123) {   
+generate_data <- function(n, mtx, seed = 123, outlier = FALSE) {   
   mu <- c(0, 0, 0)   
+  set.seed(seed)  
   data <- mvrnorm(n, mu, mtx, empirical = TRUE)   
   U <- pnorm(data, mean = 0, sd = 1)   
-  set.seed(seed)      
-  tibble(mortality = qpois(U[,1], 182), # assume distribution
-         pm10 = qgamma(U[,2], shape = 6, rate = 0.2),           
-         temp = qnorm(U[,3], mean = 55, sd = 16))   
-  }  
+  tibble(mortality = qnbinom(U[,1], size = 74, mu = 183),           
+         pm10 = qbeta(U[,2], shape1 = 4.21, shape2 = 11.67) * 100,           
+         temp = qweibull(U[,3], shape = 3.8, scale = 61))   
+}
 
 res <- tibble(corr_mtx = corr_mtx) |> 
   mutate(id = row_number()) |> 
@@ -275,22 +347,92 @@ res <- tibble(corr_mtx = corr_mtx) |>
   rowwise() |>   
   mutate(data = list(generate_data(n = sample_size, mtx = corr_mtx)),          
          fit = list(summary(lm(model, data))$coefficients))  
+
+pm10_df <- res |>   
+  mutate(     
+    p_value = fit[2,4],     
+    coef = fit[2,1],     
+    mor_pm10_correlation = corr_mtx[1, 2],     
+    mor_temp_correlation = corr_mtx[1, 3],     
+    temp_pm10_yz_correlation = corr_mtx[2, 3],     
+    fml = deparse(model) |> as.factor(),     
+    unexpect = ifelse(p_value < 0.05, 0, 1),
+    #unexpect = ifelse(between(coef, 0, 0.15), 0, 1),
+    `smpl_size <= 200` = ifelse(sample_size <= 200, 1, 0),
+    `smpl_size <= 400` = ifelse(sample_size <= 400, 1, 0),
+    `smpl_size <= 600` = ifelse(sample_size <= 600, 1, 0),
+    `smpl_size <= 800` = ifelse(sample_size <= 800, 1, 0),
+    `cor(m, PM10) < -0.03` = ifelse(mor_pm10_correlation < -0.03, 1, 0),
+    `cor(m, PM10) < -0.04` = ifelse(mor_pm10_correlation < -0.04, 1, 0),
+    `cor(m, PM10) < -0.05` = ifelse(mor_pm10_correlation < -0.05, 1, 0),
+    `cor(m, PM10) < -0.06` = ifelse(mor_pm10_correlation < -0.06, 1, 0),
+    `cor(m, tmp) > -0.3` = ifelse(mor_temp_correlation > -0.3, 1, 0),
+    `cor(m, tmp) > -0.35` = ifelse(mor_temp_correlation > -0.35, 1, 0),
+    `cor(m, tmp) > -0.4` = ifelse(mor_temp_correlation > -0.4, 1, 0),
+    `cor(m, tmp) > -0.45` = ifelse(mor_temp_correlation > -0.45, 1, 0)
+  ) |>    
+  ungroup() 
+
+
 ```
+
+::: {#fig-linear-reg-tree}
+
+```{r}
+#| fig.width: 8
+#| fig.heigh: 3
+fit <- pm10_df |> fit_logic_reg(unexpect, `smpl_size <= 200`:`cor(m, tmp) > -0.45`, 
+                                seed = 4, nleaves = 3)
+plot_logicreg(fit) 
+```
+<!-- The caption with some LaTeX like this $\lambda$. -->
+
+Logic regression model fitted to the twelve unit tests and the outcome expectation (unexpect) as the response variable. The model suggests the relationship:
+($\text{cor}(\text{m}, \text{tmp}) > -0.35$ AND $\text{smpl\_size} \le 600$) OR $\text{cor}(\text{m},  \text{PM10}) < - 0.05$
+:::
+
+```{r}
+#| label: tbl-linear-reg
+library(kableExtra)
+df <- list(
+  tibble(.fitted = pm10_df$`smpl_size <= 600`, 
+         unexpect = pm10_df$unexpect),
+  tibble(.fitted = pm10_df$`cor(m, PM10) < -0.04`, 
+         unexpect = pm10_df$unexpect),
+  tibble(.fitted = pm10_df$`cor(m, tmp) > -0.45`, 
+         unexpect = pm10_df$unexpect),
+  augment(fit)) |>
+  map_dfr(~.x |> calc_miscla_rate(unexpect, .fitted) |> 
+            mutate(overlapping = 0, independence = 1) |> 
+            calc_metrics(metrics = c("harmonic", "arithmetic")), .id = "id") 
+
+tbl <- tibble(tests = c(1,2,3,4)) |> bind_cols(df |> dplyr::select(-id)) 
+tbl |> 
+  kable(digits = 3, escape = FALSE,
+        caption = "Accuracy (precision and recall) and parsimony (independence) metrics derived from the logic regression model, along with harmonic and arithmetic means, for individual unit tests (1: sample size, 2: mortality-PM10 correlation, 3: mortality-temperature correlation), and the combined test rule 4: (sample size AND mortality-temperature correlation) OR mortality-PM10 correlation.") 
+
+```
+
+A total of `r ncol(pm10_df) - ncol(res) - 7` tests with four cutoff values each for the three types of tests are used to fit the logic regression and calculate the precision and recall score for predictability of an unexpected outcome (p value \< 0.05). @fig-linear-reg-tree shows the logic regression tree from the fitted model and @tbl-linear-reg prints the numerical summary of three selected single test and their combined test found by the logic regression. The logic regression model is capable of picking up the best cutoff value for each type of tests and yields the following three tests:
+
+-   sample size less than or equal to 600
+-   mortality-temperature correlation greater than -0.35
+-   mortality-PM10 correlation less than -0.05
+
+The combined test rule, (mortality-tempearture correlation AND sample size) OR mortality-PM10 correlation, has the highest precision, recall, and independence, suggesting that it is the most effective test for diagnosing unexpected results in the linear regression model given our assumption on the data. The tree structure suggests obtaining the mortality-PM10 correlation is as important as obtaining a combined relationship between mortality-temperature correlation and sample size in diagnosing unexpected results in the linear regression model. And based on our assumption of the variable distribution from the data simulation, we can obtain a precision of 0.908 and a recall of 0.794 for the unexpected outcome. These provides check points for the analysts to diagnose the unexpected results and to improve the model.
 
 # Discussion
 
-* how to systematically simulate data is still unknown, sensitivity of the simulation to the results 
+-   how to systematically simulate data is still unknown, sensitivity of the simulation to the results
 
-* plotting is a critical way to check data and they can still be frame into a unit test. it is a open problem to how to encode the visualization into the unit tests. Maybe a procedure like confirm plot (this looks alright to you) and then press the button to continue
+-   plotting is a critical way to check data and they can still be frame into a unit test. it is a open problem to how to encode the visualization into the unit tests. Maybe a procedure like confirm plot (this looks alright to you) and then press the button to continue
 
-* currently no automated way to generate unit tests. It is interesting to see the automation of generating unit tests, although it requires the inputs from experts across a wide array of common scenarios.  
+-   currently no automated way to generate unit tests. It is interesting to see the automation of generating unit tests, although it requires the inputs from experts across a wide array of common scenarios.
 
-* There are cost and benefit on setting expectation on different granularity. At the lowest level, one may have a plan for each data entry and every data handling steps. This requires more work from the analysts and may not be practical in practice. For more complex analyses, analysts may divide the analysis into sections and set expectations for each. They can then focus on the specific sections flagged by the tests and sub-divide the sections to set expectation and diagnose the analysis in a hierarchical manner.
+-   There are cost and benefit on setting expectation on different granularity. At the lowest level, one may have a plan for each data entry and every data handling steps. This requires more work from the analysts and may not be practical in practice. For more complex analyses, analysts may divide the analysis into sections and set expectations for each. They can then focus on the specific sections flagged by the tests and sub-divide the sections to set expectation and diagnose the analysis in a hierarchical manner.
 
-* (only mention it) Software testing relies on "oracles" to provide the expected output necessary for verifying test results. For example, to test whether the program correctly calculates 1 + 1, one need to supply the correct answer, 2. However, establishing this "correct" output can sometimes be challenging, where obtaining a solution may be difficult without the program itself. This situation leads to the oracle problem [@barr2014oracle]. In data analysis, the similar oracle problem can happen, as the "truth" of an outcome, the expectation, depends on the underlying theory or interpretation. For example, in a linear regression model, the significance of a coefficient may be expected or unexpected based on the theory, making it challenging for researcher with a different theory to assess the results and the analysis. 
-
+-   (only mention it) Software testing relies on "oracles" to provide the expected output necessary for verifying test results. For example, to test whether the program correctly calculates 1 + 1, one need to supply the correct answer, 2. However, establishing this "correct" output can sometimes be challenging, where obtaining a solution may be difficult without the program itself. This situation leads to the oracle problem [@barr2014oracle]. In data analysis, the similar oracle problem can happen, as the "truth" of an outcome, the expectation, depends on the underlying theory or interpretation. For example, in a linear regression model, the significance of a coefficient may be expected or unexpected based on the theory, making it challenging for researcher with a different theory to assess the results and the analysis.
 
 # Conclusion {#sec-conclusion}
-
 
 # References

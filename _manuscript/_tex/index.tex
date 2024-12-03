@@ -90,6 +90,20 @@
 \def\fps@figure{htbp}
 \makeatother
 
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -308,7 +322,7 @@ data quality and model diagnostics. In software development,
   in the code for defensive programming.
 \end{itemize}
 
-\section{Analysis plan}\label{sec-plan}
+\section{xxxxx (not analysis plan)}\label{sec-plan}
 
 \subsection{Framing checks into unit
 tests}\label{framing-checks-into-unit-tests}
@@ -377,6 +391,12 @@ below 8,000, this could indicate an excess of low-count days.
 Additionally, we may may expect the standard deviation of the step count
 not to be overly large.
 
+TODO: add one or two scenarios on why step count could go up or down: 1)
+you take off your watch in the middle of the day, 2) have an workout
+
+TODO: phrase it as Researcher measuring someone's step count rather than
+measuring your own step count
+
 These considerations yield the following three unit tests as plan
 expectations:
 
@@ -408,10 +428,6 @@ outcome in this scenario.}
 
 \end{figure}%
 
-\textsubscript{Source:
-\href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
-Notebook}}
-
 \section{Method}\label{method}
 
 \subsection{A workflow to assess the quality of unit
@@ -440,10 +456,6 @@ workflow for calculating the metrics.
 \caption{\label{fig-metric-calc}this is the cap}
 
 \end{figure}%
-
-\textsubscript{Source:
-\href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
-Notebook}}
 
 Accuracy refers to a set of tests' ability to accurately detect
 unexpected outcomes while minimizing false positives and false
@@ -540,6 +552,9 @@ a similar model of first split on test1 and then split on test3, and
 results in the same accuracy and overall score as the logic regression
 model.
 
+top-down and bottom up (regression tree + logic tree): more naturally
+useful summary of the say it is organized. (put down the plot)
+
 \phantomsection\label{cell-fig-logic-reg}
 \begin{figure}[H]
 
@@ -555,14 +570,6 @@ as the response variable. The model suggests using an OR rule to combine
 test1 and test3 to predict the outcome expectation.}
 
 \end{figure}%
-
-\textsubscript{Source:
-\href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
-Notebook}}
-
-\textsubscript{Source:
-\href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
-Notebook}}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.2424}}
@@ -608,46 +615,209 @@ regression tree & 0.821 & 0.836 & 1.000 & 0.879 & 0.886 \\
 
 \end{longtable}
 
-\textsubscript{Source:
-\href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
-Notebook}}
-
 \section{Applications}\label{sec-examples}
 
-Three examples are presented to illustrate how the concept of analysis
-plan can be applied to data analysis. {[}toy example{]}.
-Section~\ref{sec-linear-reg} illustrates how constructing the result
-universe in a linear regression model of PM10 on mortality can help
-understand the impact of sample size, model specification, and variable
-correlation structure on data analysis. {[}example three{]}
+A regression example is produced to illustrate the test selection
+process for analyzing the effect of PM10 on mortality. The example
+demonstrates how the test process can be used to select cutoff value in
+the unit tests and how the test can be used to diagnose the unexpected
+results.
 
 \subsection{Linear regression}\label{sec-linear-reg}
 
 Consider a linear regression model to study the effect of PM10 on
-mortality (provide context of using PM10 to study mortality). Analysts
-may expect a significant (p-value \(\le\) 0.05) PM10 coefficient in the
-linear model from the literature. This is the \emph{outcome
-expectation}. There are multiple factors that can affect the outcome
-expectation of linear regression, which here is called \emph{plan
-expectation}, for example, 1) sample size, 2) model specification, and
-3) correlation structure between variables. Adequate sample size is
-required to achieve the desired power to detect the significance of PM10
-on mortality. Temperature is often an important confounder to consider
-in such study (add reference). From some domain knowledge, an analyst
-may expect that the significance of PM10 coefficient can be attained by
-adding temperature to the model. Analysts may also expect certain
-correlation structure between PM10, temperature, and mortality, and the
-distribution of each variable.
+mortality (provide context of using PM10 to study mortality). From the
+literature, analysts may expect a significant (p-value \(\le\) 0.05)
+PM10 coefficient in the linear model after considering the temperature
+confounding {[}TODO add reference{]}. This expectation can be framed
+into a unit test: the test fails, labelled as 1, if the p-value of the
+PM10 coefficient is greater than 0.05. And we have devised three unit
+tests to consider the 1) sample size, 2) strength of correlation between
+mortality and PM10, and 3) strength of correlation between mortality and
+temperature. {[}sample size matters because \ldots, correlation between
+mortality and PM10 matters because\ldots{]}. However, it is not clear
+how to set the cutoff value for these tests to determine a failure. Here
+a list of tests are created in Table~\ref{tbl-tests}.
+
+\begin{longtable}[]{@{}l@{}}
+\caption{A list of unit tests created for the linear regression model of
+mortality on PM10 and temperature. The tests are based on the sample
+size, correlation between mortality and PM10, and correlation between
+mortality and temperature. The cutoff values for each test are specified
+to determine a failure.}\label{tbl-tests}\tabularnewline
+\toprule\noalign{}
+the test fails if \ldots{} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+the test fails if \ldots{} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+sample size less than or equal to 200 \\
+sample size less than or equal to 400 \\
+sample size less than or equal to 600 \\
+sample size less than or equal to 800 \\
+mortality-PM10 correlation less than -0.03 \\
+mortality-PM10 correlation less than -0.04 \\
+mortality-PM10 correlation less than -0.05 \\
+mortality-PM10 correlation less than -0.06 \\
+mortality-temperature correlation greater than -0.3 \\
+mortality-temperature correlation greater than -0.35 \\
+mortality-temperature correlation greater than -0.4 \\
+mortality-temperature correlation greater than -0.45 \\
+\end{longtable}
+
+To generate replicate of the data, we first simulate the correlation
+matrix for the three variables: mortality, PM10, and temperature with
+the following vector:
 
 \begin{itemize}
 \tightlist
 \item
-  add a paragraph to describe the simulation process
+  mortality and PM10: -0.03 to -0.1
+\item
+  mortality and temperature: -0.2 to -0.4
+\item
+  PM10 and temperature: 0.2 to 0.4
 \end{itemize}
 
-\textsubscript{Source:
-\href{https://huizezhang-sherry.github.io/paper-analysis-plan/index.qmd.html}{Article
-Notebook}}
+We then use a Gaussian copula to generate a multivariate normal
+distribution based on the specified correlation matrix and sample size.
+The multivariate normal distribution is transformed using the normal
+CDF, followed by the inverse CDF of the assumed distributions of the
+three variables. Various distributions are fitted to the variables,
+including poisson and negative binomial for mortality; gamma,
+log-normal, exponential, weibull, and normal for pm10 and temperature;
+and beta for pm10 after rescaling the data to \([0-1]\). AIC is used to
+determine the best distribution fit for each variable with qq plot
+presented in Figure~\ref{fig-dist-fit} to evaluate the fit. The
+following distributions and parameters, estimated from the original
+data, are used to simulate the three variables:
+
+\begin{itemize}
+\tightlist
+\item
+  mortality, negative binomial distribution with size = 74 and mu = 183
+\item
+  PM10, beta distribution with shape1 = 4.21 and shape2 = 11.67, then
+  multiply by 100
+\item
+  temperature, weibull distribution with shape = 3.8 and scale = 61
+\end{itemize}
+
+\phantomsection\label{cell-fig-dist-fit}
+\begin{figure}[H]
+
+\centering{
+
+\includegraphics{index_files/figure-pdf/fig-dist-fit-1.pdf}
+
+}
+
+\caption{\label{fig-dist-fit}QQ-plot of the distribution fit for
+mortality, PM10, and temperature based on the fitted distribution from
+the original data. The fitted distribution is compared to the observed
+data to assess the distribution fit.}
+
+\end{figure}%
+
+\begin{figure}
+
+\centering{
+
+\includegraphics{index_files/figure-pdf/unnamed-chunk-8-1.pdf}
+
+}
+
+\caption{\label{fig-linear-reg-tree}Logic regression model fitted to the
+twelve unit tests and the outcome expectation (unexpect) as the response
+variable. The model suggests the relationship:
+(\(\text{cor}(\text{m}, \text{tmp}) > -0.35\) AND
+\(\text{smpl\_size} \le 600\)) OR
+\(\text{cor}(\text{m},  \text{PM10}) < - 0.05\)}
+
+\end{figure}%
+
+\begin{longtable}[]{@{}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.0882}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1471}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1029}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1765}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1912}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1324}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1618}}@{}}
+
+\caption{\label{tbl-linear-reg}Accuracy (precision and recall) and
+parsimony (independence) metrics derived from the logic regression
+model, along with harmonic and arithmetic means, for individual unit
+tests (1: sample size, 2: mortality-PM10 correlation, 3:
+mortality-temperature correlation), and the combined test rule 4:
+(sample size AND mortality-temperature correlation) OR mortality-PM10
+correlation.}
+
+\tabularnewline
+
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+tests
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+precision
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+recall
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+overlapping
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+independence
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+harmonic
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+arithmetic
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & 0.713 & 0.662 & 0 & 1 & 0.767 & 0.792 \\
+2 & 0.906 & 0.748 & 0 & 1 & 0.872 & 0.885 \\
+3 & 0.789 & 0.733 & 0 & 1 & 0.826 & 0.841 \\
+4 & 0.908 & 0.794 & 0 & 1 & 0.893 & 0.901 \\
+
+\end{longtable}
+
+A total of 12 tests with four cutoff values each for the three types of
+tests are used to fit the logic regression and calculate the precision
+and recall score for predictability of an unexpected outcome (p value
+\textless{} 0.05). Figure~\ref{fig-linear-reg-tree} shows the logic
+regression tree from the fitted model and Table~\ref{tbl-linear-reg}
+prints the numerical summary of three selected single test and their
+combined test found by the logic regression. The logic regression model
+is capable of picking up the best cutoff value for each type of tests
+and yields the following three tests:
+
+\begin{itemize}
+\tightlist
+\item
+  sample size less than or equal to 600
+\item
+  mortality-temperature correlation greater than -0.35
+\item
+  mortality-PM10 correlation less than -0.05
+\end{itemize}
+
+The combined test rule, (mortality-tempearture correlation AND sample
+size) OR mortality-PM10 correlation, has the highest precision, recall,
+and independence, suggesting that it is the most effective test for
+diagnosing unexpected results in the linear regression model given our
+assumption on the data. The tree structure suggests obtaining the
+mortality-PM10 correlation is as important as obtaining a combined
+relationship between mortality-temperature correlation and sample size
+in diagnosing unexpected results in the linear regression model. And
+based on our assumption of the variable distribution from the data
+simulation, we can obtain a precision of 0.908 and a recall of 0.794 for
+the unexpected outcome. These provides check points for the analysts to
+diagnose the unexpected results and to improve the model.
 
 \section{Discussion}\label{discussion}
 
