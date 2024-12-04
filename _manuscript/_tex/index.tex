@@ -205,59 +205,51 @@ cutoff point for the unit tests.
 \begin{itemize}
 \tightlist
 \item
-  emphasize trustworthy data science since it is the theme of the
+  TODO: emphasize trustworthy data science since it is the theme of the
   special issue
 \end{itemize}
 
-In a data analysis, an experienced researcher can often quickly assess
-whether a result meets their expectation, while others may be unsure of
-what to anticipate from the analysis or how to recognize when results
-diverge form expected norms. (These expectations are often based on
-prior knowledge, domain expertise, or common sense and they can often be
-framed into a Boolean question that can be answered by a unit test. For
-example, in a linear regression model, one may expect the p-value of the
-coefficient to be less than 0.05. On top of the expectation on the final
-results, researchers may also have expectations on the intermediate
-steps of the analysis process. For example, one may expect the data
-doesn't contain outliers, etc. These expectations are often checked
-early on to prevent an unexpected propagate through the analysis
-process.)
+In data analysis, experienced researchers often rely on their prior
+knowledge or domain expertise to quickly assess whether results align
+with their expectations. When outcomes deviate, they can quickly iterate
+through the analysis cycle to identify potential issues, refine methods,
+or revise assumptions. However, this iterative process they employ is
+rarely explicit, documented, or discussed in publications. As a result,
+readers are typically presented with the final outcomes of the analysis
+cycle where the results and expectations are aligned -- achieved either
+by refining the analysis or updating the expectations based on
+statistical evidence. These missing pieces of information provides
+little guidance for diagnosing issues in the analysis when the same
+methodology is applied to a new dataset that produces different
+outcomes. Similarly, when researchers with different background
+knowledge it becomes unclear whether variations in results arise from
+differences in the assumptions or in the analysis itself.
 
-This expectation-setting process is often implicit and rarely documented
-or discussed in publications. (There are most publication requires open
-source code for publication, however, it is no instruction or guidance
-on checking \ldots). Yet, making them explicit is crucial for 1) helping
-junior researchers interpret results and diagnose the unexpected, 2)
-providing checkpoints that support independent replication or
-application of methods to new data, 3) aligning assumption across
-researchers from different backgrounds.
+In this paper, we frame these expectations as checks within an
+\emph{analysis plan}, which allows us to examine these implicit
+assumptions made about the data during analysis and to compare different
+checks for diagnosing unexpected outcomes. We then introduce a procedure
+to evaluate the quality of these checks, either individually or in
+combination through logic regression, based on their accuracy and
+redundancy across simulation of the original data. Accuracy is assessed
+using binary classification metrics, precision and recall, while
+redundancy is measured using mutual information. The proposed workflow
+offers a numerical guarantee, based on simulation, that the analysis
+will produce the expected results, assuming the data generating
+mechanism holds. {[}something about trustworthy data science{]}
 
-In this paper, we formalize these informal checks into an \emph{analysis
-plan} comprising the analysis steps along with the associated unit
-tests. This formalization allows us to examine assumptions made about
-the data during analysis and to compare different unit tests in
-diagnosing unexpected outcomes. We then introduce a procedure to assess
-the quality of these unit tests based on their accuracy and redundancy
-across simulated version of the original data. The accuracy is assessed
-using binary classification metrics -- precision and recall -- while
-redundancy is measured using mutual information. The workflow provides
-numerical guarantee of the consistency of the expectation and the data
-for the analysis plan. This means that given the assumption of the data
-generating mechanism, the analysis will provide the outcome we expect.
-In data analysis, analysts are not necessarily collecting the data and
-they can only make reasonable assumption about the quality of the data.
-This method we propose provides a numerical guarantee, based on
-simulation, that the analysis will produce the outcome we expect, given
-the assumption of the data generating mechanism. This provides
-transparency of the analysis and build trustworthy data analysis.
-
-The rest of the paper is organized as follows: Section~\ref{sec-plan}
-describes the concept of analysis plan in detail.
-Section~\ref{sec-examples} provides examples of analysis plan {[}more
-details{]}. (need another section here or before examples?)
+The rest of the paper is organized as follows:
+Section~\ref{sec-lit-review} reviews the concept of diagnosing
+unexpected outcomes and data quality checks. Section~\ref{sec-plan}
+introduces the concept of analysis plan, illustrated with a toy example
+on fitness step count. Section~\ref{sec-method} describes the procedure
+for selecting optimal check combinations to predict unexpected outcomes.
+Section~\ref{sec-examples} applies this selection procedure to a linear
+regression example examining the effect of PM10 on mortality.
+Section~\ref{sec-discussion} discusses a few key considerations and
 Section~\ref{sec-conclusion} concludes the paper.
 
-\section{Literature review}\label{literature-review}
+\section{Literature review}\label{sec-lit-review}
 
 \subsection{Diagnosing unexpected outcomes in data
 analysis}\label{diagnosing-unexpected-outcomes-in-data-analysis}
@@ -379,6 +371,12 @@ don't align with expectations. By explicitly formulating these
 expectations, an analysis plan can guide the analysis process,
 facilitate the communication and evaluate the validity of the results.
 
+Yet, making them explicit is crucial for 1) helping junior researchers
+interpret results and diagnose the unexpected, 2) providing checkpoints
+that support independent replication or application of methods to new
+data, 3) aligning assumption across researchers from different
+backgrounds.
+
 \subsection{A toy example}\label{a-toy-example}
 
 Consider a 30-day step count goal. Suppose you resolve to walk at least
@@ -444,7 +442,7 @@ outcome in this scenario.}
 
 \end{figure}%
 
-\section{Method}\label{method}
+\section{Method}\label{sec-method}
 
 \subsection{A workflow to assess the quality of unit
 tests}\label{a-workflow-to-assess-the-quality-of-unit-tests}
@@ -835,7 +833,7 @@ simulation, we can obtain a precision of 0.908 and a recall of 0.794 for
 the unexpected outcome. These provides check points for the analysts to
 diagnose the unexpected results and to improve the model.
 
-\section{Discussion}\label{discussion}
+\section{Discussion}\label{sec-discussion}
 
 \begin{itemize}
 \item
