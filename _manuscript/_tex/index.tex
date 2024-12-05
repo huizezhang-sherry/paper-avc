@@ -244,8 +244,8 @@ unexpected outcomes and data quality checks. Section~\ref{sec-plan}
 introduces the concept of analysis plan, illustrated with a toy example
 on fitness step count. Section~\ref{sec-method} describes the procedure
 for selecting optimal check combinations to predict unexpected outcomes.
-Section~\ref{sec-examples} applies this selection procedure to a linear
-regression example examining the effect of PM10 on mortality.
+Section~\ref{sec-pm10-mortality} applies this selection procedure to a
+linear regression example examining the effect of PM10 on mortality.
 Section~\ref{sec-discussion} discusses a few key considerations and
 Section~\ref{sec-conclusion} concludes the paper.
 
@@ -621,93 +621,78 @@ regression tree & 0.821 & 0.836 & 1.000 & 0.879 & 0.886 \\
 
 A regression example is produced to illustrate the test selection
 process for analyzing the effect of PM10 on mortality. The example
-demonstrates how the test process can be used to select cutoff value in
-the unit tests and how the test can be used to diagnose the unexpected
-results.
+demonstrates how the test process can be used to select cutoff values in
+the unit tests and how the test can be used to diagnose an unexpected
+PM10 coefficient from the generalized linear model.
 
-\subsection{Linear regression}\label{sec-linear-reg}
+\subsection{Effect of PM10 on mortality}\label{sec-pm10-mortality}
 
-Consider a linear regression model to study the effect of PM10 on
-mortality (provide context of using PM10 to study mortality). From the
-literature, analysts may expect a significant (p-value \(\le\) 0.05)
-PM10 coefficient in the linear model after considering the temperature
-confounding {[}TODO add reference{]}. This expectation can be framed
-into a unit test: the test fails, labelled as 1, if the p-value of the
-PM10 coefficient is greater than 0.05. And we have devised three unit
-tests to consider the 1) sample size, 2) strength of correlation between
-mortality and PM10, and 3) strength of correlation between mortality and
-temperature. {[}sample size matters because \ldots, correlation between
-mortality and PM10 matters because\ldots{]}. However, it is not clear
-how to set the cutoff value for these tests to determine a failure. Here
-a list of tests are created in Table~\ref{tbl-tests}.
+Consider a generalized linear model (GLM) to study the effect of PM10 on
+mortality {[}TODO: provide more context of the mortality-PM10 study{]}.
+Analysts may expect a PM10 coefficient between {[}0, 0.005{]} after
+considering the temperature confounding {[}TODO: reference{]}. This
+expectation can be framed into a check that fails, labelled as 1, if the
+PM10 coefficient is outside the range {[}0, 0.005{]}. Multiple factors
+can impact the PM10 coefficient, such as the sample size, the strength
+of the correlation between mortality and PM10, and the strength of the
+correlation between mortality and temperature. Analysts may expect a
+reasonable sample size to ensure the reliability of the coefficient
+estimate. Outliers in the three variables can also leverage the
+coefficient. While these are possible factors that could affect the
+analysis result, it is not clear the cutoff values for these checks to
+determine a failure. Here a list of checks are created in
+Table~\ref{tbl-checks}.
 
 \begin{longtable}[]{@{}l@{}}
-\caption{A list of unit tests created for the linear regression model of
-mortality on PM10 and temperature. The tests are based on the sample
-size, correlation between mortality and PM10, and correlation between
-mortality and temperature. The cutoff values for each test are specified
-to determine a failure.}\label{tbl-tests}\tabularnewline
+\caption{A list of checks considered for the generalized linear model of
+mortality on PM10 and temperature. The checks are based on the sample
+size, correlation between mortality and PM10, correlation between
+mortality and temperature, and univariate outlier detection. Multiple
+cutoff values are specified for each check to determine a
+failure.}\label{tbl-checks}\tabularnewline
 \toprule\noalign{}
-the test fails if \ldots{} \\
+the check fails if \ldots{} \\
 \midrule\noalign{}
 \endfirsthead
 \toprule\noalign{}
-the test fails if \ldots{} \\
+the check fails if \ldots{} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-sample size less than or equal to 200 \\
-sample size less than or equal to 400 \\
-sample size less than or equal to 600 \\
-sample size less than or equal to 800 \\
-mortality-PM10 correlation less than -0.03 \\
-mortality-PM10 correlation less than -0.04 \\
-mortality-PM10 correlation less than -0.05 \\
-mortality-PM10 correlation less than -0.06 \\
-mortality-temperature correlation greater than -0.3 \\
-mortality-temperature correlation greater than -0.35 \\
-mortality-temperature correlation greater than -0.4 \\
-mortality-temperature correlation greater than -0.45 \\
+Sample size less than or equal to 200 \\
+Sample size less than or equal to 400 \\
+Sample size less than or equal to 600 \\
+Sample size less than or equal to 800 \\
+Mortality-PM10 correlation less than -0.03 \\
+Mortality-PM10 correlation less than -0.04 \\
+Mortality-PM10 correlation less than -0.05 \\
+Mortality-PM10 correlation less than -0.06 \\
+Mortality-temperature correlation greater than -0.3 \\
+Mortality-temperature correlation greater than -0.35 \\
+Mortality-temperature correlation greater than -0.4 \\
+Mortality-temperature correlation greater than -0.45 \\
+Outlier(s) are presented in the variable PM10 \\
+Outlier(s) are presented in the variable mortality \\
 \end{longtable}
 
 To generate replicate of the data, we first simulate the correlation
-matrix for the three variables: mortality, PM10, and temperature with
-the following vector:
-
-\begin{itemize}
-\tightlist
-\item
-  mortality and PM10: -0.03 to -0.1
-\item
-  mortality and temperature: -0.2 to -0.4
-\item
-  PM10 and temperature: 0.2 to 0.4
-\end{itemize}
-
-We then use a Gaussian copula to generate a multivariate normal
-distribution based on the specified correlation matrix and sample size.
-The multivariate normal distribution is transformed using the normal
-CDF, followed by the inverse CDF of the assumed distributions of the
-three variables. Various distributions are fitted to the variables,
-including poisson and negative binomial for mortality; gamma,
-log-normal, exponential, weibull, and normal for pm10 and temperature;
-and beta for pm10 after rescaling the data to \([0-1]\). AIC is used to
-determine the best distribution fit for each variable with qq plot
-presented in Figure~\ref{fig-dist-fit} to evaluate the fit. The
-following distributions and parameters, estimated from the original
-data, are used to simulate the three variables:
-
-\begin{itemize}
-\tightlist
-\item
-  mortality, negative binomial distribution with size = 74 and mu = 183
-\item
-  PM10, beta distribution with shape1 = 4.21 and shape2 = 11.67, then
-  multiply by 100
-\item
-  temperature, weibull distribution with shape = 3.8 and scale = 61
-\end{itemize}
+matrix of the three variables in a grid and then use a Gaussian copula
+to generate a multivariate normal distribution based on the specified
+correlation matrix and sample size. The multivariate normal distribution
+is transformed using the normal CDF before the inverse CDF of the
+assumed distributions of the three variables is applied. To determine
+the appropriate distribution of each variable, various distributions are
+fitted and compared. This includes poisson and negative binomial for
+mortality; gamma, log-normal, exponential, weibull, and normal for pm10
+and temperature; and beta for pm10 after rescaling the data to
+\([0-1]\). AIC is used to determine the best distribution fit for each
+variable with qq plot presented in Figure~\ref{fig-dist-fit} to evaluate
+the fit. AIC suggests a negative binomial distributio nfor mortality, a
+beta distribution for PM10 (multiple by 100 to obtain the original
+scale), and a Weibull distribution for temperature. To include the
+effect of outlier, we add a single outlier to the data for mortality and
+PM10 {[}more details{]}.
 
 \phantomsection\label{cell-fig-dist-fit}
 \begin{figure}[H]
@@ -781,45 +766,46 @@ arithmetic
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-1 & 0.713 & 0.662 & 0 & 1 & 0.767 & 0.792 \\
-2 & 0.906 & 0.748 & 0 & 1 & 0.872 & 0.885 \\
-3 & 0.789 & 0.733 & 0 & 1 & 0.826 & 0.841 \\
-4 & 0.908 & 0.794 & 0 & 1 & 0.893 & 0.901 \\
+1 & 0.087 & 0.215 & 0 & 1 & 0.175 & 0.434 \\
+2 & 0.988 & 0.610 & 0 & 1 & 0.822 & 0.866 \\
+3 & 0.392 & 0.581 & 0 & 1 & 0.569 & 0.658 \\
+4 & 0.649 & 0.641 & 0 & 1 & 0.732 & 0.763 \\
+5 & 0.760 & 0.880 & 0 & 1 & 0.869 & 0.880 \\
 
 \end{longtable}
 
-A total of 12 tests with four cutoff values each for the three types of
-tests are used to fit the logic regression and calculate the precision
-and recall score for predictability of an unexpected outcome (p value
-\textless{} 0.05). Figure~\ref{fig-linear-reg-tree} shows the logic
-regression tree from the fitted model and Table~\ref{tbl-linear-reg}
-prints the numerical summary of three selected single test and their
-combined test found by the logic regression. The logic regression model
-is capable of picking up the best cutoff value for each type of tests
-and yields the following three tests:
+A logic regression is fitted to predict whether the PM10 coefficient is
+unexpected (outside the range of {[}0, 0.005{]}) using the checks listed
+in Table~\ref{tbl-checks}. Precision, recall, and independence score,
+along with their harmonic and arithmetic mean are calculated.
+Figure~\ref{fig-linear-reg-tree} shows the logic regression tree from
+the fitted model and Table~\ref{tbl-linear-reg} prints the numerical
+summary of four selected single test and their combined test found by
+the logic regression. The logic regression model picks up the following
+cutoff value for each type of check:
 
 \begin{itemize}
 \tightlist
 \item
-  sample size less than or equal to 600
+  sample size \emph{larger than} 200
 \item
   mortality-temperature correlation greater than -0.35
 \item
-  mortality-PM10 correlation less than -0.05
+  mortality-PM10 correlation less than -0.04
+\item
+  mortality contain outliers that are detected by the univariate outlier
+  detection
 \end{itemize}
 
-The combined test rule, (mortality-tempearture correlation AND sample
-size) OR mortality-PM10 correlation, has the highest precision, recall,
-and independence, suggesting that it is the most effective test for
-diagnosing unexpected results in the linear regression model given our
-assumption on the data. The tree structure suggests obtaining the
-mortality-PM10 correlation is as important as obtaining a combined
-relationship between mortality-temperature correlation and sample size
-in diagnosing unexpected results in the linear regression model. And
-based on our assumption of the variable distribution from the data
-simulation, we can obtain a precision of 0.908 and a recall of 0.794 for
-the unexpected outcome. These provides check points for the analysts to
-diagnose the unexpected results and to improve the model.
+The tree structure suggests checking mortality-PM10 correlation and a
+sample size larger than 200 with an additional check of either outlier
+on mortality or correlation between mortality and temperature. This
+combined check rule generates a 0.76 precision and a 0.88 recall for
+predicting the unexpected PM10 coefficient. The single check,
+\texttt{cor(m,\ PM10)\ \textless{}\ -0.03}, is also powerful with a high
+precision of 0.988, but the low recall value of 0.61 suggests its high
+false positive rate, as compared to the combined rule suggested by the
+logic regression.
 
 \section{Discussion}\label{sec-discussion}
 
