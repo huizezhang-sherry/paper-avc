@@ -282,6 +282,14 @@ packages, e.g.~\texttt{assertr} \citep{assertr}, \texttt{validate}
 providing data validation tools, allowing users to define customized
 data quality checks based on the applications.
 
+\section{Analysis validation checks}\label{sec-plan}
+
+\subsection{Framing expectations as
+checks}\label{framing-expectations-as-checks}
+
+Q: Whether we should formulate these concept with math notation?? A:
+only if it helps
+
 While data validation focuses on verifying or subsetting data based on
 predefined rules \citep{zio2015methodology}, data analysis checks
 specify assumptions made on the data required for the analysis process
@@ -308,35 +316,6 @@ to deliver this type of quality checks as structured data in a data
 analysis. This gap highlights the need for tools that provide higher
 level documentation of reasoning behind the checks, facilitating a more
 transparent and interpretable analysis process.
-
-\subsection{Unit tests}\label{unit-tests}
-
-Why develop unit tests in software engineering? Because it is difficult
-to predict the outcome of a program, especially when the program is
-complex. Because the loss associated with a program failure is costly.
-
-Existing tools for checks in data analysis including those check for
-data quality and model diagnostics. In software development,
-
-\begin{itemize}
-\tightlist
-\item
-  the \texttt{testthat} package \citep{testthat} provides the
-  infrastructure for testing R code. It allows users to write unit tests
-  for functions and packages.
-\item
-  The \texttt{assertthat} package \citep{assertthat} helps to write
-  assertion statements that are supposed to be true at a certain point
-  in the code for defensive programming.
-\end{itemize}
-
-\section{xxxxx (not analysis plan)}\label{sec-plan}
-
-\subsection{Framing checks into unit
-tests}\label{framing-checks-into-unit-tests}
-
-Q: Whether we should formulate these concept with math notation?? A:
-only if it helps
 
 An analysis plan is a set of analysis steps combined with expectations.
 Expectations represent our belief about certain aspects of the analysis,
@@ -371,11 +350,20 @@ don't align with expectations. By explicitly formulating these
 expectations, an analysis plan can guide the analysis process,
 facilitate the communication and evaluate the validity of the results.
 
-Yet, making them explicit is crucial for 1) helping junior researchers
-interpret results and diagnose the unexpected, 2) providing checkpoints
-that support independent replication or application of methods to new
-data, 3) aligning assumption across researchers from different
-backgrounds.
+Yet, making them explicit is crucial for
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi})}
+\tightlist
+\item
+  helping junior researchers interpret results and diagnose the
+  unexpected,
+\item
+  providing checkpoints that support independent replication or
+  application of methods to new data, and
+\item
+  aligning assumption across researchers from different backgrounds.
+\end{enumerate}
 
 \subsection{A toy example}\label{a-toy-example}
 
