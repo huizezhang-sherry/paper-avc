@@ -31,6 +31,15 @@ pm10 <- read_csv(here::here("data", "pm10.csv")) |>
   mutate(season = as.factor(season))  
 ```
 
+
+README: 
+
+* *Check for TODOs*
+- Literature review: Section *diagnosing unexpected outcomes in data analysis* 
+- *Discussion* and *Conclusion*
+- In Section *Application*: provide more context on the PM10-mortality study and add reference of the [0, 0.005] PM10 coefficient
+- Roger's Orcid???
+
 \newpage
 
 # Introduction
@@ -54,8 +63,6 @@ TODO: what if the expectation is "wrong"
 ## Data analysis checks 
 
 A substantial body of literature has addressed the definition of data quality [@8642813, more] and developed frameworks, that includes dimensions, attributes, and measures to evaluate and improve data quality [@cai2015challenges; @wang1996beyond; @6204995; @woodall2014classification]. These frameworks are often used information system and database management and support business decision-making in the industry. For research purposes, high-quality data ensures the credibility of scientific findings and supports reproducibility and reusability in future studies [ref]. With the growing prevalence of open data in scientific research, the consumers or users of the data typically are no longer the data producers or collectors who have the full knowledge of data in hand, prompting more interest towards the data quality checks in the data analysis process. In R, there are some packages, like`skimr` [@skimr] and `dataMaid` [@dataMaid], provides basic data screening and reporting, while another class of packages, e.g. `assertr` [@assertr], `validate` [@validate], and `pointblank` [@pointblank], focuses on providing data validation tools, allowing users to define customized data quality checks based on the applications. 
-
-
 
 # Analysis validation checks {#sec-plan}
 
@@ -428,16 +435,27 @@ The tree structure suggests checking mortality-PM10 correlation and a sample siz
 
 # Discussion {#sec-discussion}
 
--   how to systematically simulate data is still unknown, sensitivity of the simulation to the results
+TODO
 
--   plotting is a critical way to check data and they can still be frame into a unit test. it is a open problem to how to encode the visualization into the unit tests. Maybe a procedure like confirm plot (this looks alright to you) and then press the button to continue
+-   how to systematically simulate data is still unknown
 
--   currently no automated way to generate unit tests. It is interesting to see the automation of generating unit tests, although it requires the inputs from experts across a wide array of common scenarios.
+-   plotting is a critical way to check data and they can still be frame into checks. i.e. the density/ histogram suggests there are outliers. It is a open problem to how to encode the visualization into checks. 
+
+-   currently no automated way to generate checks. It is interesting to see how check generation can be automated, although it requires the inputs from experts across a wide array of common scenarios.
+
+- checks are also closely related to the concept of unit tests in software engineering. While unit tests are designed to isolate and test specific aspects of the code, it is difficult for analysis validation check to do so.
 
 -   There are cost and benefit on setting expectation on different granularity. At the lowest level, one may have a plan for each data entry and every data handling steps. This requires more work from the analysts and may not be practical in practice. For more complex analyses, analysts may divide the analysis into sections and set expectations for each. They can then focus on the specific sections flagged by the tests and sub-divide the sections to set expectation and diagnose the analysis in a hierarchical manner.
 
--   (only mention it) Software testing relies on "oracles" to provide the expected output necessary for verifying test results. For example, to test whether the program correctly calculates 1 + 1, one need to supply the correct answer, 2. However, establishing this "correct" output can sometimes be challenging, where obtaining a solution may be difficult without the program itself. This situation leads to the oracle problem [@barr2014oracle]. In data analysis, the similar oracle problem can happen, as the "truth" of an outcome, the expectation, depends on the underlying theory or interpretation. For example, in a linear regression model, the significance of a coefficient may be expected or unexpected based on the theory, making it challenging for researcher with a different theory to assess the results and the analysis.
 
 # Conclusion {#sec-conclusion}
+
+TODO
+
+# Acknowledgement
+
+The article is created using Quarto [@Allaire_Quarto_2022] in R [@R].
+The source code for reproducing the work reported in this paper can be
+found at: <https://github.com/huizezhang-sherry/paper-avc>. 
 
 # References

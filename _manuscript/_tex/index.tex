@@ -198,6 +198,25 @@ cutoff point for the unit tests.
 \tableofcontents
 }
 
+README:
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{Check for TODOs}
+\item
+  Literature review: Section \emph{diagnosing unexpected outcomes in
+  data analysis}
+\item
+  \emph{Discussion} and \emph{Conclusion}
+\item
+  In Section \emph{Application}: provide more context on the
+  PM10-mortality study and add reference of the {[}0, 0.005{]} PM10
+  coefficient
+\item
+  Roger's Orcid???
+\end{itemize}
+
 \newpage
 
 \section{Introduction}\label{introduction}
@@ -809,19 +828,24 @@ logic regression.
 
 \section{Discussion}\label{sec-discussion}
 
+TODO
+
 \begin{itemize}
 \item
-  how to systematically simulate data is still unknown, sensitivity of
-  the simulation to the results
+  how to systematically simulate data is still unknown
 \item
   plotting is a critical way to check data and they can still be frame
-  into a unit test. it is a open problem to how to encode the
-  visualization into the unit tests. Maybe a procedure like confirm plot
-  (this looks alright to you) and then press the button to continue
+  into checks. i.e.~the density/ histogram suggests there are outliers.
+  It is a open problem to how to encode the visualization into checks.
 \item
-  currently no automated way to generate unit tests. It is interesting
-  to see the automation of generating unit tests, although it requires
-  the inputs from experts across a wide array of common scenarios.
+  currently no automated way to generate checks. It is interesting to
+  see how check generation can be automated, although it requires the
+  inputs from experts across a wide array of common scenarios.
+\item
+  checks are also closely related to the concept of unit tests in
+  software engineering. While unit tests are designed to isolate and
+  test specific aspects of the code, it is difficult for analysis
+  validation check to do so.
 \item
   There are cost and benefit on setting expectation on different
   granularity. At the lowest level, one may have a plan for each data
@@ -831,23 +855,18 @@ logic regression.
   expectations for each. They can then focus on the specific sections
   flagged by the tests and sub-divide the sections to set expectation
   and diagnose the analysis in a hierarchical manner.
-\item
-  (only mention it) Software testing relies on ``oracles'' to provide
-  the expected output necessary for verifying test results. For example,
-  to test whether the program correctly calculates 1 + 1, one need to
-  supply the correct answer, 2. However, establishing this ``correct''
-  output can sometimes be challenging, where obtaining a solution may be
-  difficult without the program itself. This situation leads to the
-  oracle problem \citep{barr2014oracle}. In data analysis, the similar
-  oracle problem can happen, as the ``truth'' of an outcome, the
-  expectation, depends on the underlying theory or interpretation. For
-  example, in a linear regression model, the significance of a
-  coefficient may be expected or unexpected based on the theory, making
-  it challenging for researcher with a different theory to assess the
-  results and the analysis.
 \end{itemize}
 
 \section{Conclusion}\label{sec-conclusion}
+
+TODO
+
+\section{Acknowledgement}\label{acknowledgement}
+
+The article is created using Quarto \citep{Allaire_Quarto_2022} in R
+\citep{R}. The source code for reproducing the work reported in this
+paper can be found at:
+\url{https://github.com/huizezhang-sherry/paper-avc}.
 
 
 \renewcommand\refname{References}
