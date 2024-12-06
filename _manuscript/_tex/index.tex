@@ -193,7 +193,7 @@ formalize these informal assumptions by framing them as binary
 \emph{analysis validation check}. We then introduce a procedure to
 quantify how violations of these checks may lead to unexpected results
 in the analysis. The procedure relies on simulations of the original
-data and evaluates boht accuracy and redundancy. Accuracy is calculated
+data and evaluates both accuracy and redundancy. Accuracy is calculated
 through binary classification metric, while redundancy is measured using
 mutual information. We demonstrate this approach with a toy example on
 the fitness step count data and a generalized linear model exmaple
@@ -207,7 +207,8 @@ README:
 \begin{itemize}
 \tightlist
 \item
-  \emph{Check for TODOs}, things inside ``{[}{]}'' are my comments
+  \emph{Check for TODOs}, things inside ``{[}\ldots{]}'', other than
+  references, are my comments
 \item
   Literature review: Section \emph{diagnosing unexpected outcomes in
   data analysis}
@@ -256,14 +257,14 @@ be a way to make these expectations explicit and accessible to others.
 Even better, if the encoding is machine-readable, we could analyze these
 expectations and learn from the analysis -- whether the checks also
 apply to other researchers analyzing new data in the same context,
-whether they reflect commo common practices in the field, or whether
-they are specific to the data or analysis at hand.
+whether they reflect common practices in the field, or whether they are
+specific to the data or analysis at hand.
 
 In this paper, we conceptualize these internal expectations and
 assumptions as \emph{analysis validation checks}, which allows us to
 examine these assumptions made during analysis to diagnose unexpected
 outcomes. We then introduce a procedure that provides a quantitative
-emasure on how violations in a tree of checks, derived from individual
+measure on how violations in a tree of checks, derived from individual
 checks, will lead to an unexpected result. The procedure, based on
 simulations of the original data, calculates accuracy and redundancy.
 Accuracy is determined using binary classification metrics, precision
@@ -434,16 +435,13 @@ outcome in this scenario.}
 \subsection{A workflow to assess the quality of unit
 tests}\label{a-workflow-to-assess-the-quality-of-unit-tests}
 
-In real-world applications, it is rare to create a set of unit tests can
-fully guarantee expected results. On one hand, there is the cost of
-effort involved in manually developing all these tests; on the other,
-there is the inherent complexity of the problem. (can we - if we're
-thriving for detecting 95\% of the cause?). However, the quality of unit
-tests can be evaluated by simulated data. One set of tests is considered
-better than another if a small set of tests can reliably detect
-unexpected outcomes, which brings two criteria in the evaluation metric:
-accuracy and parsimony. Figure~\ref{fig-metric-calc} illustrates the
-workflow for calculating the metrics.
+While some checks are crucial and can lead to unexpected outcomes,
+others may be tangential to the root cause. In this section, we propose
+a procedure to measure the violation of checks, combined using logical
+operators, contribute to an unexpected outcome. A small set of
+independent checks is considered effective if it translates to
+unexpected outcomes and Figure~\ref{fig-metric-calc} provides an
+overview of the calculation.
 
 \phantomsection\label{cell-fig-metric-calc}
 \begin{figure}[H]
@@ -454,44 +452,36 @@ workflow for calculating the metrics.
 
 }
 
-\caption{\label{fig-metric-calc}this is the cap}
+\caption{\label{fig-metric-calc}{[}this is the cap and the plot needs
+polish{]}}
 
 \end{figure}%
 
-Accuracy refers to a set of tests' ability to accurately detect
-unexpected outcomes while minimizing false positives and false
-negatives. A false positive can indicate (caution or skepticism on
-checking the data), whereas a false negative suggests the tests may lack
-sensitivity to unexpected outcomes. To model the relationship between
-the plan and outcome expectation (binary-binary), a logic regression
-model is used \citep{ruczinski_logic_2003}. Originally developed for SNP
+From the simulated data, the accuracy branch refers to a set of checks'
+ability to accurately detect unexpected outcomes while minimizing false
+positives and false negatives. While a false positive can raise caution
+or skepticism on the data, both false positive and false negative
+suggest the checks are over or lack sensitivity to unexpected outcomes.
+To incorporate the effect of multiple checks on the outcome, a logic
+regression model \citep{ruczinski_logic_2003} is fitted to the checks
+and whether the outcome is unexpected. Originally developed for SNP
 microarray data, logic regression constructs Boolean combinations of
-binary variables to solve regression problems {[}more introduction on
-logic regression{]}. Compared to other tree-based methods or machine
-learning methods for binary-binary prediction, logic regression produces
-Boolean combinations, or meta rules, that combines unit tests to solve
-the prediction problem. {[}need rewrite here{]}. The performance of the
-tests can be evaluated using precision and recall metrics derived from
-the confusion matrix of the logic regression prediction
+binary variables, in a tree structure, to predict both binary and
+numerical outcomes. Compared to other tree-based methods for
+binary-binary prediction, the Boolean combinations from the logic
+regression model produce a tree structure that can be directly
+interpreted as the possible combination of checks leading to an
+unexpected outcome, without the need to invert the tree as required in
+classic tree-based methods. The model is then used to predict the
+outcome expectation based on the checks, and the prediction is compared
+to the actual outcome expectation to calculate the precision and recall
+of the checks.
 
-\begin{itemize}
-\tightlist
-\item
-  precision: the proportion of correctly identified unexpected results
-  (true positives) out of all the predicted unexpected results (true
-  positives + false positives)
-\item
-  recall: the proportion of correctly identified unexpected results
-  (true positives) out of all the actual unexpected results (true
-  positives + false negatives)
-\end{itemize}
-
-The second criteria is parsimony in the tests. While tests may score
-high on accuracy, they may be less effective at explaining the reasons
-behind unexpected results. This could happen if a set of tests are all
-tangentially related to the cause of the unexpected results, but none
-addressing the root cause. It may also occur if the tests are correlated
-with one another, leading to redundancy.
+While tests may score high on accuracy, they may be less effective at
+explaining the reasons behind unexpected results. This could happen if a
+set of tests are all tangentially related to the cause of the unexpected
+results, but none addressing the root cause. It may also occur if the
+tests are correlated with one another, leading to redundancy.
 
 To quantify redundancy, the concept of mutual information is used.
 Mutual information \(I(x, y)\) measures the amount of information shared
@@ -502,21 +492,21 @@ and the product of the marginal distributions:
 \[I(x,y) = D\big(p(x,y) \parallel p(x)p(y)\big) = \sum_x \sum_y p(x,y) \log \frac{p(x,y)}{p(x)p(y)}\]
 
 This concept extends naturally to multiple variables through total
-correlation {[}ref{]}, \(C(X_1, X_2, \cdots, X_n)\), which captures
-redundancy across a set of \(n\) variables:
+correlation, \(C(X_1, X_2, \cdots, X_n)\), which captures redundancy
+across a set of \(n\) variables:
 
 \[C(X_1, X_2, \cdots, X_n) = \sum_{x_1} \sum_{x_2} \cdots \sum_{x_n} p(x_1, x_2, \cdots, x_n) \log \frac{p(x_1, x_2, \cdots, x_n)}{p(x_1)p(x_2) \cdots p(x_n)}\]
 
 A high mutual information value indicates redundancy among the tests,
-while a low value suggests that the tests are independent and provide
+while a low value suggests that the tests are independent and provides
 unique information to diagnose the unexpected outcome. To standardize
 this measure, the total correlation \emph{per observation} is
 calculated, and an independence score, ranging between 0 and 1, is
 defined as 1 - mutual information.
 
 To combine precision, recall, and independence into a single metric,
-various mathematical means, such as arithmetic mean, harmonic mean, and
-quadratic mean, can be used. The differences among these means are
+mathematical means, such as arithmetic mean, harmonic mean, and
+quadratic mean can be used. The differences among these means are
 minimal when the three metrics are similar. However, as the differences
 among the metrics increases, the harmonic mean tends to produce the
 smallest overall score, as it penalizes low values, while the quadratic
@@ -527,34 +517,6 @@ recall, and independence need to be penalized or rewarded more, the
 harmonic and quadratic mean should be considered.
 
 \subsection{Toy example revisited}\label{toy-example-revisited}
-
-In the step count example, we can use the logic regression model to
-evaluate the quality of the unit tests. The logic regression model is
-fitted to the three unit tests (test1, test2, test3) and the outcome
-expectation (unexpect) as the response variable. The model is then used
-to predict the outcome expectation based on the unit tests. The
-prediction is then compared to the actual outcome expectation to
-calculate the precision and recall of the tests. The independence of the
-tests is also calculated to assess the redundancy of the tests.
-Figure~\ref{fig-logic-reg} presents the suggested logic regression model
-as a combination of test 1 and test 3 with an OR operator.
-
-Table~\ref{tbl-logic-reg} presents the calculated precision, recall, and
-independence for the three individual tests and the combined test rule
-(test1 OR test3) from the logic regression. The harmonic and arithmetic
-means are included to evaluate the quality of the unit tests in
-diagnosing unexpected step counts. The results show that the combined
-test rule (test1 OR test3) has the highest precision, recall, and
-independence, suggesting that it is the most effective test for
-diagnosing unexpected step counts. We also include the metric calculated
-from fitting a regression tree model to the data to compare the
-performance of the logic regression model. The regression tree produces
-a similar model of first split on test1 and then split on test3, and
-results in the same accuracy and overall score as the logic regression
-model.
-
-top-down and bottom up (regression tree + logic tree): more naturally
-useful summary of the say it is organized. (put down the plot)
 
 \phantomsection\label{cell-fig-logic-reg}
 \begin{figure}[H]
@@ -615,6 +577,23 @@ test1 OR test3 & 0.821 & 0.836 & 0.999 & 0.879 & 0.886 \\
 regression tree & 0.821 & 0.836 & 1.000 & 0.879 & 0.886 \\
 
 \end{longtable}
+
+In the step count example, the logic regression model is fitted to the
+three unit tests to generate the prediction for calculating precision
+and recall. Figure~\ref{fig-logic-reg} shows the chosen logic regression
+model: a combination of test 1 and test 3 with an OR operator and
+Table~\ref{tbl-logic-reg} presents the calculated precision, recall, and
+independence for the three individual tests and the combined test rule
+(test1 OR test3) from the logic regression. We also include the metric
+calculated from fitting a regression tree model to the data to compare
+the performance of the logic regression model. The harmonic and
+arithmetic means are included to combine the three measures. The results
+show that the two tests produced by the logic regression can accurately
+predict 82.1\% of all \emph{predicted unexpected cases}, and 83.6\%
+cases of all \emph{actual unexpected results} in the simulation data.
+The regression tree produces a similar model of first split on test1 and
+then split on test3, and results in the same accuracy and overall score
+as the logic regression model.
 
 \section{Application}\label{sec-pm10-mortality}
 
