@@ -4,9 +4,11 @@
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 %
 \documentclass[
-]{jds}
+  12pt,
+]{interact}
 
 \usepackage{amsmath,amssymb}
+\usepackage{setspace}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
@@ -39,7 +41,7 @@
 \makeatother
 \usepackage{xcolor}
 \setlength{\emergencystretch}{3em} % prevent overfull lines
-\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\setcounter{secnumdepth}{5}
 % Make \paragraph and \subparagraph free-standing
 \makeatletter
 \ifx\paragraph\undefined\else
@@ -104,6 +106,7 @@
 \usepackage[normalem]{ulem}
 \usepackage{makecell}
 \usepackage{xcolor}
+\usepackage{orcidlink}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -157,6 +160,7 @@
 \urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
   pdftitle={My wonderful paper},
+  pdfauthor={H. Sherry Zhang; Roger D. Peng},
   colorlinks=true,
   linkcolor={blue},
   filecolor={Maroon},
@@ -166,11 +170,17 @@
 
 
 \title{My wonderful paper}
-\author{}
-\date{}
+\author{H. Sherry Zhang$\textsuperscript{1}$, Roger D.
+Peng$\textsuperscript{1}$}
 
+\thanks{CONTACT: H. Sherry
+Zhang. Email: \href{mailto:huize.zhang@austin.utexas.edu}{\nolinkurl{huize.zhang@austin.utexas.edu}}. Roger
+D.
+Peng. Email: \href{mailto:roger.peng@austin.utexas.edu}{\nolinkurl{roger.peng@austin.utexas.edu}}. }
 \begin{document}
+\captionsetup{labelsep=space}
 \maketitle
+\textsuperscript{1}  University of Texas at Austin,  
 \begin{abstract}
 Unexpected results in data analysis can prompt researchers to examine
 data quality and analysis steps. While some researchers can typically
@@ -191,13 +201,8 @@ analysis, compare different analysis plans, and to identify the optimal
 cutoff point for the unit tests.
 \end{abstract}
 
-\renewcommand*\contentsname{Table of contents}
-{
-\hypersetup{linkcolor=}
-\setcounter{tocdepth}{3}
-\tableofcontents
-}
 
+\setstretch{2}
 README:
 
 \begin{itemize}
@@ -213,8 +218,6 @@ README:
   In Section \emph{Application}: provide more context on the
   PM10-mortality study and add reference of the {[}0, 0.005{]} PM10
   coefficient
-\item
-  Roger's Orcid???
 \end{itemize}
 
 \newpage
