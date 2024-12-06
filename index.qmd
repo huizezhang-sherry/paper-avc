@@ -113,7 +113,7 @@ In this scenario, the outcome is that the number of days with a step count below
 
 ```{r}
 #| label: fig-step-count
-#| fig-cap: Number of days with fewer than 8,000 steps across 300 simulated 30-day periods. The orange bars indicate instances where the count exeeds five days, representing an unexpected outcome in this scenario. 
+#| fig-cap: Number of days with fewer than 8,000 steps across 300 simulated 30-day periods. The orange bars indicate instances where the count exceeds five days, representing an unexpected outcome in this scenario. 
 set.seed(1234)
 step_count <- tibble(id = 1:300) |> 
   rowwise() |> 
@@ -189,7 +189,7 @@ To combine precision, recall, and independence into a single metric, mathematica
 #| label: fig-logic-reg
 #| fig.width: 6
 #| fig.heigh: 2
-#| fig-cap: Logic regression model fitted to the three unit tests (test1, test2, test3) and the outcome expectation (unexpect) as the response variable. The model suggests using an OR rule to combine test1 and test3 to predict the outcome expectation.
+#| fig-cap: Logic regression model fitted to the three unit tests (test1, test2, test3). The model suggests using an OR rule to combine test1 and test3 to predict the outcome expectation.
 fit <- step_count |> fit_logic_reg(unexpect, test1:test3, seed = 1, nleaves = 4)
 plot_logicreg(fit)
 ```
@@ -236,9 +236,10 @@ In the step count example, the logic regression model is fitted to the three uni
 
 # Application {#sec-pm10-mortality}
 
-A regression example is produced to illustrate the test selection process for analyzing the effect of PM10 on mortality. The example demonstrates how the procedure presented in @sec-method can be used to select cutoff values in the checks to diagnose an unexpected PM10 coefficient from the generalized linear model. 
 
-Consider a generalized linear model (GLM) to study the effect of PM10 on mortality [TODO: provide more context of the mortality-PM10 study]. Analysts may expect a PM10 coefficient between [0, 0.005] after considering the temperature confounding [TODO: reference]. This expectation can be framed into a check that fails, labelled as 1, if the PM10 coefficient is outside the range [0, 0.005]. Multiple factors can impact the PM10 coefficient, such as the sample size, the strength of the correlation between mortality and PM10, and the strength of the correlation between mortality and temperature. Analysts may expect a reasonable sample size to ensure the reliability of the coefficient estimate. Outliers in the three variables can also leverage the coefficient. While these are possible factors that could affect the analysis result, it is not clear the cutoff values for these checks to determine a failure. Here a list of checks are created in @tbl-checks. 
+Consider a generalized linear model (GLM) to study the effect of PM10 on mortality [TODO: provide more context of the mortality-PM10 study]. Analysts may expect a PM10 coefficient between [0, 0.005] after considering the temperature confounding [TODO: reference]. The example demonstrates how the procedure presented in @sec-method can be used to select cutoff values in the checks to diagnose an unexpected PM10 coefficient from the generalized linear model. 
+
+This PM10 coefficient expectation can be framed into a check that fails, labelled as 1, if the PM10 coefficient is outside the range [0, 0.005] and 0 if it is within. Multiple factors can affect the PM10 coefficient, such as the sample size, the strength of the correlation between mortality and PM10, and the strength of the correlation between mortality and temperature. Analysts may expect a reasonable sample size to ensure the reliability of the coefficient estimate. Outliers in the three variables can also leverage the coefficient. While these are possible factors that could affect the analysis result, it is not clear the cutoff values for these checks to determine a failure. Here we create a list of checks in @tbl-checks with varied cutoff values for each: 
 
 | the check fails if ... | 
 |--------------| 
@@ -259,7 +260,7 @@ Consider a generalized linear model (GLM) to study the effect of PM10 on mortali
 
 : A list of checks considered for the generalized linear model of mortality on PM10 and temperature. The checks are based on the sample size, correlation between mortality and PM10, correlation between mortality and temperature, and univariate outlier detection. Multiple cutoff values are specified for each check to determine a failure. {#tbl-checks} 
 
-To generate replicate of the data, we first simulate the correlation matrix of the three variables in a grid and then use a Gaussian copula to generate a multivariate normal distribution based on the specified correlation matrix and sample size. The multivariate normal distribution is transformed using the normal CDF before the inverse CDF of the assumed distributions of the three variables is applied. To determine the appropriate distribution of each variable, various distributions are fitted and compared. This includes poisson and negative binomial for mortality; gamma, log-normal, exponential, weibull, and normal for pm10 and temperature; and beta for pm10 after rescaling the data to $[0-1]$. AIC is used to determine the best distribution fit for each variable with qq plot presented in @fig-dist-fit to evaluate the fit. AIC suggests a negative binomial distributio nfor mortality, a beta distribution for PM10 (multiple by 100 to obtain the original scale), and a Weibull distribution for temperature. To include the effect of outlier, we add a single outlier to the data for mortality and PM10 [more details].
+To generate replicate of the data, we first simulate the correlation matrix of the three variables in a grid and then use a Gaussian copula to generate a multivariate normal distribution based on the specified correlation matrix and sample size. The multivariate normal distribution is transformed using the normal CDF before the inverse CDF of the assumed distributions of the three variables is applied. To determine the appropriate distribution of each variable, various distributions are fitted and compared. This includes poisson and negative binomial for mortality; gamma, log-normal, exponential, weibull, and normal for pm10 and temperature; and beta for pm10 after rescaling the data to $[0-1]$. AIC is used to determine the best distribution fit for each variable with qq plot presented in @fig-dist-fit to evaluate the fit. AIC suggests a negative binomial distribution for mortality, a beta distribution for PM10 (multiple by 100 to obtain the original scale), and a Weibull distribution for temperature. To include the effect of outlier, we add a single outlier to the data for both variable mortality and PM10.
 
 ```{r}
 #| label: fig-dist-fit
@@ -391,12 +392,11 @@ pm10_df <- pm10_df |>
 #| fig.heigh: 3
 fit <- pm10_df |> fit_logic_reg(unexpect, `smpl_size <= 200`:`mortality_outlier`, 
                                 seed = 6, nleaves = 4)
-plot_logicreg(fit) 
+plot(fit) 
 ```
-<!-- The caption with some LaTeX like this $\lambda$. -->
 
-Logic regression model fitted to the twelve unit tests and the outcome expectation (unexpect) as the response variable. The model suggests the relationship:
-($\text{cor}(\text{m}, \text{tmp}) > -0.35$ AND $\text{smpl\_size} \le 600$) OR $\text{cor}(\text{m},  \text{PM10}) < - 0.05$
+Logic regression model fitted to the fourteen unit tests and the outcome expectation (unexpected) as the response variable. The model suggests the relationship:
+(sample size *greater than* 200 AND mortality-PM10 correlation < -0.04) AND (mortality-temperature correlation > -0.35 OR there exist mortality outlier) to predict the unexpected PM10 coefficient. [sorry the proper plot is not ready].
 :::
 
 ```{r}
@@ -419,11 +419,11 @@ df <- list(
 tbl <- tibble(tests = c(1,2,3,4, 5)) |> bind_cols(df |> dplyr::select(-id)) 
 tbl |> 
   kable(digits = 3, escape = FALSE,
-        caption = "Accuracy (precision and recall) and parsimony (independence) metrics derived from the logic regression model, along with harmonic and arithmetic means, for individual unit tests (1: sample size, 2: mortality-PM10 correlation, 3: mortality-temperature correlation), and the combined test rule 4: (sample size AND mortality-temperature correlation) OR mortality-PM10 correlation.") 
+        caption = "Accuracy (precision and recall) and parsimony (independence) metrics derived from the logic regression model, along with harmonic and arithmetic means, for individual unit tests (1: sample size, 2: mortality-PM10 correlation, 3: mortality-temperature correlation,  4: mortality outlier), and the combined test rule 5: (sample size AND mortality-PM10 correlation) AND (mortality-temperature correlation OR mortality outlier.") 
 
 ```
 
-A logic regression is fitted to predict whether the PM10 coefficient is unexpected (outside the range of [0, 0.005]) using the checks listed in @tbl-checks. Precision, recall, and independence score, along with their harmonic and arithmetic mean are calculated. @fig-linear-reg-tree shows the logic regression tree from the fitted model and @tbl-linear-reg prints the numerical summary of four selected single test and their combined test found by the logic regression. The logic regression model picks up the following cutoff value for each type of check:
+A logic regression is fitted to predict whether the PM10 coefficient is unexpected using the checks listed in @tbl-checks and @fig-linear-reg-tree shows the logic regression tree from the fitted model. Precision, recall, and independence score, along with their harmonic and arithmetic mean are calculated in  @tbl-linear-reg. The logic regression model picks up the following cutoff value for each type of check:
 
 -   sample size *larger than* 200
 -   mortality-temperature correlation greater than -0.35
@@ -432,7 +432,7 @@ A logic regression is fitted to predict whether the PM10 coefficient is unexpect
 
 <!-- (mortality-temperature correlation > -0.35 OR there exist mortality outlier) and (mortality-PM10 correlation < -0.04 AND (not sample size less than 200) )  -->
 
-The tree structure suggests checking mortality-PM10 correlation and a sample size larger than 200 with an additional check of either outlier on mortality or correlation between mortality and temperature. This combined check rule generates a `r round(as.numeric(df[5, "precision"]), 3)` precision and a `r round(as.numeric(df[5, "recall"]), 3)` recall for predicting the unexpected PM10 coefficient. The single check, `cor(m, PM10) < -0.03`, is also powerful with a high precision of `r round(as.numeric(df[2, "precision"]), 3)`, but the low recall value of `r round(as.numeric(df[2, "recall"]), 3)` suggests its high false positive rate, as compared to the combined rule suggested by the logic regression.
+The tree structure suggests checking mortality-PM10 correlation and a sample size larger than 200 with an additional check of either outlier on mortality or correlation between mortality and temperature. This combined check rule generates a precision of `r round(as.numeric(df[5, "precision"]), 3)` and a recall of `r round(as.numeric(df[5, "recall"]), 3)` for predicting the unexpected PM10 coefficient. The single check, `cor(m, PM10) < -0.03`, is also powerful with a high precision of `r round(as.numeric(df[2, "precision"]), 3)`, but the low recall value of `r round(as.numeric(df[2, "recall"]), 3)` suggests its high false positive rate, as compared to the combined rule suggested by the logic regression.
 
 # Discussion {#sec-discussion}
 
