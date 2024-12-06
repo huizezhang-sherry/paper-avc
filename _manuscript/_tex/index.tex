@@ -234,19 +234,32 @@ README:
 
 In data analysis, experienced researchers often rely on their prior
 knowledge or domain expertise to quickly assess whether results align
-with their expectations. When outcomes deviate, they can quickly iterate
-through the analysis cycle to identify potential issues, refine methods,
-or revise assumptions. However, this iterative process they employ is
-rarely explicit, documented, or discussed in publications. As a result,
-readers are typically presented with the final outcomes of the analysis
-cycle where the results and expectations are aligned -- achieved either
-by refining the analysis or updating the expectations based on
-statistical evidence. These missing pieces of information provides
-little guidance for diagnosing issues in the analysis when the same
-methodology is applied to a new dataset that produces different
+with their expectations. When a result falls outside of this interval,
+it prompts the researchers to investigate backwards on the data quality,
+the analysis steps, or the assumptions made during the analysis process.
+This mental process of where to diagnose unexpected outcomes is often
+difficult to trace and discuss in publications. As a result, readers are
+typically presented with the final outcomes of the analysis cycle where
+the results and expectations are aligned -- achieved either by refining
+the analysis or updating the expectations based on statistical evidence
+\citep{grolemund_cognitive_2014}. These missing pieces of information
+provides little guidance for diagnosing issues in the analysis when the
+same methodology is applied to a new dataset that produces different
 outcomes. Similarly, when researchers with different background
-knowledge it becomes unclear whether variations in results arise from
-differences in the assumptions or in the analysis itself.
+knowledge it becomes unclear whether discrepancies arise from differing
+expectations or from the use of statistical techniques.
+
+One might gain insight into analysts' thought process by speaking with
+them directly or watching screencast videos they produce, such as,
+TidyTuesday screencast videos. However, direct conversation are not
+scalable and may not be feasible while creating educational videos
+requires significant effort from the researchers. Ideally, there could
+be a way to make these expectations explicit and accessible to others.
+Even better, if the encoding is machine-readable, we could analyze these
+expectations and learn from the analysis -- whether the checks also
+apply to other researchers analyzing new data in the same context,
+whether they reflect commo common practices in the field, or whether
+they are sepcific to the data or analysis at hand.
 
 In this paper, we frame these expectations as checks within an
 \emph{analysis plan}, which allows us to examine these implicit
@@ -277,6 +290,10 @@ Section~\ref{sec-conclusion} concludes the paper.
 \subsection{Diagnosing unexpected outcomes in data
 analysis}\label{diagnosing-unexpected-outcomes-in-data-analysis}
 
+They shape how we interpret the results and assess whether they are
+consistent with existing knowledge or indicate the need for updates.
+\citep{grolemund_cognitive_2014}
+
 \citep{peng_diagnosing_2021} describes three pedagogical exercises of
 introducing diagnosing unexpected outcome into a classroom setting.
 
@@ -297,11 +314,11 @@ future studies {[}ref{]}. With the growing prevalence of open data in
 scientific research, the consumers or users of the data typically are no
 longer the data producers or collectors who have the full knowledge of
 data in hand, prompting more interest towards the data quality checks in
-the data analysis process. In R, there are some packages,
-like\texttt{skimr} \citep{skimr} and \texttt{dataMaid} \citep{dataMaid},
+the data analysis process. In R, there are some packages, like
+\texttt{skimr} \citep{skimr} and \texttt{dataMaid} \citep{dataMaid},
 provides basic data screening and reporting, while another class of
 packages, e.g.~\texttt{assertr} \citep{assertr}, \texttt{validate}
-\citep{validate}, and \texttt{pointblank} \citep{pointblank}, focuses on
+\citep{validate}, and \texttt{pointblank} \citep{pointblank} focuses on
 providing data validation tools, allowing users to define customized
 data quality checks based on the applications.
 
@@ -310,82 +327,40 @@ data quality checks based on the applications.
 \subsection{Framing expectations as
 checks}\label{framing-expectations-as-checks}
 
-Q: Whether we should formulate these concept with math notation?? A:
-only if it helps
-
-While data validation focuses on verifying or subsetting data based on
-predefined rules \citep{zio2015methodology}, data analysis checks
-specify assumptions made on the data required for the analysis process
-to obtain the reported results. These checks often involve evaluating
-aspects such as data distribution and outliers, relationships between
-variables, and the validity of model assumptions.
-
-However, there are other checks that reflect the mental process of of
-how data analysts diagnose the unexpected output that are not documented
-in this process. For example, when an unexpected output occurs, an
-analyst may check on whether a column in the data frame is between two
-values for data quality. However, it is not documented what motivates
-the analyst to conduct this check -- whether it also applies to other
-researchers analyzing new data in the same contexts, whether it is a
-common practice in the field, or whether it is a reaction to this
-particular data or scenario. Currently, most of these assumptions are
-not discussed in the publication or captured by tools themselves. While
-one might be able to infer some of the mental process of the analysts
-from external sources, such as talking to them or watching screencast
-videos produced by the analysts e.g.~TidyTuesday screencast videos,
-these insights are not systematically documented or made
-machine-readable. A question to consider here is whether it is possible
-to deliver this type of quality checks as structured data in a data
-analysis. This gap highlights the need for tools that provide higher
-level documentation of reasoning behind the checks, facilitating a more
-transparent and interpretable analysis process.
-
-An analysis plan is a set of analysis steps combined with expectations.
-Expectations represent our belief about certain aspects of the analysis,
-independent of the analysis itself. It can be divided into two types:
-\emph{outcome expectation} and \emph{plan expectation}. Outcome
-expectation refers to what we anticipate from the main result of the
-analysis based on prior knowledge. They shape how we interpret the
-results and assess whether they are consistent with existing knowledge
-or indicate the need for updates \citep{grolemund_cognitive_2014}. For
-example, in public health, prior research shows the average increase in
-mortality rate per unit increase in PM10 is about 0.50\%
-\citep{liu2019ambient}. This serves as an expectation for similar future
-studies. Plan expectations concern the intermediate steps within the
-analysis rather than the final outcome. They serve as checkpoints to
-detect deflection in the analysis process For example, we may expect
-temporal data to be ordered with no gaps and duplicates, or expect that
-temperature will be a significant covariate in the linear regression
-model of PM10 on mortality.
-
-Experienced analysts often have implicit expectation about the outcome
-and rely on a few ``directional signs'' to check when the outcome
-deviate from those expectation. However, these expectations are rarely
-made explicit within the analysis workflow. This makes it challenging
-for consumers of the analysis to evaluate the results, since it becomes
-difficult to disentangle whether discrepancies arise from differing
-expectations or from the use of statistical technique, without running
-the analysis themselves. Non-expert analysts, lacking prior knowledge or
-instinct, may not have clear expectations of the results. This can lead
-to reduced confidence of the analysis and makes it more difficult and
-time-consuming to diagnose the cause of the deviation when the results
-don't align with expectations. By explicitly formulating these
-expectations, an analysis plan can guide the analysis process,
-facilitate the communication and evaluate the validity of the results.
-
-Yet, making them explicit is crucial for
+Expectations represent our beliefs about certain aspects of the
+analysis, independent of the analysis itself. When outcomes deviate from
+these expectations, analysts often revisit the analysis cycle to
+identify potential issues, refine methods, or revise assumptions.
+Experienced analysts can typically identify issues quickly and correct
+them on the spot, but they often do so without discussing the underlying
+reasoning, making it harder for less experienced researchers to learn
+and master these skills. Here, we introduce the concept of
+\emph{analysis validation checks}, which frames these expectations or
+assumptions as explicit checks that returns a TRUE or FALSE output given
+the data analyzed at hand. Inspired by \emph{data validation checks}
+\citep{validate}, where ensure datasets meet expected format and
+quality, analysis validation checks reverse the approach: they validate
+the assumptions about the data necessary for the analysis to produce the
+reported results. This allows the concept to encompass a broad range of
+checks, such as data quality (i.e.~missing data, how the data is
+structured), data distribution and outliers, bivariate and multivariate
+relationships between variables, and contextual information. These
+externalized checks provide insights into analysts' thoughts process
+process and offer several benefits:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi})}
 \tightlist
 \item
-  helping junior researchers interpret results and diagnose the
-  unexpected,
+  help students and junior researchers develop skills to diagnose
+  unexpected analysis results,
 \item
-  providing checkpoints that support independent replication or
+  serve as clear checkpoints to support independent replication or
   application of methods to new data, and
 \item
-  aligning assumption across researchers from different backgrounds.
+  align assumptions among researchers from different domain backgrounds.
+\item
+  improve analysis transparency, reproducibility, and trustworthiness.
 \end{enumerate}
 
 \subsection{A toy example}\label{a-toy-example}
