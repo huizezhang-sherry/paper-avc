@@ -2,14 +2,26 @@
 title: "My wonderful paper"
 abstract: "Unexpected results in data analysis can prompt researchers to examine data quality and analysis steps. While some researchers can typically diagnose issues effectively with a few checks, others may struggle to identify appropriate checks to diagnose the problem. [an example of check] These checks are often informal and difficult to trace and discuss in publications, resulting in others questioning the trustworthiness of the analysis. To address this, we formalize the informal checks into an *analysis plan* that encompasses the analysis steps and (the unit tests): one test for whether the result meets expectations and multiple tests for checking the analysis. We then present a procedure to assess the quality of these unit tests based on their accuracy and redundancy on simulated versions of the original data. The accuracy is assessed using binary classification metrics, *i.e.*, precision and recall, while redundancy is calculated using mutual information. This procedure can be used to conduct a sensitivity analysis, compare different analysis plans, and to identify the optimal cutoff point for the unit tests."
 author:
-  - name: "H. Sherry Zhang"
-    affiliation: "University of Texas at Austin"
-    email: "huize.zhang@austin.utexas.edu"
+  - name: H. Sherry Zhang
+    email: huize.zhang@austin.utexas.edu
+    affiliations: 
+        - id: 1
+          name: University of Texas at Austin
+          department: Department of Statistics and Data Sciences
+          city: Texas
+          country: United States
+          postal-code: 78705
     attributes:
-      corresponding: true
-  - name: "Roger D. Peng"
-    affiliation: "University of Texas at Austin"
-    email: "roger.peng@austin.utexas.edu"
+        corresponding: true
+  - name: Roger D. Peng
+    email: roger.peng@austin.utexas.edu
+    affiliations: 
+        - id: 1
+          name: University of Texas at Austin
+          department: Department of Statistics and Data Sciences
+          city: Texas
+          country: United States
+          postal-code: 78705
 cite-method: natbib
 bibliography: references.bib
 format:
