@@ -55,7 +55,7 @@ pm10 <- read_csv(here::here("data", "pm10.csv")) |>
 
 README: 
 
-* *Check for TODOs*
+* *Check for TODOs*, things inside "[]" are my comments
 - Literature review: Section *diagnosing unexpected outcomes in data analysis* 
 - *Discussion* and *Conclusion*
 - In Section *Application*: provide more context on the PM10-mortality study and add reference of the [0, 0.005] PM10 coefficient
@@ -101,21 +101,15 @@ Expectations represent our beliefs about certain aspects of the analysis, indepe
 
 ## A toy example
 
-Consider a 30-day step count goal. Suppose you resolve to walk at least 8,000 steps each day, using an app to record your daily step count. Your target average is 9,000 steps per day, with some "lows" day, where you walk around 4,000 steps and "high" days where you reach about 12,000 steps. After 30 days, you check how many times your step count fall below 8,000 and aim for no more than five days under this threshold.
+Consider a 30-day step count experiment in public health. Testers are instructed to walk at least 8,000 steps each day, with an expected average of 9,000 steps, tracked by a step counter app. While there may be occasional "low" days due to factors such as forgetting to wear their watch or unfavorable weather condition limiting outdoor activities, there are also "high" days after an outdoor hike or intense workout. After 30 days, you review the data and expect no more than five days with step counts falling below the 8,000-step threshold [I think we need a bit more scenario to justify we expect no more than 5 days, say it needs to have at least 25 days for it to be valid for the next stage research??].
 
-To simulation this data, three normal distributions with different means are used for the daily step counts: $\mathcal{N}(4000, 200)$ for low days, $\mathcal{N}(12000, 200)$ for high days, and $\mathcal{N}(9000, 300)$ for typical days. The number of low and high days can be simulated from a Poisson distribution with $\lambda = 4$. @fig-step-count displays the number of days with fewer than 8,000 steps across 300 simulated 30-day periods.
+To simulation this data, three normal distributions are used for the daily step counts: $\mathcal{N}(4000, 200)$ for low days, $\mathcal{N}(12000, 200)$ for high days, and $\mathcal{N}(9000, 300)$ for typical days. The number of low and high days can be simulated from a Poisson distribution with $\lambda = 4$. @fig-step-count displays the number of days with fewer than 8,000 steps across 300 simulated 30-day periods.
 
-In this scenario, the outcome expectation is that the number of days with a step count below 8,000 will be no more than five. To diagnose potential reasons why this outcome expectation might fail, we can establish a few plan expectations. For example, if the average step count is too low, this may suggest there are too many low days, potentially lead to an unexpected outcome. Similarly, we can also check the quantile of the step count, if more than a third of the days fall below 8,000, this could indicate an excess of low-count days. Additionally, we may may expect the standard deviation of the step count not to be overly large.
-
-TODO: add one or two scenarios on why step count could go up or down: 1) you take off your watch in the middle of the day, 2) have an workout
-
-TODO: phrase it as Researcher measuring someone's step count rather than measuring your own step count
-
-These considerations yield the following three unit tests as plan expectations:
+In this scenario, the outcome is that the number of days with a step count below 8,000 being no more than five. To diagnose potential reasons why this outcome expectation might fail, we can establish a few analysis validation checks. For example, if the average step count is too low, this may suggest there are too many low days, potentially lead to the unexpected outcome. Similarly, we can also check the quantile of the step count, if more than a third of the days fall below 8,000, this could indicate an excess of low-count days. Additionally, we may may expect the standard deviation of the step count not to be overly large. These considerations yield the following three unit tests as plan expectations:
 
 -   test1: the test fails if the mean step count is below 8,200
 -   test2: the test fails if the 30th percentile of the step counts is below 8,200
--   test3: the test fails if the standard deviation of the step countsexceeds 2,500.
+-   test3: the test fails if the standard deviation of the step counts exceeds 2,500.
 
 ```{r}
 #| label: fig-step-count
