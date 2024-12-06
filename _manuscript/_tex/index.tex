@@ -183,23 +183,21 @@ Peng. Email: \href{mailto:roger.peng@austin.utexas.edu}{\nolinkurl{roger.peng@au
 \textsuperscript{1} Department of Statistics and Data
 Sciences, University of Texas at Austin, Texas, United States
 \begin{abstract}
-Unexpected results in data analysis can prompt researchers to examine
-data quality and analysis steps. While some researchers can typically
-diagnose issues effectively with a few checks, others may struggle to
-identify appropriate checks to diagnose the problem. {[}an example of
-check{]} These checks are often informal and difficult to trace and
-discuss in publications, resulting in others questioning the
-trustworthiness of the analysis. To address this, we formalize the
-informal checks into an \emph{analysis plan} that encompasses the
-analysis steps and (the unit tests): one test for whether the result
-meets expectations and multiple tests for checking the analysis. We then
-present a procedure to assess the quality of these unit tests based on
-their accuracy and redundancy on simulated versions of the original
-data. The accuracy is assessed using binary classification metrics,
-\emph{i.e.}, precision and recall, while redundancy is calculated using
-mutual information. This procedure can be used to conduct a sensitivity
-analysis, compare different analysis plans, and to identify the optimal
-cutoff point for the unit tests.
+In data analysis, unexpected results often prompt researchers to revisit
+their procedures to identify potential issues. While experienced
+researchers can typically diagnose problems by checking a few key
+assumptions, others may struggle to identify the root causes. These
+checked assumptions, or expectations, are typically informal, difficult
+to trace, and rarely discussed in publications. In this paper, we
+formalize these informal assumptions by framing them as binary
+\emph{analysis validation check}. We then introduce a procedure to
+quantify how violations of these checks may lead to unexpected results
+in the analysis. The procedure relies on simulations of the original
+data and evaluates boht accuracy and redundancy. Accuracy is calculated
+through binary classification metric, while redundancy is measured using
+mutual information. We demonstrate this approach with a toy example on
+the fitness step count data and a generalized linear model exmaple
+examining the effect of PM10 on mortality.
 \end{abstract}
 
 
@@ -259,45 +257,50 @@ Even better, if the encoding is machine-readable, we could analyze these
 expectations and learn from the analysis -- whether the checks also
 apply to other researchers analyzing new data in the same context,
 whether they reflect commo common practices in the field, or whether
-they are sepcific to the data or analysis at hand.
+they are specific to the data or analysis at hand.
 
-In this paper, we frame these expectations as checks within an
-\emph{analysis plan}, which allows us to examine these implicit
-assumptions made about the data during analysis and to compare different
-checks for diagnosing unexpected outcomes. We then introduce a procedure
-to evaluate the quality of these checks, either individually or in
-combination through logic regression, based on their accuracy and
-redundancy across simulation of the original data. Accuracy is assessed
-using binary classification metrics, precision and recall, while
-redundancy is measured using mutual information. The proposed workflow
-offers a numerical guarantee, based on simulation, that the analysis
-will produce the expected results, assuming the data generating
-mechanism holds. {[}something about trustworthy data science{]}
+In this paper, we conceptualize these internal expectations and
+assumptions as \emph{analysis validation checks}, which allows us to
+examine these assumptions made during analysis to diagnose unexpected
+outcomes. We then introduce a procedure that provides a quantitative
+emasure on how violations in a tree of checks, derived from individual
+checks, will lead to an unexpected result. The procedure, based on
+simulations of the original data, calculates accuracy and redundancy.
+Accuracy is determined using binary classification metrics, precision
+and recall, from a logic regression fit while redundancy is measured
+using mutual information. The proposed workflow offers a numerical
+guarantee that the analysis will produce the expected results, assuming
+the data generating mechanism holds. {[}something about trustworthy data
+science{]}
 
 The rest of the paper is organized as follows:
 Section~\ref{sec-lit-review} reviews the concept of diagnosing
 unexpected outcomes and data quality checks. Section~\ref{sec-plan}
-introduces the concept of analysis plan, illustrated with a toy example
-on fitness step count. Section~\ref{sec-method} describes the procedure
-for selecting optimal check combinations to predict unexpected outcomes.
-Section~\ref{sec-pm10-mortality} applies this selection procedure to a
-linear regression example examining the effect of PM10 on mortality.
-Section~\ref{sec-discussion} discusses a few key considerations and
-Section~\ref{sec-conclusion} concludes the paper.
+introduces the concept of analysis validation check, illustrated with a
+toy example on fitness step count. Section~\ref{sec-method} describes
+the procedure that quantify how checks combined in logical operators can
+predict unexpected outcomes. Section~\ref{sec-pm10-mortality} applies
+this procedure to examine the effect of PM10 on mortality in public
+health in a generalized linear model. Section~\ref{sec-discussion}
+discusses a few key considerations and Section~\ref{sec-conclusion}
+concludes the paper.
 
 \section{Literature review}\label{sec-lit-review}
 
 \subsection{Diagnosing unexpected outcomes in data
 analysis}\label{diagnosing-unexpected-outcomes-in-data-analysis}
 
-They shape how we interpret the results and assess whether they are
-consistent with existing knowledge or indicate the need for updates.
-\citep{grolemund_cognitive_2014}
-
-\citep{peng_diagnosing_2021} describes three pedagogical exercises of
-introducing diagnosing unexpected outcome into a classroom setting.
-
-TODO: what if the expectation is ``wrong''
+\begin{itemize}
+\item
+  They shape how we interpret the results and assess whether they are
+  consistent with existing knowledge or indicate the need for updates.
+  \citep{grolemund_cognitive_2014}
+\item
+  \citep{peng_diagnosing_2021} describes three pedagogical exercises of
+  introducing diagnosing unexpected outcome into a classroom setting.
+\item
+  what if the expectation is ``wrong''
+\end{itemize}
 
 \subsection{Data analysis checks}\label{data-analysis-checks}
 
@@ -337,7 +340,7 @@ reasoning, making it harder for less experienced researchers to learn
 and master these skills. Here, we introduce the concept of
 \emph{analysis validation checks}, which frames these expectations or
 assumptions as explicit checks that returns a TRUE or FALSE output given
-the data analyzed at hand. Inspired by \emph{data validation checks}
+the data analyzed at hand. Inspired by data validation checks
 \citep{validate}, where ensure datasets meet expected format and
 quality, analysis validation checks reverse the approach: they validate
 the assumptions about the data necessary for the analysis to produce the
@@ -355,10 +358,11 @@ process and offer several benefits:
   help students and junior researchers develop skills to diagnose
   unexpected analysis results,
 \item
-  serve as clear checkpoints to support independent replication or
-  application of methods to new data, and
+  serve as clear checkpoints to support replication or application of
+  methods to (new) data,
 \item
-  align assumptions among researchers from different domain backgrounds.
+  align assumptions among researchers from different domain backgrounds,
+  and
 \item
   improve analysis transparency, reproducibility, and trustworthiness.
 \end{enumerate}
@@ -615,15 +619,13 @@ regression tree & 0.821 & 0.836 & 1.000 & 0.879 & 0.886 \\
 
 \end{longtable}
 
-\section{Applications}\label{sec-examples}
+\section{Application}\label{sec-pm10-mortality}
 
 A regression example is produced to illustrate the test selection
 process for analyzing the effect of PM10 on mortality. The example
-demonstrates how the test process can be used to select cutoff values in
-the unit tests and how the test can be used to diagnose an unexpected
+demonstrates how the procedure presented in Section~\ref{sec-method} can
+be used to select cutoff values in the checks to diagnose an unexpected
 PM10 coefficient from the generalized linear model.
-
-\subsection{Effect of PM10 on mortality}\label{sec-pm10-mortality}
 
 Consider a generalized linear model (GLM) to study the effect of PM10 on
 mortality {[}TODO: provide more context of the mortality-PM10 study{]}.
