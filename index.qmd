@@ -89,14 +89,19 @@ If it is true that the speed with which data analysts can identify problems with
 
 ## Data analysis checks 
 
-A substantial body of literature has addressed the definition of data quality [@8642813, more] and developed frameworks, that includes dimensions, attributes, and measures to evaluate and improve data quality [@cai2015challenges; @wang1996beyond; @6204995; @woodall2014classification]. These frameworks are often used information system and database management and support business decision-making in the industry. For research purposes, high-quality data ensures the credibility of scientific findings and supports reproducibility and reusability in future studies [ref]. With the growing prevalence of open data in scientific research, the consumers or users of the data typically are no longer the data producers or collectors who have the full knowledge of data in hand, prompting more interest towards the data quality checks in the data analysis process. In R, there are some packages, like `skimr` [@skimr] and `dataMaid` [@dataMaid], provides basic data screening and reporting, while another class of packages, e.g. `assertr` [@assertr], `validate` [@validate], and `pointblank` [@pointblank] focuses on providing data validation tools, allowing users to define customized data quality checks based on the applications. 
+A substantial body of literature has addressed the definition of data quality [@8642813, more] and has developed frameworks that include dimensions, attributes, and measures to evaluate and improve data quality [@cai2015challenges; @wang1996beyond; @6204995; @woodall2014classification]. These frameworks are often used in  information systems and database management and support business decision-making in various industries. For research purposes, high-quality data ensures the credibility of scientific findings and supports reproducibility and re-usability in future studies [ref]. With the growing prevalence of open data in scientific research, the consumers or users of the data typically are no longer the producers or collectors of the data who would have the full knowledge of data in hand, prompting more interest towards data quality checks in the data analysis process. In R, there are some packages, like `skimr` [@skimr] and `dataMaid` [@dataMaid], that provide basic data screening and reporting tools, while another class of packages, e.g. `assertr` [@assertr], `validate` [@validate], and `pointblank` [@pointblank] focuses on providing data validation tools, allowing users to define customized data quality checks based on the applications. 
 
+The literature on data quality typically focuses on the intrinsic or inherent quality of the data themselves, rather than the data's relationship to any specific data analysis. So for example, if a column in a data table is expecting numerical data, but we observe a character value in one of the entries, then that occurrence would trigger some sort of data quality check. This type of quality check can be triggered without any knowledge of what the data will ultimately be used for. However, for a given analysis, we may require specific aspects of the data to be true because they affect the result being computed. Conversely, certain types of poor quality data may have little impact on the ultimate result of an analysis (e.g. data that are missing completely at random). Defining data quality in terms of what may affect a specific analysis outcome or result has the potential to open new avenues for defining data checks and for building algorithms for optimizing the collection of checks defined for a specific analysis.
 
 
 
 # Analysis validation checks {#sec-plan}
 
-Expectations represent our understanding of certain aspects of the analysis and the data, independent of the analysis itself. When outcomes deviate from these expectations, analysts often revisit the analysis cycle to identify potential issues, refine methods, or revise assumptions. Experienced analysts can typically identify issues quickly and correct them on the spot, but they often do so without discussing the underlying reasoning, making it harder for less experienced researchers to learn and master these skills. Here, we introduce the concept of **analysis validation checks**, which frames these expectations or assumptions as explicit checks that return a TRUE or FALSE output given the data analyzed at hand. Inspired by the concept of data validation checks (@validate), which are designed to ensure that datasets meet expected formats and quality, analysis validation checks reverse the approach: they validate the assumptions about the data necessary for the analysis to produce the *expected results*. The focus on expected results allows the concept of analysis validation checks to encompass a broad range of checks, such as data quality (i.e. missing data, how the data are structured), data distribution and outliers, bivariate and multivariate relationships between variables, and other contextual information. These externalized checks provide insights into analysts' thought processes and offer the following benefits: 
+Expectations represent our understanding of certain aspects of the analysis and the data, independent of the results of the analysis itself. When observed outcomes deviate from these expectations, analysts often revisit the analysis process to identify potential issues, refine methods, or revise assumptions. Experienced analysts can typically identify issues quickly and correct them on the spot, but they often do so without discussing the underlying reasoning, making it harder for less experienced researchers to learn and master these skills. 
+
+Here, we introduce the concept of **analysis validation checks**, which frame these expectations or assumptions as explicit checks that return a TRUE or FALSE result given the data analyzed at hand. Inspired by the concept of data validation checks (@validate), which are designed to ensure that datasets meet expected formats and quality, analysis validation checks reverse the approach: they validate the assumptions about the data necessary for the analysis to produce the *expected results*, as defined by the analyst. The focus on expected results allows the concept of analysis validation checks to encompass a broad range of checks, such as data quality (i.e. missing data, how the data are structured), data distribution and outliers, bivariate and multivariate relationships between variables, and other contextual information. 
+
+Our proposed analysis validation checks provide insights into an analyst's thought process and offer the following benefits: 
 
   1. Serve as clear checkpoints to support the replication or application of methods to (new) data by programmatically communicating the requirements or assumptions made of the data;
   3. Align assumptions among researchers from different domain backgrounds who may have different expectations about the data;
@@ -105,17 +110,18 @@ Expectations represent our understanding of certain aspects of the analysis and 
   
 In addition to the above benefits, the development and publication of analysis checks has the potential to help students, inexperienced analysts, and junior researchers develop the skills needed to diagnose unexpected analysis results for a given type of data because the assumptions made about the data are made transparent. The analysis checks can serve as a basis for new analysts to have conversations about the data they are analyzing and to develop a better understanding of the potential data generation process.
 
-## A toy example
 
-Consider a 30-day step count experiment in public health. Testers are instructed to walk at least 8,000 steps each day, with an expected average of 9,000 steps, tracked by a step counter app. While there may be occasional "low" days due to factors such as forgetting to wear their watch or unfavorable weather condition limiting outdoor activities, there are also "high" days after an outdoor hike or intense workout. After 30 days, you review the data and expect no more than five days with step counts falling below the 8,000-step threshold [I think we need a bit more scenario to justify we expect no more than 5 days, say it needs to have at least 25 days for it to be valid for the next stage research??].
+## A Toy Example {#sec-toy}
 
-To simulation this data, three normal distributions are used for the daily step counts: $\mathcal{N}(4000, 200)$ for low days, $\mathcal{N}(12000, 200)$ for high days, and $\mathcal{N}(9000, 300)$ for typical days. The number of low and high days can be simulated from a Poisson distribution with $\lambda = 4$. @fig-step-count displays the number of days with fewer than 8,000 steps across 300 simulated 30-day periods.
+Consider a 30-day step count experiment in public health. Subjects are instructed to walk at least 8,000 steps each day, with an expected average of 9,000 steps, tracked by a step counter app. After 30 days, we review the data and examine the number of steps taken each day. With data of this nature, we may expect there to be occasional "low" days due to factors such as forgetting to wear their watch or unfavorable weather conditions limiting outdoor activities.  We may also expect "high" days recorded after an outdoor hike or intense workout. Given the requirements of the study, we expect that for a given subject there would be no more than five days with step counts falling below the 8,000-step threshold ("invalid days"). If there were more than five invalid days, the data from that subject would not be usable for the study.
 
-In this scenario, the outcome is that the number of days with a step count below 8,000 being no more than five. To diagnose potential reasons why this outcome expectation might fail, we can establish a few analysis validation checks. For example, if the average step count is too low, this may suggest there are too many low days, potentially lead to the unexpected outcome. Similarly, we can also check the quantile of the step count, if more than a third of the days fall below 8,000, this could indicate an excess of low-count days. Additionally, we may may expect the standard deviation of the step count not to be overly large. These considerations yield the following three unit tests as plan expectations:
+In this scenario, the outcome is that the number of days with a step count below 8,000 and the expectation is that this outcome would take a value no more than 5. If the expectation is violated, we can consider the potential configurations of the data that could lead to such an anomaly. To diagnose potential reasons why this outcome expectation might fail, we can establish a few analysis validation checks in anticipation of seeing the data. For example, if the average step count is too low, this may suggest that the subject is incapable of taking the required number of steps, potentially leading to the unexpected outcome. Similarly, we can also check the quantile of the step count, if more than a third of the days fall below 8,000, this could indicate an excess of low-count days. Additionally, we may may expect the standard deviation of the step count not to be overly large. These considerations yield the following three analysis validation checks:
 
 -   test1: the test fails if the mean step count is below 8,200
--   test2: the test fails if the 30th percentile of the step counts is below 8,200
--   test3: the test fails if the standard deviation of the step counts exceeds 2,500.
+-   test2: the test fails if the 30th percentile of the observed step counts is below 8,200
+-   test3: the test fails if the standard deviation of the observed step counts exceeds 2,500.
+
+The cutoff values chosen for these tests would presumably be chosen based on prior experience with these kinds of data, but could also be optimized using the method presented in the next section.
 
 ```{r}
 #| label: fig-step-count
@@ -158,11 +164,16 @@ step_count |>
   theme(legend.position = "none")
 ```
 
+
+To simulate this data, three normal distributions are used for the daily step counts: $\mathcal{N}(4000, 200)$ for low days, $\mathcal{N}(12000, 200)$ for high days, and $\mathcal{N}(9000, 300)$ for typical days. The number of low and high days can be simulated from a Poisson distribution with $\lambda = 4$. @fig-step-count displays the number of days with fewer than 8,000 steps across 300 simulated 30-day periods.
+
+
+
+
 # Method {#sec-method}
 
-## A workflow to assess the quality of unit tests
 
-While some checks are crucial and can lead to unexpected outcomes, others may be tangential to the root cause. In this section, we propose a procedure to measure the violation of checks, combined using logical operators, contribute to an unexpected outcome. A small set of independent checks is considered effective if it translates to unexpected outcomes and @fig-metric-calc provides an overview of the calculation. 
+While some checks may be crucial and directly indicate an unexpected outcome, others may be tangential to the problem at hand and not indicate a root cause of an unexpected outcome. In this section, we propose a procedure to measure the effectiveness of checks that, when combined using logical operators, contribute to an unexpected outcome. A small set of independent checks is considered effective if it translates to unexpected outcomes and @fig-metric-calc provides an overview of the calculation. 
 
 ```{r}
 #| label: fig-metric-calc
@@ -170,12 +181,14 @@ While some checks are crucial and can lead to unexpected outcomes, others may be
 knitr::include_graphics(here::here("figures", "metric-calc.png"))
 ```
 
-From the simulated data, the accuracy branch refers to a set of checks' ability to accurately detect unexpected outcomes while minimizing false positives and false negatives. While a false positive can raise caution or skepticism on the data, both false positive and false negative suggest the checks are over or lack sensitivity to unexpected outcomes. To incorporate the effect of multiple checks on the outcome, a logic regression model [@ruczinski_logic_2003] is fitted to the checks and whether the outcome is unexpected. Originally developed for SNP microarray data, logic regression constructs Boolean combinations of binary variables, in a tree structure, to predict both binary and numerical outcomes. Compared to other tree-based methods for binary-binary prediction, the Boolean combinations from the logic regression model produce a tree structure that can be directly interpreted as the possible combination of checks leading to an unexpected outcome, without the need to invert the tree as required in classic tree-based methods. The model is then used to predict the outcome expectation based on the checks, and the prediction is compared to the actual outcome expectation to calculate the precision and recall of the checks. 
+From the simulated data, the accuracy branch refers to a set of checks' ability to accurately detect unexpected outcomes while minimizing false positives and false negatives. While a false positive can raise caution or skepticism on the data, the presence of both false positives and false negatives suggest that the checks are overly sensitive or lack sensitivity to unexpected outcomes. 
+
+To incorporate the effect of multiple checks on the outcome, a logic regression model [@ruczinski_logic_2003] is fitted to the analysis validation checks using the indicator of an unexpected result as the outcome in the model. Originally developed for SNP microarray data, logic regression constructs Boolean combinations of binary variables, in a tree structure, to predict both binary and numerical outcomes. Compared to other tree-based methods for binary-binary prediction, the Boolean combinations from the logic regression model produce a tree structure that can be directly interpreted as the possible combination of checks leading to an unexpected outcome, without the need to invert the tree as required in classic tree-based recursive partitioning methods. The logic regression model is then used to predict the analysis result based on the values of checks, and the prediction is compared to the actual analysis result in order to calculate the precision and recall of the checks. 
 
 <!-- -   precision: the proportion of correctly identified unexpected results (true positives) out of all the predicted unexpected results (true positives + false positives) -->
 <!-- -   recall: the proportion of correctly identified unexpected results (true positives) out of all the actual unexpected results (true positives + false negatives) -->
 
-While tests may score high on accuracy, they may be less effective at explaining the reasons behind unexpected results. This could happen if a set of tests are all tangentially related to the cause of the unexpected results, but none addressing the root cause. It may also occur if the tests are correlated with one another, leading to redundancy.
+While tests may score high on accuracy, they may be less effective at explaining the various reasons behind unexpected results. This could happen if, for example, a set of tests are all tangentially related to the cause of the unexpected results, but none addresses the root cause. It may also occur if the tests are highly correlated with one another, leading to redundancy.
 
 To quantify redundancy, the concept of mutual information is used. Mutual information $I(x, y)$ measures the amount of information shared between two random variables and is defined as the KL-distance $D(p \parallel q)$ between the joint distribution of the two variables and the product of the marginal distributions:
 
@@ -187,9 +200,13 @@ $$C(X_1, X_2, \cdots, X_n) = \sum_{x_1} \sum_{x_2} \cdots \sum_{x_n} p(x_1, x_2,
 
 A high mutual information value indicates redundancy among the tests, while a low value suggests that the tests are independent and provides unique information to diagnose the unexpected outcome. To standardize this measure, the total correlation *per observation* is calculated, and an independence score, ranging between 0 and 1, is defined as 1 - mutual information.
 
-To combine precision, recall, and independence into a single metric, mathematical means, such as arithmetic mean, harmonic mean, and quadratic mean can be used. The differences among these means are minimal when the three metrics are similar. However, as the differences among the metrics increases, the harmonic mean tends to produce the smallest overall score, as it penalizes low values, while the quadratic mean tends to produce the largest score by rewarding higher values more. For simple interpretation of the score, the arithmetic mean is preferred, while in applications where the difference between precision, recall, and independence need to be penalized or rewarded more, the harmonic and quadratic mean should be considered.
+To combine precision, recall, and independence into a single metric, we can combine the three scores using the arithmetic mean, harmonic mean, or quadratic mean. The differences among these means are minimal when the three metrics are similar. However, as the differences among the metrics increases, the harmonic mean tends to produce the smallest overall score, as it penalizes low values, while the quadratic mean tends to produce the largest score by rewarding higher values more. For simple interpretation of the score, the arithmetic mean is preferred, while in applications where the difference between precision, recall, and independence need to be penalized or rewarded more, the harmonic and quadratic mean should be considered.
 
-## Toy example revisited
+
+
+## Toy Example Revisited
+
+Returning to the step count example introduced in @sec-toy, the logic regression model is fitted to the three analysis checks described previously to generate the prediction of the unexpected outcome, which is whether the number of days with fewer than 8,000 steps is greater than 5. The predictions from the logic regression model can be compared with the simulated true outcome for calculating the precision and recall metrics. @fig-logic-reg shows the best-fitting logic regression model, which is a combination of test1 ("mean step count is below 8,200") and test3 ("standard deviation exceeds 2,500") with an OR operator. In other words, if either test1 or test3 is true, then we would predict an unexpected outcome in the analysis (i.e. the number of days with fewer than 8,000 steps is greater than 5).
 
 ```{r}
 #| label: fig-logic-reg
@@ -210,6 +227,10 @@ regtree_df <- step_count |> dplyr::select(unexpect) |> bind_cols(pred_vec) |>
          independence = 1 - overlapping) |> 
   calc_metrics(metrics = c("harmonic", "arithmetic"))
 ```
+
+
+@tbl-logic-reg presents the calculated precision, recall, and independence for the three individual tests and the combined test rule (test1 OR test3) from the logic regression. We also include the metric calculated from fitting a regression tree model to the data to compare the performance of the logic regression model. The harmonic and arithmetic means are included to combine the three measures. The results show that the two tests produced by the logic regression can accurately predict 83.6% cases of all *actual unexpected results* in the simulation data. Furthermore, 82.1% of all *predicted unexpected results* were in fact observed to be unexpected.  
+
 
 ```{r}
 #| label: tbl-logic-reg
@@ -234,7 +255,10 @@ list(tibble(.fitted = step_count$test1, unexpect = step_count$unexpect),
         caption = "Accuracy (precision and recall) and parsimony (independence) metrics for each individual unit test and for the combined test rule (test1 OR test3) derived from the logic regression model. The harmonic and arithmetic means of the three metrics are included to evaluate the quality of the unit tests in  diagnosing unexpected step counts (more than five days with fewer than 8,000 steps).")
 ```
 
-In the step count example, the logic regression model is fitted to the three unit tests to generate the prediction for calculating precision and recall. @fig-logic-reg shows the chosen logic regression model: a combination of test 1 and test 3 with an OR operator and @tbl-logic-reg presents the calculated precision, recall, and independence for the three individual tests and the combined test rule (test1 OR test3) from the logic regression. We also include the metric calculated from fitting a regression tree model to the data to compare the performance of the logic regression model. The harmonic and arithmetic means are included to combine the three measures. The results show that the two tests produced by the logic regression can accurately predict 82.1% of all *predicted unexpected cases*, and 83.6% cases of all *actual unexpected results* in the simulation data. The regression tree produces a similar model of first split on test1 and then split on test3, and results in the same accuracy and overall score as the logic regression model.
+
+For comparison, the regression tree produces a similar prediction to the logic regression, by first splitting on test1 and then splitting on test3, and results in the same accuracy and overall score as the logic regression model. However, we argue that the logic regression tree shown in @fig-logic-reg is more interpretable for our purposes because it provides a direct representation of which combinations of analysis checks lead to unexpected outcomes. The logic regression tree is also directly comparable to other diagnostic techniques, which we discuss further in @sec-discussion.
+
+
 
 <!-- * provide interpretation at different scenarios: -->
 
