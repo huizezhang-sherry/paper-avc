@@ -1,5 +1,5 @@
 ---
-title: "My wonderful paper"
+title: "Inside Out: Externalizing Assumptions in Data Analysis as Validation Checks"
 abstract: "In data analysis, unexpected results often prompt researchers to revisit their procedures to identify potential issues. While experienced researchers can often quickly diagnose problems by checking a few key assumptions, others may struggle to identify the root causes. These checked assumptions, or expectations, are typically informal, difficult to trace, and rarely discussed in publications. In this paper, we formalize these informal assumptions by framing them as binary *analysis validation checks*. We then introduce a procedure to quantify how violations of these checks may lead to unexpected results in the analysis. The procedure relies on simulations of the original data and evaluates both accuracy and redundancy. Accuracy is calculated through a binary classification metric, while redundancy is measured using mutual information. We demonstrate this approach with a toy example based on fitness step count data and a generalized linear model example examining the effect of particulate matter air pollution on daily mortality. "
 author:
   - name: H. Sherry Zhang
