@@ -189,27 +189,7 @@ daily mortality.
 \end{abstract}
 
 
-\setstretch{2}
-README:
-
-\begin{itemize}
-\tightlist
-\item
-  \emph{Check for TODOs}, things inside ``{[}\ldots{]}'', other than
-  references, are my comments
-\item
-  Literature review: Section \emph{diagnosing unexpected outcomes in
-  data analysis}
-\item
-  \emph{Discussion} and \emph{Conclusion}
-\item
-  In Section \emph{Application}: provide more context on the
-  PM10-mortality study and add reference of the {[}0, 0.005{]} PM10
-  coefficient
-\end{itemize}
-
-\newpage
-
+\setstretch{1.15}
 \section{Introduction}\label{introduction}
 
 In data analysis, experienced researchers often rely on their prior
@@ -954,34 +934,34 @@ an important use case for fault trees is to develop a comprehensive
 understanding of a system \emph{before} an anomaly occurs
 \citep{michael2002fault}.
 
-TODO
+Visualization methods are also valuable tools for assessing data
+assumptions and can potentially be formalized as analysis validation
+checks. For instance, plotting a variable's distribution using a
+histogram, density plot, or bee swarm plot can reveal outliers or
+deviations from normality. These visualizations could be reframed as
+checks that fail when the data does not conform to the expected
+distribution. However, translating visualization results into binary
+checks that return (TRUE, FALSE) remains an open challenge, requiring
+either manual verification or the development of automated methods to
+interpret visualization outputs.
 
-\begin{itemize}
-\item
-  how to systematically simulate data is still unknown
-\item
-  plotting is a critical way to check data and they can still be frame
-  into checks. i.e.~the density/ histogram suggests there are outliers.
-  It is a open problem to how to encode the visualization into checks.
-\item
-  currently no automated way to generate checks. It is interesting to
-  see how check generation can be automated, although it requires the
-  inputs from experts across a wide array of common scenarios.
-\item
-  checks are also closely related to the concept of unit tests in
-  software engineering. While unit tests are designed to isolate and
-  test specific aspects of the code, it is difficult for analysis
-  validation check to do so.
-\item
-  There are cost and benefit on setting expectation on different
-  granularity. At the lowest level, one may have a plan for each data
-  entry and every data handling steps. This requires more work from the
-  analysts and may not be practical in practice. For more complex
-  analyses, analysts may divide the analysis into sections and set
-  expectations for each. They can then focus on the specific sections
-  flagged by the tests and sub-divide the sections to set expectation
-  and diagnose the analysis in a hierarchical manner.
-\end{itemize}
+Systematically generating simulated data is a key component of our
+approach. In the PM10 example, the inverse transform method is used to
+preserve the correlation structure among mortality, PM10, and
+temperature. However, simulation can become complex when additional
+restrictions are imposed. In such cases, techniques like the
+acceptance-reject method or permutation may be used to generate the
+data.
+
+Analysis validation checks are closely related to the concept of unit
+testing in software engineering. While unit tests isolate and test
+specific lines of the code, analysis validation checks focus on the
+assumptions underlying the analysis rather than the explicit code
+itself. Moreover, while software testing is deterministic, with clear
+rules for determining failure, analysis validation checks are
+probabilistic. As a result, an analysis may fail several assumption
+checks yet produce an expected outcome, or pass all checks but yield an
+unexpected result.
 
 \section{Conclusion}\label{sec-conclusion}
 
