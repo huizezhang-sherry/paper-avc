@@ -37,7 +37,7 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(patchwork)
 library(MASS)
@@ -107,11 +107,11 @@ Consider a 30-day step count experiment in public health. Subjects are instructe
 
 In this scenario, the outcome is that the number of days with a step count below 8,000 and the expectation is that this outcome would take a value no more than 5. If the expectation is violated, we can consider the potential configurations of the data that could lead to such an anomaly. To diagnose potential reasons why this outcome expectation might fail, we can establish a few analysis validation checks in anticipation of seeing the data. For example, if the average step count is too low, this may suggest that the subject is incapable of taking the required number of steps, potentially leading to the unexpected outcome. Similarly, we can also check the quantile of the step count, if more than a third of the days fall below 8,000, this could indicate an excess of low-count days. Additionally, we may may expect the standard deviation of the step count not to be overly large. These considerations yield the following three analysis validation checks:
 
--   test1: the test fails if the mean step count is below 8,200
--   test2: the test fails if the 30th percentile of the observed step counts is below 8,200
--   test3: the test fails if the standard deviation of the observed step counts exceeds 2,500.
+-   check 1: the check fails if the mean step count is below 8,200
+-   check 2: the check fails if the 30th percentile of the observed step counts is below 8,200
+-   check 3: the check fails if the standard deviation of the observed step counts exceeds 2,500.
 
-The cutoff values chosen for these tests would presumably be chosen based on prior experience with these kinds of data, but could also be optimized using the method presented in the next section.
+The cutoff values chosen for these checks would presumably be chosen based on prior experience with these kinds of data, but could also be optimized using the method presented in the next section.
 
 ```{r}
 #| label: fig-step-count
@@ -182,7 +182,7 @@ To incorporate the effect of multiple checks on the outcome, a logic regression 
 <!-- -   precision: the proportion of correctly identified unexpected results (true positives) out of all the predicted unexpected results (true positives + false positives) -->
 <!-- -   recall: the proportion of correctly identified unexpected results (true positives) out of all the actual unexpected results (true positives + false negatives) -->
 
-While tests may score high on accuracy, they may be less effective at explaining the various reasons behind unexpected results. This could happen if, for example, a set of tests are all tangentially related to the cause of the unexpected results, but none addresses the root cause. It may also occur if the tests are highly correlated with one another, leading to redundancy.
+While checks may score high on accuracy, they may be less effective at explaining the various reasons behind unexpected results. This could happen if, for example, a set of checks are all tangentially related to the cause of the unexpected results, but none addresses the root cause. It may also occur if the checks are highly correlated with one another, leading to redundancy.
 
 To quantify redundancy, the concept of mutual information is used. Mutual information $I(x, y)$ measures the amount of information shared between two random variables and is defined as the KL-distance $D(p \parallel q)$ between the joint distribution of the two variables and the product of the marginal distributions:
 
@@ -192,7 +192,7 @@ This concept extends naturally to multiple variables through total correlation, 
 
 $$C(X_1, X_2, \cdots, X_n) = \sum_{x_1} \sum_{x_2} \cdots \sum_{x_n} p(x_1, x_2, \cdots, x_n) \log \frac{p(x_1, x_2, \cdots, x_n)}{p(x_1)p(x_2) \cdots p(x_n)}$$
 
-A high mutual information value indicates redundancy among the tests, while a low value suggests that the tests are independent and provides unique information to diagnose the unexpected outcome. To standardize this measure, the total correlation *per observation* is calculated, and an independence score, ranging between 0 and 1, is defined as 1 - mutual information.
+A high mutual information value indicates redundancy among the checks, while a low value suggests that the checks are independent and provides unique information to diagnose the unexpected outcome. To standardize this measure, the total correlation *per observation* is calculated, and an independence score, ranging between 0 and 1, is defined as 1 - mutual information.
 
 To combine precision, recall, and independence into a single metric, we can combine the three scores using the arithmetic mean, harmonic mean, or quadratic mean. The differences among these means are minimal when the three metrics are similar. However, as the differences among the metrics increases, the harmonic mean tends to produce the smallest overall score, as it penalizes low values, while the quadratic mean tends to produce the largest score by rewarding higher values more. For simple interpretation of the score, the arithmetic mean is preferred, while in applications where the difference between precision, recall, and independence need to be penalized or rewarded more, the harmonic and quadratic mean should be considered.
 
@@ -200,13 +200,13 @@ To combine precision, recall, and independence into a single metric, we can comb
 
 ## Toy Example Revisited
 
-Returning to the step count example introduced in @sec-toy, the logic regression model is fitted to the three analysis checks described previously to generate the prediction of the unexpected outcome, which is whether the number of days with fewer than 8,000 steps is greater than 5. The predictions from the logic regression model can be compared with the simulated true outcome for calculating the precision and recall metrics. @fig-logic-reg shows the best-fitting logic regression model, which is a combination of test1 ("mean step count is below 8,200") and test3 ("standard deviation exceeds 2,500") with an OR operator. In other words, if either test1 or test3 is true, then we would predict an unexpected outcome in the analysis (i.e. the number of days with fewer than 8,000 steps is greater than 5).
+Returning to the step count example introduced in @sec-toy, the logic regression model is fitted to the three analysis checks described previously to generate the prediction of the unexpected outcome, which is whether the number of days with fewer than 8,000 steps is greater than 5. The predictions from the logic regression model can be compared with the simulated true outcome for calculating the precision and recall metrics. @fig-logic-reg shows the best-fitting logic regression model, which is a combination of check 1 ("mean step count is below 8,200") and check 3 ("standard deviation exceeds 2,500") with an OR operator. In other words, if either check 1 or check 3 is true, then we would predict an unexpected outcome in the analysis (i.e. the number of days with fewer than 8,000 steps is greater than 5).
 
 ```{r}
 #| label: fig-logic-reg
 #| fig.width: 6
 #| fig.heigh: 2
-#| fig-cap: Logic regression model fitted to the three unit tests (test1, test2, test3). The model suggests using an OR rule to combine test1 and test3 to predict the outcome expectation.
+#| fig-cap: Logic regression model fitted to the three unit tests (check 1, check 2, check 3). The model suggests using an OR rule to combine check 1 and check 3 to predict the outcome expectation.
 fit <- step_count |> fit_logic_reg(unexpect, test1:test3, seed = 1, nleaves = 4)
 plot_logicreg(fit)
 ```
@@ -223,7 +223,7 @@ regtree_df <- step_count |> dplyr::select(unexpect) |> bind_cols(pred_vec) |>
 ```
 
 
-@tbl-logic-reg presents the calculated precision, recall, and independence for the three individual tests and the combined test rule (test1 OR test3) from the logic regression. We also include the metric calculated from fitting a regression tree model to the data to compare the performance of the logic regression model. The harmonic and arithmetic means are included to combine the three measures. The results show that the two tests produced by the logic regression can accurately predict 83.6% cases of all *actual unexpected results* in the simulation data. Furthermore, 82.1% of all *predicted unexpected results* were in fact observed to be unexpected.  
+@tbl-logic-reg presents the calculated precision, recall, and independence for the three individual checks and the combined check rule (check 1 OR check 3) from the logic regression. We also include the metric calculated from fitting a regression tree model to the data to compare the performance of the logic regression model. The harmonic and arithmetic means are included to combine the three measures. The results show that the two checks produced by the logic regression can accurately predict 83.6% cases of all *actual unexpected results* in the simulation data. Furthermore, 82.1% of all *predicted unexpected results* were in fact observed to be unexpected.  
 
 
 ```{r}
@@ -235,22 +235,22 @@ list(tibble(.fitted = step_count$test1, unexpect = step_count$unexpect),
   map_dfr(~.x |> calc_miscla_rate(unexpect, .fitted) |> 
             mutate(independence = 1) |> 
             calc_metrics(metrics = c("harmonic", "arithmetic")), .id = "tests") |> 
-  mutate(tests = c("test1", "test2", "test3")) |>
+  mutate(checks = c("check 1", "check 2", "check 3")) |>
   bind_rows(augment(fit) |> 
               calc_miscla_rate(unexpect, .fitted) |> 
               calc_independence() |> 
               calc_metrics(metrics = c("harmonic", "arithmetic")) |> 
-              mutate(tests = "test1 OR test3") |> 
+              mutate(tests = "check 1 OR check 3") |> 
               dplyr::select(-overlapping)) |> 
   bind_rows(regtree_df |> 
               dplyr::select(-overlapping) |> 
               mutate(tests = "regression tree")) |>
   kable(digits = 3, 
-        caption = "Accuracy (precision and recall) and parsimony (independence) metrics for each individual unit test and for the combined test rule (test1 OR test3) derived from the logic regression model. The harmonic and arithmetic means of the three metrics are included to evaluate the quality of the unit tests in  diagnosing unexpected step counts (more than five days with fewer than 8,000 steps).")
+        caption = "Accuracy (precision and recall) and parsimony (independence) metrics for each individual check and for the combined check rule (check 1 OR check 3) derived from the logic regression model. The harmonic and arithmetic means of the three metrics are included to evaluate the quality of the checks in  diagnosing unexpected step counts (more than five days with fewer than 8,000 steps).")
 ```
 
 
-For comparison, the regression tree produces a similar prediction to the logic regression, by first splitting on test1 and then splitting on test3, and results in the same accuracy and overall score as the logic regression model. However, we argue that the logic regression tree shown in @fig-logic-reg is more interpretable for our purposes because it provides a direct representation of which combinations of analysis checks lead to unexpected outcomes. The logic regression tree is also directly comparable to other diagnostic techniques, which we discuss further in @sec-discussion.
+For comparison, the regression tree produces a similar prediction to the logic regression, by first splitting on check 1 and then splitting on check 3, and results in the same accuracy and overall score as the logic regression model. However, we argue that the logic regression tree shown in @fig-logic-reg is more interpretable for our purposes because it provides a direct representation of which combinations of analysis checks lead to unexpected outcomes. The logic regression tree is also directly comparable to other diagnostic techniques, which we discuss further in @sec-discussion.
 
 
 
@@ -262,7 +262,7 @@ For comparison, the regression tree produces a similar prediction to the logic r
 
 In the study of the health effects of outdoor air pollution, one area of interest is the association between short-term, day-to-day changes in particulate matter air pollution and daily mortality counts. Substantial work has been done to study this question and to date, there appears to be strong evidence of an association between particulate matter less than 10 $\mu$g/m$^3$ in aerodynamic diameter (PM10) and daily mortality from all non-accidental causes [@samet2000fine]. For our second example, we use the problem of studying PM10 and mortality along with data from the National Morbidity, Mortality, and Air Pollution Study (NMMAPS) to demonstrate how our analysis validation checks described in @sec-method can be applied.
 
-The typical approach to studying the association between PM10 and mortality is to apply a generalized linear model with a Poisson link to relate daily mortality counts to daily measures of PM10. Based on previous work and the range of effect sizes published in the literature, an analyst might expect the coefficient for PM10 in this GLM to lie between [0, 0.005], after adjusting for daily temperature [@samet200fine; @welty2005acute]. Observing an estimated coefficient outside of this interval would be highly unusual and would warrant a serious re-examination of the analysis process. Therefore, our unexpected outcome in this analysis will be the binary indicator of whether the estimated coefficient for PM10 in the GLM lies outside of the interval [0, 0.005]. In addition to providing a more substantial problem for our methods, this example also demonstrates how the procedure presented in @sec-method can be used to select cutoff values in the analysis checks to diagnose an unexpected PM10 coefficient from the generalized linear model. 
+The typical approach to studying the association between PM10 and mortality is to apply a generalized linear model with a Poisson link to relate daily mortality counts to daily measures of PM10. Based on previous work and the range of effect sizes published in the literature, an analyst might expect the coefficient for PM10 in this GLM to lie between $[0, 0.005]$, after adjusting for daily temperature [@samet200fine; @welty2005acute]. Observing an estimated coefficient outside of this interval would be highly unusual and would warrant a serious re-examination of the analysis process. Therefore, our unexpected outcome in this analysis will be the binary indicator of whether the estimated coefficient for PM10 in the GLM lies outside of the interval $[0, 0.005]$. In addition to providing a more substantial problem for our methods, this example also demonstrates how the procedure presented in @sec-method can be used to select cutoff values in the analysis checks to diagnose an unexpected PM10 coefficient from the generalized linear model. 
 
 This PM10 coefficient expectation can be framed as an analysis check that fails, labelled as 1, if the estimate of the PM10 coefficient (adjusted for temperature) is outside the range [0, 0.005], and 0 if it is within. Multiple factors can affect the estimated PM10 coefficient, such as the sample size, the strength of the correlation between mortality and PM10, and the strength of the correlation between mortality and temperature. Analysts may expect a reasonable sample size to ensure the reliability of the coefficient estimate. Outliers in the three variables can also leverage the coefficient. While these are possible factors that could affect the analysis result, it is not clear what the cutoff values for these checks should be to determine a failure. Here we consider a list of checks in @tbl-checks with varied cutoff values for each: 
 
@@ -415,20 +415,20 @@ pm10_df <- pm10_df |>
   ungroup()
 ```
 
-A logic regression is fitted using all variations of the tests in @tbl-checks to predict whether the PM10 coefficient is unexpected. @fig-linear-reg-tree shows the optimal logic regression tree from the fitted model. Precision, recall, and independence score, along with their harmonic and arithmetic mean are calculated in @tbl-linear-reg. 
+A logic regression is fitted using all variations of the checks in @tbl-checks to predict whether the PM10 coefficient is unexpected. @fig-linear-reg-tree shows the optimal logic regression tree from the fitted model. Precision, recall, and independence score, along with their harmonic and arithmetic mean are calculated in @tbl-linear-reg. 
 
 
 ::: {#fig-linear-reg-tree}
 
 ```{r}
-#| fig.width: 8
+#| fig.width: 9
 #| fig.height: 4
 fit <- pm10_df |> fit_logic_reg(unexpect, `smpl_size <= 200`:`mortality_outlier`, 
                                 seed = 6, nleaves = 4)
-plot(fit) 
+plot_logicreg(fit) 
 ```
 
-Logic regression model fitted to the fourteen unit tests and the outcome expectation (unexpected) as the response variable. The model suggests the relationship: (sample size *greater than* 200 AND mortality-PM10 correlation < -0.04) AND (mortality-temperature correlation > -0.35 OR there exist mortality outlier) to predict the unexpected PM10 coefficient. [sorry the proper plot is not ready].
+Logic regression model fitted to the fourteen checks and the outcome expectation (unexpected) as the response variable. The model suggests the relationship: (sample size *greater than* 200 AND mortality-PM10 correlation < -0.04) AND (mortality-temperature correlation > -0.35 OR there exist mortality outlier) to predict the unexpected PM10 coefficient. [sorry the proper plot is not ready].
 :::
 
 
@@ -450,10 +450,13 @@ df <- list(
             mutate(overlapping = 0, independence = 1) |> 
             calc_metrics(metrics = c("harmonic", "arithmetic")), .id = "id") 
 
-tbl <- tibble(tests = c(1,2,3,4, 5)) |> bind_cols(df |> dplyr::select(-id)) 
+tbl <- tibble(check = c("check 1: sample size <= 200", "check 2: cor(m, PM10) < -0.03",
+                        "check 3: cor(m, tmp) > -0.35", "check 4: mortality_outlier", 
+                        "(not check 1 AND check 2) AND (check 3 OR check 4)")) |> bind_cols(df |> dplyr::select(-id, -overlapping)) |> rename(`indep.` = independence) 
+
 tbl |> 
   kable(digits = 3, escape = FALSE,
-        caption = "Accuracy (precision and recall) and parsimony (independence) metrics derived from the logic regression model, along with harmonic and arithmetic means, for individual unit tests (1: sample size, 2: mortality-PM10 correlation, 3: mortality-temperature correlation,  4: mortality outlier), and the combined test rule 5: (sample size AND mortality-PM10 correlation) AND (mortality-temperature correlation OR mortality outlier.") 
+        caption = "Accuracy (precision and recall) and parsimony (independence) metrics derived from the logic regression model, along with harmonic and arithmetic means, for individual checks (1: sample size, 2: mortality-PM10 correlation, 3: mortality-temperature correlation,  4: mortality outlier), and the combined check rule 5: (sample size AND mortality-PM10 correlation) AND (mortality-temperature correlation OR mortality outlier.") 
 
 ```
 
@@ -467,7 +470,7 @@ As indicated in @fig-linear-reg-tree, the logic regression model picks up the fo
 <!-- (mortality-temperature correlation > -0.35 OR there exist mortality outlier) and (mortality-PM10 correlation < -0.04 AND (not sample size less than 200) )  -->
 The tree structure suggests checking mortality-PM10 correlation and a sample size larger than 200 with an additional check of either outlier on mortality or correlation between mortality and temperature. This combined check rule generates a precision of `r round(as.numeric(df[5, "precision"]), 3)` and a recall of `r round(as.numeric(df[5, "recall"]), 3)` for predicting the unexpected PM10 coefficient. The single check, `cor(m, PM10) < -0.03`, is also powerful with a high precision of `r round(as.numeric(df[2, "precision"]), 3)`, but the low recall value of `r round(as.numeric(df[2, "recall"]), 3)` suggests its high false positive rate, as compared to the combined rule suggested by the logic regression. 
 
-As shown in @fig-linear-reg-tree, there is no single analysis check in the tree that predicts an unexpected outcome. rather at least three checks in the tree must be TRUE in order for the model to predict an unexpected outcome. Given the high independence of the tests (@tbl-linear-reg), this suggests that unexpected results are only likely after multiple anomalies are observed in the data.
+As shown in @fig-linear-reg-tree, there is no single analysis check in the tree that predicts an unexpected outcome. rather at least three checks in the tree must be TRUE in order for the model to predict an unexpected outcome. Given the high independence of the checks (@tbl-linear-reg), this suggests that unexpected results are only likely after multiple anomalies are observed in the data.
 
 # Discussion {#sec-discussion}
 
