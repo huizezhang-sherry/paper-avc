@@ -47,6 +47,7 @@ library(broom)
 library(knitr)
 library(rpart)
 library(infotheo)
+library(patchwork)
 pm10 <- read_csv(here::here("data", "pm10.csv")) |> 
   filter(!is.na(pm10)) |>    
   mutate(season = as.factor(season))  
@@ -62,11 +63,9 @@ The externalization of the data analysis process is a practice that has potentia
 
 In this paper, we conceptualize these internal expectations and assumptions as *analysis validation checks*, which allows us to examine the assumptions made during an analysis and to diagnose unexpected outcomes. We then introduce a procedure that provides a quantitative measure of how violations in a tree of analysis checks, derived from individual checks, will lead to an unexpected result. The procedure, based on simulations of the original data, calculates the accuracy and redundancy of the analysis checks. Accuracy is determined using binary classification metrics, precision and recall, from a logic regression fit [@ruczinski_logic_2003], while redundancy is measured using mutual information. The proposed workflow offers a numerical guarantee that the analysis will produce the expected results, assuming the assumptions about the data generating mechanism hold.
 
-The rest of the paper is organized as follows: @sec-lit-review reviews the concepts of diagnosing unexpected outcomes and general data quality checks. @sec-plan introduces the concept of analysis validation checks, illustrated with a toy example based on fitness step count data. @sec-method describes the procedure that quantifies how analysis validation checks combined using logical operators can predict unexpected outcomes in an analysis. @sec-pm10-mortality applies this procedure to a larger example that estimates the effect of particulate matter air pollution on daily mortality. @sec-discussion discusses a few key considerations and @sec-conclusion concludes the paper.
+The rest of the paper is organized as follows: @sec-lit-review reviews the concepts of diagnosing unexpected outcomes and general data quality checks. @sec-plan introduces the concept of analysis validation checks, illustrated with a toy example based on fitness step count data. @sec-method describes the procedure that quantifies how analysis validation checks combined using logical operators can predict unexpected outcomes in an analysis. @sec-pm10-mortality applies this procedure to a larger example that estimates the effect of particulate matter air pollution on daily mortality. @sec-discussion summarises teh paper and discusses a few key considerations.
 
 # Related Work {#sec-lit-review}
-
-
 
 ## Diagnosing unexpected outcomes in data analysis
 
@@ -76,14 +75,11 @@ The skill of diagnosing unexpected data analysis results is not one that has rec
 
 If it is true that the speed with which data analysts can identify problems with an analysis is related to their experience working with a given type of data, then there is perhaps room to improve the analytic process by externalizing the aspects that an analyst learns through experience. That way, inexperienced analysts could examine the thought process of an experienced analyst and learn to identify factors that can cause unexpected results to occur.
 
-
 ## Data analysis checks 
 
 A substantial body of literature has addressed the definition of data quality [@8642813, more] and has developed frameworks that include dimensions, attributes, and measures to evaluate and improve data quality [@cai2015challenges; @wang1996beyond; @6204995; @woodall2014classification]. These frameworks are often used in  information systems and database management and support business decision-making in various industries. For research purposes, high-quality data ensures the credibility of scientific findings and supports reproducibility and re-usability in future studies [ref]. With the growing prevalence of open data in scientific research, the consumers or users of the data typically are no longer the producers or collectors of the data who would have the full knowledge of data in hand, prompting more interest towards data quality checks in the data analysis process. In R, there are some packages, like `skimr` [@skimr] and `dataMaid` [@dataMaid], that provide basic data screening and reporting tools, while another class of packages, e.g. `assertr` [@assertr], `validate` [@validate], and `pointblank` [@pointblank] focuses on providing data validation tools, allowing users to define customized data quality checks based on the applications. 
 
 The literature on data quality typically focuses on the intrinsic or inherent quality of the data themselves, rather than the data's relationship to any specific data analysis. So for example, if a column in a data table is expecting numerical data, but we observe a character value in one of the entries, then that occurrence would trigger some sort of data quality check. This type of quality check can be triggered without any knowledge of what the data will ultimately be used for. However, for a given analysis, we may require specific aspects of the data to be true because they affect the result being computed. Conversely, certain types of poor quality data may have little impact on the ultimate result of an analysis (e.g. data that are missing completely at random). Defining data quality in terms of what may affect a specific analysis outcome or result has the potential to open new avenues for defining data checks and for building algorithms for optimizing the collection of checks defined for a specific analysis.
-
-
 
 # Analysis validation checks {#sec-plan}
 
@@ -103,71 +99,60 @@ In addition to the above benefits, the development and publication of analysis c
 
 ## A Toy Example {#sec-toy}
 
-Consider a 30-day step count experiment in public health. Subjects are instructed to walk at least 8,000 steps each day, with an expected average of 9,000 steps, tracked by a step counter app. After 30 days, we review the data and examine the number of steps taken each day. With data of this nature, we may expect there to be occasional "low" days due to factors such as forgetting to wear their watch or unfavorable weather conditions limiting outdoor activities.  We may also expect "high" days recorded after an outdoor hike or intense workout. Given the requirements of the study, we expect that for a given subject there would be no more than five days with step counts falling below the 8,000-step threshold ("invalid days"). If there were more than five invalid days, the data from that subject would not be usable for the study.
+Consider a 30-day step count experiment in public health. Subjects are instructed to walk at least 8,000 steps each day, with an expected average of 9,000 steps, tracked by a step counter app. After 30 days, we review the data and examine the number of steps taken each day. With data of this nature, we may expect there to be occasional "low" days due to factors such as forgetting to wear their watch or unfavorable weather conditions limiting outdoor activities.  We may also expect "high" days recorded after an outdoor hike or intense workout. Given the requirements of the study, we expect that for a given subject 
+the average step count would be between $[8500, 9500]$. 
 
-In this scenario, the outcome is that the number of days with a step count below 8,000 and the expectation is that this outcome would take a value no more than 5. If the expectation is violated, we can consider the potential configurations of the data that could lead to such an anomaly. To diagnose potential reasons why this outcome expectation might fail, we can establish a few analysis validation checks in anticipation of seeing the data. For example, if the average step count is too low, this may suggest that the subject is incapable of taking the required number of steps, potentially leading to the unexpected outcome. Similarly, we can also check the quantile of the step count, if more than a third of the days fall below 8,000, this could indicate an excess of low-count days. Additionally, we may may expect the standard deviation of the step count not to be overly large. These considerations yield the following three analysis validation checks:
+To diagnose potential reasons why this outcome expectation might fail, we can establish a few analysis validation checks in anticipation of seeing the data. For example, we can check the quantile of the step count, if more than a third of the days fall below 8,000, or more than two-thirds exceed 10,000 steps, this could indicate an excess of low-count or high-count days. Similarly, we may may expect the standard deviation of the step count not to be overly large. These considerations yield the following three analysis validation checks that *fails* when:
 
--   check 1: the check fails if the mean step count is below 8,200
--   check 2: the check fails if the 30th percentile of the observed step counts is below 8,200
--   check 3: the check fails if the standard deviation of the observed step counts exceeds 2,500.
+-   check 1: the 60% quantile of the observed step counts is greater than 10,000
+-   check 2: the 40% quantile of the observed step counts is less than 8,000, and
+-   check 3: the standard deviation of the observed step counts exceeds 2,500.
 
 The cutoff values chosen for these checks would presumably be chosen based on prior experience with these kinds of data, but could also be optimized using the method presented in the next section.
 
 ```{r}
+#| fig-height: 3
 #| label: fig-step-count
-#| fig-cap: Number of days with fewer than 8,000 steps across 300 simulated 30-day periods. The orange bars indicate instances where the count exceeds five days, representing an unexpected outcome in this scenario. 
+#| fig-cap: Average step count across 300 simulated 30-day periods. The orange points indicate instances where the average step count fails outside the [8,500, 9,500] interval, representing an unexpected outcome in this scenario. 
 set.seed(1234)
 step_count <- tibble(id = 1:300) |> 
   rowwise() |> 
   mutate(
-    small_n = rpois(1, 4),
-    large_n = rpois(1, 4),
+    small_n = rpois(1, 8),
+    large_n = rpois(1, 8),
     norm_sd = rlogis(1, 800, scale = 100),
     norm_n = 30 - small_n - large_n,
-    step = list(round(c(rnorm(small_n, 4000, 200), 
+    step = list(round(c(rnorm(small_n, 6000, 200), 
                         rnorm(large_n, 12000, 200), 
                         rnorm(norm_n, 9000, 300)
-                        ), 0)),
-    less_than_8000 = sum(step < 8000), 
-    unexpect = ifelse(less_than_8000 > 5, 1, 0),
-    test1 = ifelse(mean(step) < 8200, 1, 0),
-    test2 = ifelse(quantile(step, 0.3, na.rm = TRUE) < 8300, 1, 0),
-    test3 = ifelse(sd(step) > 2500, 1, 0),
-    ) |>
+    ), 0)),
+    mean = mean(step, na.rm = TRUE),
+    unexpect = ifelse(between(mean, 8500, 9500), 0, 1),
+    `q(step, 0.6) > 10000` = ifelse(quantile(step, 0.6, na.rm = TRUE) > 10000, 1, 0),
+    `q(step, 0.4) < 8000` = ifelse(quantile(step, 0.4, na.rm = TRUE) < 8000, 1, 0),
+    `sd(step) > 2500` = ifelse(sd(step) > 2500, 1, 0),
+  ) |>
   ungroup()
 
-# step_count |> 
-#   dplyr::select(id, step) |> 
-#   unnest(step) |>
-#   mutate(day = rep(1:30, 300)) |> 
-#   ggplot(aes(x = step, y = id)) + 
-#   geom_point(alpha = 0.5) + 
-#   theme_bw()
-
 step_count |> 
-  ggplot(aes(x = less_than_8000, fill = as.factor(unexpect))) + 
-  geom_histogram(binwidth = 0.5) + 
-  scale_x_continuous(breaks = seq(0, 13, 1)) +
-  scale_fill_brewer(palette = "Dark2") + 
-  xlab("Number of days with step count less than 8000") + 
+  ggplot(aes(x = mean, y = 1, color = as.factor(unexpect))) + 
+  ggbeeswarm::geom_quasirandom() + 
+  scale_y_continuous(breaks = seq(0, 13, 1)) +
+  scale_color_brewer(palette = "Dark2") + 
+  xlab("Average number of steps") + 
+  ylab("") + 
   theme_bw() + 
-  theme(legend.position = "none")
+  theme(legend.position = "none", panel.grid.minor = element_blank(), axis.text.y = element_blank())
 ```
 
 
-To simulate this data, three normal distributions are used for the daily step counts: $\mathcal{N}(4000, 200)$ for low days, $\mathcal{N}(12000, 200)$ for high days, and $\mathcal{N}(9000, 300)$ for typical days. The number of low and high days can be simulated from a Poisson distribution with $\lambda = 4$. @fig-step-count displays the number of days with fewer than 8,000 steps across 300 simulated 30-day periods.
-
-
-
+To simulate this data, three normal distributions are used for the daily step counts: $\mathcal{N}(6000, 200)$ for low days, $\mathcal{N}(12000, 200)$ for high days, and $\mathcal{N}(9000, 300)$ for typical days. The number of low and high days can be simulated from a Poisson distribution with $\lambda = 8$. @fig-step-count displays average step count across 300 simulated 30-day periods.
 
 # Method {#sec-method}
-
 
 While some checks may be crucial and directly indicate an unexpected outcome, others may be tangential to the problem at hand and not indicate a root cause of an unexpected outcome. In this section, we propose a procedure to measure the effectiveness of checks that, when combined using logical operators, contribute to an unexpected outcome. A small set of independent checks is considered effective if it translates to unexpected outcomes.
 
 The approach relies on the use of simulated datasets that are generated based on the analyst's knowledge and assumptions about the data generation mechanism. Datasets are simulated to have the same structure and characteristics of the observed data that will be analyzed at some point in the future. For each simulated dataset, we can apply a collection of analysis validation checks to the dataset and record which ones were TRUE and which were FALSE. We can also compute the outcome of the analysis to see whether the outcome is unexpected in a given simulated datsets. We can then generate many datasets, each time applying the analysis validation checks and computing the outcome. After generating many datasets, we can relate the patterns in the analysis validation checks to the likely that the outcome will be unexpected in a given dataset. @fig-metric-calc provides an overview of the process. 
-
-
 
 ```{r}
 #| label: fig-metric-calc
@@ -177,7 +162,17 @@ knitr::include_graphics(here::here("figures", "metric-calc.png"))
 
 From the simulated data, the accuracy branch refers to a set of checks' ability to accurately detect unexpected outcomes while minimizing false positives and false negatives. While a false positive can raise caution or skepticism on the data, the presence of both false positives and false negatives suggest that the checks are overly sensitive or lack sensitivity to unexpected outcomes. 
 
-To incorporate the effect of multiple checks on the outcome, a logic regression model [@ruczinski_logic_2003] is fitted to the analysis validation checks using the indicator of an unexpected result as the outcome in the model. Originally developed for SNP microarray data, logic regression constructs Boolean combinations of binary variables, in a tree structure, to predict both binary and numerical outcomes. Compared to other tree-based methods for binary-binary prediction, the Boolean combinations from the logic regression model produce a tree structure that can be directly interpreted as the possible combination of checks leading to an unexpected outcome, without the need to invert the tree as required in classic tree-based recursive partitioning methods. The logic regression model is then used to predict the analysis result based on the values of checks, and the prediction is compared to the actual analysis result in order to calculate the precision and recall of the checks. 
+To incorporate the effect of multiple checks on the outcome, a logic regression model [@ruczinski_logic_2003] is fitted to the analysis validation checks. Originally developed for SNP microarray data, logic regression constructs Boolean combinations of binary variables, $\mathcal{L}(X_1, X_2, \cdots, X_n)$, to predict both binary and numerical outcomes. In our case, 
+
+* the outcome, $Y$, is a binary variable indicating whether the result is *unexpected* (1) or *expected* (0),
+* $X_1, X_2, \cdots, X_n$ represent the binary analysis validation checks, where each check is labeled as 1 if it fails and 0 if it passes.
+
+For classification problems, the logic regression model is reduced to the following form:
+
+$$E(Y) = \mathcal{L}(X_1, X_2, \cdots, X_n)$$
+The logical operations of the binary variables $X_1, X_2, \cdots, X_n$, including AND ($\land$), OR ($\lor$), and NOT ($\neg$) and an example of such logic combination can be $X_1 \text{ AND } (X_2 \text{ OR } X_3)$. Simulated annealing is used to explore the search space by minimizing the mis-classification error. The following 6 moves are permitted during the search (as detailed in Figure 2 of @ruczinski_logic_2003): 1) replacing a leaf node, 2) replacing an operator, 3) growing a branch, 4) pruning a branch, 5) splitting a leaf node, and 6) deleting a leaf node.
+
+Compared to other tree-based methods for binary-binary prediction, the Boolean combinations from the logic regression model produce a tree structure that can be directly interpreted as the possible combination of checks leading to an unexpected outcome, without the need to invert the tree as required in classic tree-based recursive partitioning methods. The logic regression model is then used to predict the analysis result based on the values of checks, and the prediction is compared to the actual analysis result in order to calculate the precision and recall of the checks. 
 
 <!-- -   precision: the proportion of correctly identified unexpected results (true positives) out of all the predicted unexpected results (true positives + false positives) -->
 <!-- -   recall: the proportion of correctly identified unexpected results (true positives) out of all the actual unexpected results (true positives + false negatives) -->
@@ -196,61 +191,62 @@ A high mutual information value indicates redundancy among the checks, while a l
 
 To combine precision, recall, and independence into a single metric, we can combine the three scores using the arithmetic mean, harmonic mean, or quadratic mean. The differences among these means are minimal when the three metrics are similar. However, as the differences among the metrics increases, the harmonic mean tends to produce the smallest overall score, as it penalizes low values, while the quadratic mean tends to produce the largest score by rewarding higher values more. For simple interpretation of the score, the arithmetic mean is preferred, while in applications where the difference between precision, recall, and independence need to be penalized or rewarded more, the harmonic and quadratic mean should be considered.
 
-
-
 ## Toy Example Revisited
 
-Returning to the step count example introduced in @sec-toy, the logic regression model is fitted to the three analysis checks described previously to generate the prediction of the unexpected outcome, which is whether the number of days with fewer than 8,000 steps is greater than 5. The predictions from the logic regression model can be compared with the simulated true outcome for calculating the precision and recall metrics. @fig-logic-reg shows the best-fitting logic regression model, which is a combination of check 1 ("mean step count is below 8,200") and check 3 ("standard deviation exceeds 2,500") with an OR operator. In other words, if either check 1 or check 3 is true, then we would predict an unexpected outcome in the analysis (i.e. the number of days with fewer than 8,000 steps is greater than 5).
+Returning to the step count example introduced in @sec-toy, the logic regression model is fitted to the three analysis checks described previously to generate the prediction of the unexpected outcome, whether the average number of step falls within the [8,500, 9,500] interval. The predictions from the logic regression model can be compared with the simulated true outcome for calculating the precision and recall metrics. @fig-logic-reg shows the best-fitting logic regression model as
+
+(quantile(step, 0.6) > 10,000 OR quantile(step, 0.4) < 8,000) AND sd(step) < 2,500
+
+In other words, we would predict an unexpected outcome in the analysis if the standard deviation of the step count is not too large (2,500) and either the 60% quantile of the step count exceeds 10,000 or the 40% quantile of the step count falls below 8,000.
 
 ```{r}
 #| label: fig-logic-reg
-#| fig.width: 6
+#| fig.width: 8
 #| fig.heigh: 2
-#| fig-cap: Logic regression model fitted to the three unit tests (check 1, check 2, check 3). The model suggests using an OR rule to combine check 1 and check 3 to predict the outcome expectation.
-fit <- step_count |> fit_logic_reg(unexpect, test1:test3, seed = 1, nleaves = 4)
+#| fig-cap: Logic regression model fitted to the three checks. The model suggests the rule (quantile(step, 0.6) > 10,000 OR quantile(step, 0.4) < 8,000) AND sd(step) < 2,500
+fit <- step_count |> fit_logic_reg(unexpect, `q(step, 0.6) > 10000`:`sd(step) > 2500`, seed = 1, nleaves = 3)
 plot_logicreg(fit)
 ```
 
 ```{r}
-fit_regtree <- rpart(unexpect ~ ., data = step_count |> dplyr::select(unexpect:test3), method = "class", 
+fit_regtree <- rpart(unexpect ~ ., data = step_count |> dplyr::select(unexpect:`sd(step) > 2500`), method = "class", 
                      control = rpart.control(cp = 0.01)) 
 pred_vec <- predict(fit_regtree) |> as_tibble() |> mutate(.fitted = ifelse(`0` > `1`, 0, 1)) |> dplyr::select(.fitted)
 regtree_df <- step_count |> dplyr::select(unexpect) |> bind_cols(pred_vec) |> 
   calc_miscla_rate(unexpect, .fitted) |> 
-  mutate(overlapping = multiinformation(step_count[,c(9, 11)])/nrow(step_count), 
+  mutate(overlapping = multiinformation(step_count[,c(8, 11)])/nrow(step_count), 
          independence = 1 - overlapping) |> 
   calc_metrics(metrics = c("harmonic", "arithmetic"))
 ```
 
-
-@tbl-logic-reg presents the calculated precision, recall, and independence for the three individual checks and the combined check rule (check 1 OR check 3) from the logic regression. We also include the metric calculated from fitting a regression tree model to the data to compare the performance of the logic regression model. The harmonic and arithmetic means are included to combine the three measures. The results show that the two checks produced by the logic regression can accurately predict 83.6% cases of all *actual unexpected results* in the simulation data. Furthermore, 82.1% of all *predicted unexpected results* were in fact observed to be unexpected.  
-
+@tbl-logic-reg presents the calculated precision, recall, and independence for the three individual checks and the check rule found by the logic regression. The harmonic and arithmetic means are included to combine the three measures. The results show that the two checks produced by the logic regression can accurately predict 86.1% cases of all *actual unexpected results* in the simulation data. Furthermore, 43.1% of all *predicted unexpected results* were in fact observed to be unexpected.  
 
 ```{r}
 #| label: tbl-logic-reg
-list(tibble(.fitted = step_count$test1, unexpect = step_count$unexpect),
-     tibble(.fitted = step_count$test2, unexpect = step_count$unexpect),
-     tibble(.fitted = step_count$test3, unexpect = step_count$unexpect)
+list(tibble(.fitted = step_count$`q(step, 0.6) > 10000`, unexpect = step_count$unexpect),
+     tibble(.fitted = step_count$`q(step, 0.4) < 8000`, unexpect = step_count$unexpect),
+     tibble(.fitted = step_count$`sd(step) > 2500`, unexpect = step_count$unexpect)
 ) |>
   map_dfr(~.x |> calc_miscla_rate(unexpect, .fitted) |> 
             mutate(independence = 1) |> 
-            calc_metrics(metrics = c("harmonic", "arithmetic")), .id = "tests") |> 
-  mutate(checks = c("check 1", "check 2", "check 3")) |>
+            calc_metrics(metrics = c("harmonic", "arithmetic"))) |> 
+  mutate(checks = c("check 1: q(step, 0.6) > 10000", "check 2: q(step, 0.4) < 8000", "check 3: sd(step) > 2500")) |>
   bind_rows(augment(fit) |> 
               calc_miscla_rate(unexpect, .fitted) |> 
               calc_independence() |> 
               calc_metrics(metrics = c("harmonic", "arithmetic")) |> 
-              mutate(tests = "check 1 OR check 3") |> 
+              mutate(checks = "logic regression: (check 1 OR check 2) AND check 3") |> 
               dplyr::select(-overlapping)) |> 
-  bind_rows(regtree_df |> 
-              dplyr::select(-overlapping) |> 
-              mutate(tests = "regression tree")) |>
+  bind_rows(regtree_df |>
+              dplyr::select(-overlapping) |>
+              mutate(checks = "regression tree")) |>
+  dplyr::select(checks, precision:arithmetic) |> 
+  dplyr::rename(`indep.` = independence) |> 
   kable(digits = 3, 
-        caption = "Accuracy (precision and recall) and parsimony (independence) metrics for each individual check and for the combined check rule (check 1 OR check 3) derived from the logic regression model. The harmonic and arithmetic means of the three metrics are included to evaluate the quality of the checks in  diagnosing unexpected step counts (more than five days with fewer than 8,000 steps).")
+        caption = "Accuracy (precision and recall) and parsimony (independence) metrics for each individual check and the logic regression check rule. The harmonic and arithmetic means of the three metrics are included to evaluate the quality of the checks in  diagnosing unexpected step counts (more than five days with fewer than 8,000 steps).")
 ```
 
-
-For comparison, the regression tree produces a similar prediction to the logic regression, by first splitting on check 1 and then splitting on check 3, and results in the same accuracy and overall score as the logic regression model. However, we argue that the logic regression tree shown in @fig-logic-reg is more interpretable for our purposes because it provides a direct representation of which combinations of analysis checks lead to unexpected outcomes. The logic regression tree is also directly comparable to other diagnostic techniques, which we discuss further in @sec-discussion.
+For comparison, the regression tree produces a similar prediction to the logic regression, however, we argue that the logic regression tree shown in @fig-logic-reg is more interpretable for our purposes because it provides a direct representation of which combinations of analysis checks lead to unexpected outcomes. The logic regression tree is also directly comparable to other diagnostic techniques, which we discuss further in @sec-discussion.
 
 
 
@@ -452,7 +448,8 @@ df <- list(
 
 tbl <- tibble(check = c("check 1: sample size <= 200", "check 2: cor(m, PM10) < -0.03",
                         "check 3: cor(m, tmp) > -0.35", "check 4: mortality_outlier", 
-                        "(not check 1 AND check 2) AND (check 3 OR check 4)")) |> bind_cols(df |> dplyr::select(-id, -overlapping)) |> rename(`indep.` = independence) 
+                        "logic regression: (not check 1 AND check 2) AND (check 3 OR check 4)")) |> 
+  bind_cols(df |> dplyr::select(-id, -overlapping)) |> rename(`indep.` = independence) 
 
 tbl |> 
   kable(digits = 3, escape = FALSE,
@@ -484,10 +481,6 @@ Visualization methods are also valuable tools for assessing data assumptions and
 Systematically generating simulated data is a key component of our approach. In the PM10 example, the inverse transform method is used to preserve the correlation structure among mortality, PM10, and temperature. However, simulation can become complex when additional restrictions are imposed. In such cases, techniques like the acceptance-reject method or permutation may be used to generate the data. 
 
 Analysis validation checks are closely related to the concept of unit testing in software engineering. While unit tests isolate and test specific lines of the code, analysis validation checks focus on the assumptions underlying the analysis rather than the explicit code itself. Moreover, while software testing is deterministic, with clear rules for determining failure, analysis validation checks are probabilistic. As a result, an analysis may fail several assumption checks yet produce an expected outcome, or pass all checks but yield an unexpected result.
-
-# Conclusion {#sec-conclusion}
-
-TODO
 
 # Acknowledgement
 

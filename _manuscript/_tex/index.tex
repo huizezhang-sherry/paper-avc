@@ -278,8 +278,8 @@ analysis validation checks combined using logical operators can predict
 unexpected outcomes in an analysis. Section~\ref{sec-pm10-mortality}
 applies this procedure to a larger example that estimates the effect of
 particulate matter air pollution on daily mortality.
-Section~\ref{sec-discussion} discusses a few key considerations and
-Section~\ref{sec-conclusion} concludes the paper.
+Section~\ref{sec-discussion} summarises teh paper and discusses a few
+key considerations.
 
 \section{Related Work}\label{sec-lit-review}
 
@@ -428,37 +428,30 @@ data of this nature, we may expect there to be occasional ``low'' days
 due to factors such as forgetting to wear their watch or unfavorable
 weather conditions limiting outdoor activities. We may also expect
 ``high'' days recorded after an outdoor hike or intense workout. Given
-the requirements of the study, we expect that for a given subject there
-would be no more than five days with step counts falling below the
-8,000-step threshold (``invalid days''). If there were more than five
-invalid days, the data from that subject would not be usable for the
-study.
+the requirements of the study, we expect that for a given subject the
+average step count would be between \([8500, 9500]\).
 
-In this scenario, the outcome is that the number of days with a step
-count below 8,000 and the expectation is that this outcome would take a
-value no more than 5. If the expectation is violated, we can consider
-the potential configurations of the data that could lead to such an
-anomaly. To diagnose potential reasons why this outcome expectation
-might fail, we can establish a few analysis validation checks in
-anticipation of seeing the data. For example, if the average step count
-is too low, this may suggest that the subject is incapable of taking the
-required number of steps, potentially leading to the unexpected outcome.
-Similarly, we can also check the quantile of the step count, if more
-than a third of the days fall below 8,000, this could indicate an excess
-of low-count days. Additionally, we may may expect the standard
+To diagnose potential reasons why this outcome expectation might fail,
+we can establish a few analysis validation checks in anticipation of
+seeing the data. For example, we can check the quantile of the step
+count, if more than a third of the days fall below 8,000, or more than
+two-thirds exceed 10,000 steps, this could indicate an excess of
+low-count or high-count days. Similarly, we may may expect the standard
 deviation of the step count not to be overly large. These considerations
-yield the following three analysis validation checks:
+yield the following three analysis validation checks that \emph{fails}
+when:
 
 \begin{itemize}
 \tightlist
 \item
-  check 1: the check fails if the mean step count is below 8,200
+  check 1: the 60\% quantile of the observed step counts is greater than
+  10,000
 \item
-  check 2: the check fails if the 30th percentile of the observed step
-  counts is below 8,200
+  check 2: the 40\% quantile of the observed step counts is less than
+  8,000, and
 \item
-  check 3: the check fails if the standard deviation of the observed
-  step counts exceeds 2,500.
+  check 3: the standard deviation of the observed step counts exceeds
+  2,500.
 \end{itemize}
 
 The cutoff values chosen for these checks would presumably be chosen
@@ -474,20 +467,20 @@ optimized using the method presented in the next section.
 
 }
 
-\caption{\label{fig-step-count}Number of days with fewer than 8,000
-steps across 300 simulated 30-day periods. The orange bars indicate
-instances where the count exceeds five days, representing an unexpected
-outcome in this scenario.}
+\caption{\label{fig-step-count}Average step count across 300 simulated
+30-day periods. The orange points indicate instances where the average
+step count fails outside the {[}8,500, 9,500{]} interval, representing
+an unexpected outcome in this scenario.}
 
 \end{figure}%
 
 To simulate this data, three normal distributions are used for the daily
-step counts: \(\mathcal{N}(4000, 200)\) for low days,
+step counts: \(\mathcal{N}(6000, 200)\) for low days,
 \(\mathcal{N}(12000, 200)\) for high days, and
 \(\mathcal{N}(9000, 300)\) for typical days. The number of low and high
-days can be simulated from a Poisson distribution with \(\lambda = 4\).
-Figure~\ref{fig-step-count} displays the number of days with fewer than
-8,000 steps across 300 simulated 30-day periods.
+days can be simulated from a Poisson distribution with \(\lambda = 8\).
+Figure~\ref{fig-step-count} displays average step count across 300
+simulated 30-day periods.
 
 \section{Method}\label{sec-method}
 
@@ -537,10 +530,35 @@ sensitivity to unexpected outcomes.
 
 To incorporate the effect of multiple checks on the outcome, a logic
 regression model \citep{ruczinski_logic_2003} is fitted to the analysis
-validation checks using the indicator of an unexpected result as the
-outcome in the model. Originally developed for SNP microarray data,
-logic regression constructs Boolean combinations of binary variables, in
-a tree structure, to predict both binary and numerical outcomes.
+validation checks. Originally developed for SNP microarray data, logic
+regression constructs Boolean combinations of binary variables,
+\(\mathcal{L}(X_1, X_2, \cdots, X_n)\), to predict both binary and
+numerical outcomes. In our case,
+
+\begin{itemize}
+\tightlist
+\item
+  the outcome, \(Y\), is a binary variable indicating whether the result
+  is \emph{unexpected} (1) or \emph{expected} (0),
+\item
+  \(X_1, X_2, \cdots, X_n\) represent the binary analysis validation
+  checks, where each check is labeled as 1 if it fails and 0 if it
+  passes.
+\end{itemize}
+
+For classification problems, the logic regression model is reduced to
+the following form:
+
+\[E(Y) = \mathcal{L}(X_1, X_2, \cdots, X_n)\] The logical operations of
+the binary variables \(X_1, X_2, \cdots, X_n\), including AND
+(\(\land\)), OR (\(\lor\)), and NOT (\(\neg\)) and an example of such
+logic combination can be \(X_1 \text{ AND } (X_2 \text{ OR } X_3)\).
+Simulated annealing is used to explore the search space by minimizing
+the mis-classification error. The following 6 moves are permitted during
+the search (as detailed in Figure 2 of \citet{ruczinski_logic_2003}): 1)
+replacing a leaf node, 2) replacing an operator, 3) growing a branch, 4)
+pruning a branch, 5) splitting a leaf node, and 6) deleting a leaf node.
+
 Compared to other tree-based methods for binary-binary prediction, the
 Boolean combinations from the logic regression model produce a tree
 structure that can be directly interpreted as the possible combination
@@ -596,16 +614,19 @@ quadratic mean should be considered.
 Returning to the step count example introduced in Section~\ref{sec-toy},
 the logic regression model is fitted to the three analysis checks
 described previously to generate the prediction of the unexpected
-outcome, which is whether the number of days with fewer than 8,000 steps
-is greater than 5. The predictions from the logic regression model can
+outcome, whether the average number of step falls within the {[}8,500,
+9,500{]} interval. The predictions from the logic regression model can
 be compared with the simulated true outcome for calculating the
 precision and recall metrics. Figure~\ref{fig-logic-reg} shows the
-best-fitting logic regression model, which is a combination of check 1
-(``mean step count is below 8,200'') and check 3 (``standard deviation
-exceeds 2,500'') with an OR operator. In other words, if either check 1
-or check 3 is true, then we would predict an unexpected outcome in the
-analysis (i.e.~the number of days with fewer than 8,000 steps is greater
-than 5).
+best-fitting logic regression model as
+
+(quantile(step, 0.6) \textgreater{} 10,000 OR quantile(step, 0.4)
+\textless{} 8,000) AND sd(step) \textless{} 2,500
+
+In other words, we would predict an unexpected outcome in the analysis
+if the standard deviation of the step count is not too large (2,500) and
+either the 60\% quantile of the step count exceeds 10,000 or the 40\%
+quantile of the step count falls below 8,000.
 
 \phantomsection\label{cell-fig-logic-reg}
 \begin{figure}[H]
@@ -617,36 +638,33 @@ than 5).
 }
 
 \caption{\label{fig-logic-reg}Logic regression model fitted to the three
-unit tests (check 1, check 2, check 3). The model suggests using an OR
-rule to combine check 1 and check 3 to predict the outcome expectation.}
+checks. The model suggests the rule (quantile(step, 0.6) \textgreater{}
+10,000 OR quantile(step, 0.4) \textless{} 8,000) AND sd(step)
+\textless{} 2,500}
 
 \end{figure}%
 
 Table~\ref{tbl-logic-reg} presents the calculated precision, recall, and
-independence for the three individual checks and the combined check rule
-(check 1 OR check 3) from the logic regression. We also include the
-metric calculated from fitting a regression tree model to the data to
-compare the performance of the logic regression model. The harmonic and
-arithmetic means are included to combine the three measures. The results
-show that the two checks produced by the logic regression can accurately
-predict 83.6\% cases of all \emph{actual unexpected results} in the
-simulation data. Furthermore, 82.1\% of all \emph{predicted unexpected
-results} were in fact observed to be unexpected.
+independence for the three individual checks and the check rule found by
+the logic regression. The harmonic and arithmetic means are included to
+combine the three measures. The results show that the two checks
+produced by the logic regression can accurately predict 86.1\% cases of
+all \emph{actual unexpected results} in the simulation data.
+Furthermore, 43.1\% of all \emph{predicted unexpected results} were in
+fact observed to be unexpected.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.2468}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1299}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.0909}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1688}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1169}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1429}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 12\tabcolsep) * \real{0.1039}}@{}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.5368}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1053}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0737}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0737}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0947}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1158}}@{}}
 
 \caption{\label{tbl-logic-reg}Accuracy (precision and recall) and
-parsimony (independence) metrics for each individual check and for the
-combined check rule (check 1 OR check 3) derived from the logic
-regression model. The harmonic and arithmetic means of the three metrics
-are included to evaluate the quality of the checks in diagnosing
+parsimony (independence) metrics for each individual check and the logic
+regression check rule. The harmonic and arithmetic means of the three
+metrics are included to evaluate the quality of the checks in diagnosing
 unexpected step counts (more than five days with fewer than 8,000
 steps).}
 
@@ -654,36 +672,36 @@ steps).}
 
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-tests
+checks
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 precision
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 recall
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-independence
+indep.
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 harmonic
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 arithmetic
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-checks
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-1 & 0.482 & 0.964 & 1.000 & 0.730 & 0.815 & check 1 \\
-2 & 0.214 & 1.000 & 1.000 & 0.450 & 0.738 & check 2 \\
-3 & 0.589 & 0.805 & 1.000 & 0.762 & 0.798 & check 3 \\
-check 1 OR check 3 & 0.821 & 0.836 & 0.999 & 0.879 & 0.886 & NA \\
-regression tree & 0.821 & 0.836 & 1.000 & 0.879 & 0.886 & NA \\
+check 1: q(step, 0.6) \textgreater{} 10000 & 0.319 & 0.575 & 1.000 &
+0.511 & 0.631 \\
+check 2: q(step, 0.4) \textless{} 8000 & 0.264 & 0.613 & 1.000 & 0.467 &
+0.626 \\
+check 3: sd(step) \textgreater{} 2500 & 0.153 & 0.289 & 1.000 & 0.273 &
+0.481 \\
+logic regression: (check 1 OR check 2) AND check 3 & 0.431 & 0.861 &
+0.998 & 0.669 & 0.763 \\
+regression tree & 0.542 & 0.780 & 1.000 & 0.727 & 0.774 \\
 
 \end{longtable}
 
 For comparison, the regression tree produces a similar prediction to the
-logic regression, by first splitting on check 1 and then splitting on
-check 3, and results in the same accuracy and overall score as the logic
-regression model. However, we argue that the logic regression tree shown
+logic regression, however, we argue that the logic regression tree shown
 in Figure~\ref{fig-logic-reg} is more interpretable for our purposes
 because it provides a direct representation of which combinations of
 analysis checks lead to unexpected outcomes. The logic regression tree
@@ -834,12 +852,12 @@ coefficient. {[}sorry the proper plot is not ready{]}.}
 \end{figure}%
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.5368}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1053}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0737}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0737}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0947}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1158}}@{}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.6106}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0885}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0619}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0619}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0796}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0973}}@{}}
 
 \caption{\label{tbl-linear-reg}Accuracy (precision and recall) and
 parsimony (independence) metrics derived from the logic regression
@@ -876,8 +894,8 @@ check 2: cor(m, PM10) \textless{} -0.03 & 0.988 & 0.610 & 1 & 0.822 &
 check 3: cor(m, tmp) \textgreater{} -0.35 & 0.392 & 0.581 & 1 & 0.569 &
 0.658 \\
 check 4: mortality\_outlier & 0.649 & 0.641 & 1 & 0.732 & 0.763 \\
-(not check 1 AND check 2) AND (check 3 OR check 4) & 0.760 & 0.880 & 1 &
-0.869 & 0.880 \\
+logic regression: (not check 1 AND check 2) AND (check 3 OR check 4) &
+0.760 & 0.880 & 1 & 0.869 & 0.880 \\
 
 \end{longtable}
 
@@ -980,10 +998,6 @@ rules for determining failure, analysis validation checks are
 probabilistic. As a result, an analysis may fail several assumption
 checks yet produce an expected outcome, or pass all checks but yield an
 unexpected result.
-
-\section{Conclusion}\label{sec-conclusion}
-
-TODO
 
 \section{Acknowledgement}\label{acknowledgement}
 
