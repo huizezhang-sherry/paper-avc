@@ -467,10 +467,13 @@ optimized using the method presented in the next section.
 
 }
 
-\caption{\label{fig-step-count}Average step count across 300 simulated
-30-day periods. The orange points indicate instances where the average
-step count fails outside the {[}8,500, 9,500{]} interval, representing
-an unexpected outcome in this scenario.}
+\caption{\label{fig-step-count}Beeswarm plot of average step counts
+across 300 simulated 30-day periods. Each point represents the average
+step count from one simulation. While similar to a boxplot or violin
+plot, the beeswarm plot also displays the distribution of each
+individual data point. The orange points indicate instances where the
+average step count fails outside the {[}8,500, 9,500{]} interval,
+representing an unexpected outcome in this scenario.}
 
 \end{figure}%
 
@@ -639,8 +642,10 @@ quantile of the step count falls below 8,000.
 
 \caption{\label{fig-logic-reg}Logic regression model fitted to the three
 checks. The model suggests the rule (quantile(step, 0.6) \textgreater{}
-10,000 OR quantile(step, 0.4) \textless{} 8,000) AND sd(step)
-\textless{} 2,500}
+10,000 OR quantile(step, 0.4) \textless{} 8,000) AND (NOT sd(step)
+\textgreater{} 2,500). The NOT operator applied to
+\texttt{sd(step)\ \textgreater{}\ 2,500)} is colored with a black
+background to distinguish it from other checks.}
 
 \end{figure}%
 
@@ -843,11 +848,12 @@ calculated in Table~\ref{tbl-linear-reg}.
 
 \caption{\label{fig-linear-reg-tree}Logic regression model fitted to the
 fourteen checks and the outcome expectation (unexpected) as the response
-variable. The model suggests the relationship: (sample size
-\emph{greater than} 200 AND mortality-PM10 correlation \textless{}
--0.04) AND (mortality-temperature correlation \textgreater{} -0.35 OR
-there exist mortality outlier) to predict the unexpected PM10
-coefficient. {[}sorry the proper plot is not ready{]}.}
+variable. The model suggests the relationship: (NOT sample size less
+than or equal to 200 AND mortality-PM10 correlation \textless{} -0.04)
+AND (mortality-temperature correlation \textgreater{} -0.35 OR there
+exist mortality outlier) to predict the unexpected PM10 coefficient. The
+NOT operator applied to \texttt{smpl\_size\ \textless{}=\ 200} is
+colored with a black background to distinguish it from other checks.}
 
 \end{figure}%
 
@@ -937,8 +943,8 @@ only likely after multiple anomalies are observed in the data.
 In this paper we have developed an approach to using analysis validation
 checks to externalize the assumptions about the data and analysis tools
 made during the data analysis process. These checks can serve as a
-useful summary of the analyst's thought process and can desscribe how
-characterstics of the data may lead to unexpected outcomes. Using logic
+useful summary of the analyst's thought process and can describe how
+characteristics of the data may lead to unexpected outcomes. Using logic
 regression, we can develop a graphical summary of the analysis
 validation checks as well as use the logic regression fitting process to
 choose the optimal set of checks. The logic regression model can also be
@@ -974,12 +980,15 @@ Visualization methods are also valuable tools for assessing data
 assumptions and can potentially be formalized as analysis validation
 checks. For instance, plotting a variable's distribution using a
 histogram, density plot, or bee swarm plot can reveal outliers or
-deviations from normality. These visualizations could be reframed as
+deviations from normality. These visualizations could be re-framed as
 checks that fail when the data does not conform to the expected
 distribution. However, translating visualization results into binary
 checks that return (TRUE, FALSE) remains an open challenge, requiring
 either manual verification or the development of automated methods to
-interpret visualization outputs.
+interpret visualization outputs. An existing example of visual test is
+the R package \texttt{vdiffr} \citep{vdiffr} for software unit testing.
+The package saves a template plot and compares it to the current plot to
+determine whether the unit tests passes or fails.
 
 Systematically generating simulated data is a key component of our
 approach. In the PM10 example, the inverse transform method is used to
