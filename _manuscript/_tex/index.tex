@@ -240,9 +240,9 @@ whether they are specific to the data or analysis at hand.
 
 The externalization of the data analysis process is a practice that has
 potential to improve the trustworthiness of analyses in general
-\citep{yu2024veridical62} and the trustworthiness of subsequent
-products, such as machine learning models, that may be built on such
-analyses. While publication of analysis code and data is now a common a
+\citep{yu2024veridical} and the trustworthiness of subsequent products,
+such as machine learning models, that may be built on such analyses.
+While publication of analysis code and data is now a common a
 requirement for the sake of reproducibility
 \citep{peng2011reproducible}, the publication code alone is often
 insufficient for understanding the thought process behind an analysis.
@@ -288,8 +288,8 @@ key considerations.
 analysis}\label{diagnosing-unexpected-outcomes-in-data-analysis}
 
 The concept of framing data analysis as a sense-making process was
-originally presented by \citep{grolemund_cognitive_2014} based on
-seminal work by \citep{wild1999statistical}. Key to any sense-making
+originally presented by \citet{grolemund_cognitive_2014} based on
+seminal work by \citet{wild1999statistical}. Key to any sense-making
 process is a model for the world (i.e.~expectations for what we might
 observe) and observed data with which we can compare our expectations.
 If there is a significant deviation between what we observe and our
@@ -305,13 +305,13 @@ has received significant attention in the statistics literature. While
 the concept of diagnosis is often embedded in model checking or data
 visualization techniques, systematic approaches to identifying the root
 cause of an unexpected analysis result are typically not presented
-\citep{peng2022perspective}. \citep{peng_diagnosing_2021} proposed a
+\citep{peng2022perspective}. \citet{peng_diagnosing_2021} proposed a
 series of exercises for training students in data analysis to diagnose
 different kinds of analysis problems such as coding errors or outliers.
 They provide a systematic approach involving working backwards from the
 analysis result to identify potential causes. There are parallels here
 to the concept of debugging and testing in software engineering
-\citep{donoghue2021teaching}. For example, \citep{li2019towards} found
+\citep{donoghue2021teaching}. For example, \citet{li2019towards} found
 that experienced engineers were generally able to identify problems in
 code faster than novices, and that the ability to debug code required
 knowledge that cut across different domains.
@@ -327,26 +327,27 @@ cause unexpected results to occur.
 \subsection{Data analysis checks}\label{data-analysis-checks}
 
 A substantial body of literature has addressed the definition of data
-quality \citep[more]{8642813} and has developed frameworks that include
-dimensions, attributes, and measures to evaluate and improve data
-quality
-\citep{cai2015challenges, wang1996beyond, 6204995, woodall2014classification}.
+quality and has developed frameworks that include dimensions,
+attributes, and measures to evaluate and improve data quality
+\citep{8642813, batini2009methodologies, cai2015challenges, wang1996beyond, 6204995, woodall2014classification}.
 These frameworks are often used in information systems and database
 management and support business decision-making in various industries.
-For research purposes, high-quality data ensures the credibility of
-scientific findings and supports reproducibility and re-usability in
-future studies {[}ref{]}. With the growing prevalence of open data in
-scientific research, the consumers or users of the data typically are no
-longer the producers or collectors of the data who would have the full
-knowledge of data in hand, prompting more interest towards data quality
-checks in the data analysis process. In R, there are some packages, like
-\texttt{skimr} \citep{skimr} and \texttt{dataMaid} \citep{dataMaid},
-that provide basic data screening and reporting tools, while another
-class of packages, e.g.~\texttt{assertr} \citep{assertr},
-\texttt{validate} \citep{validate}, and \texttt{pointblank}
-\citep{pointblank} focuses on providing data validation tools, allowing
-users to define customized data quality checks based on the
-applications.
+For example, such data validation systems are applied in the Google
+Tensorflow framework \citep{polyzotis2019data} and Amazon
+\citep{schelter2018automating}. For research purposes, high-quality data
+ensures the credibility of scientific findings and supports
+reproducibility and re-usability in future studies. With the growing
+prevalence of open data in scientific research, the consumers or users
+of the data typically are no longer the producers or collectors of the
+data who would have the full knowledge of data in hand, prompting more
+interest towards data quality checks in the data analysis process. In R,
+there are some packages, like \texttt{skimr} \citep{skimr} and
+\texttt{dataMaid} \citep{dataMaid}, that provide basic data screening
+and reporting tools, while another class of packages,
+e.g.~\texttt{assertr} \citep{assertr}, \texttt{validate}
+\citep{validate}, and \texttt{pointblank} \citep{pointblank} focuses on
+providing data validation tools, allowing users to define customized
+data quality checks based on the applications.
 
 The literature on data quality typically focuses on the intrinsic or
 inherent quality of the data themselves, rather than the data's
@@ -378,7 +379,7 @@ less experienced researchers to learn and master these skills.
 Here, we introduce the concept of \textbf{analysis validation checks},
 which frame these expectations or assumptions as explicit checks that
 return a TRUE or FALSE result given the data analyzed at hand. Inspired
-by the concept of data validation checks (\citet{validate}), which are
+by the concept of data validation checks \citep{validate}, which are
 designed to ensure that datasets meet expected formats and quality,
 analysis validation checks reverse the approach: they validate the
 assumptions about the data necessary for the analysis to produce the
