@@ -239,10 +239,11 @@ same context, whether they reflect common practices in the field, or
 whether they are specific to the data or analysis at hand.
 
 The externalization of the data analysis process is a practice that has
-potential to improve the trustworthiness of analyses in general and the
-trustworthiness of subsequent products, such as machine learning models,
-that may be built on such analyses. While publication of analysis code
-and data is now a common a requirement for the sake of reproducibility
+potential to improve the trustworthiness of analyses in general
+\citep{yu2024veridical62} and the trustworthiness of subsequent
+products, such as machine learning models, that may be built on such
+analyses. While publication of analysis code and data is now a common a
+requirement for the sake of reproducibility
 \citep{peng2011reproducible}, the publication code alone is often
 insufficient for understanding the thought process behind an analysis.
 Code corresponding to published analyses often reflect the final
@@ -515,12 +516,22 @@ process.
 
 \centering{
 
-\includegraphics[width=6.73in,height=\textheight]{figures/metric-calc.png}
+\includegraphics[width=1\textwidth,height=\textheight]{figures/metric-calc.png}
 
 }
 
-\caption{\label{fig-metric-calc}{[}this is the cap and the plot needs
-polish{]}}
+\caption{\label{fig-metric-calc}Overview of the procedure to quantify
+the effectiveness of analysis validation checks. The procedure involves
+simulating replicates of the data, applying the anlysis, and running the
+analysis validation checks on each replicate to determine whether the
+outcome meets the expectation (the unexpected column) and whether each
+check passes (check 1, check 2, \ldots). The simulation results are then
+passed to two branches: the accuracy branch calculates the precision and
+recall of the checks from a logic regression prediction, while the
+redundancy branch to calculate the mutual information and independence
+of the checks. These three metrics are combined to produce a single
+metric that quantifies the effectiveness of the checks in diagnosing
+unexpected outcomes in the analysis.}
 
 \end{figure}%
 
