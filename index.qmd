@@ -464,6 +464,58 @@ The tree structure suggests checking mortality-PM10 correlation and a sample siz
 
 As shown in @fig-linear-reg-tree, there is no single analysis check in the tree that predicts an unexpected outcome. rather at least three checks in the tree must be TRUE in order for the model to predict an unexpected outcome. Given the high independence of the checks (@tbl-linear-reg), this suggests that unexpected results are only likely after multiple anomalies are observed in the data.
 
+## subsection 
+
+```{r}
+pm10 <- read_csv("data/pm10.csv") |> filter(!is.na(pm10)) |> filter(!is.na(temp))
+files <- list.files(path = "data", pattern = "csv", full.names = TRUE)[-1]
+pred_res <- files |> map_dfr(function(raw){
+  data <- read_csv(raw) |> filter(!is.na(pm10)) |> filter(!is.na(temp))
+  res_df <- glm(mortality ~ pm10 + temp, family = "poisson", data = data)$coefficients |>
+    as_tibble_row()
+
+  res_df |>
+      mutate(
+        cor_m_tmp = cor(data$mortality, data$temp),
+        cor_m_pm10 = cor(data$mortality, data$pm10),
+        cor_tmp_pm10 = cor(data$temp, data$pm10),
+        unexpect = !between(pm10, 0, 0.005),
+        mort_outlier = any(scale(data$mortality) > 4),
+        pm10_outlier = any(scale(data$pm10) > 4),
+        lgl_cor_m_tmp = cor(data$mortality, data$temp) > -0.3,
+        lgl_cor_m_pm10 = cor(data$mortality, data$pm10) < -0.03,
+        .pred = ((mort_outlier &  pm10_outlier) | (lgl_cor_m_tmp)) & (lgl_cor_m_pm10),
+        ss = nrow(data)
+        )
+    })
+
+library(readr)
+library(kableExtra)
+city_name_map <- read_csv(here::here("data/city_name_map.csv"))
+tibble(city = str_remove(files, "data/pm10-") |> str_remove(".csv")) |> bind_cols(pred_res) |>
+  left_join(city_name_map) |> 
+  filter(city != "data/pm10") |> 
+  dplyr::select(cityname, pm10, unexpect, .pred, cor_m_tmp, lgl_cor_m_tmp,
+                cor_m_pm10, lgl_cor_m_pm10, mort_outlier, pm10_outlier) |>
+  mutate(pm10 = format(round(pm10, 4), nsmall = 4),
+         cor_m_tmp = format(round(cor_m_tmp, 2), nsmall = 2),
+         cor_m_pm10 = format(round(cor_m_pm10, 2), nsmall = 2),
+         across(c(cor_m_pm10, cor_m_tmp), ~str_replace(.x, "-", "--"))) |> 
+  mutate(across(c(unexpect, .pred, lgl_cor_m_pm10, lgl_cor_m_tmp, mort_outlier, pm10_outlier), 
+                ~ifelse(.x, "T", "F"))) |>
+  mutate(cor_m_tmp = paste0(cor_m_tmp, " (", lgl_cor_m_tmp, ")"),
+         cor_m_pm10 = paste0(cor_m_pm10, " (", lgl_cor_m_pm10, ")")) |> 
+  dplyr::select(-lgl_cor_m_tmp, -lgl_cor_m_pm10) |>
+  kable(format = "latex", booktabs = TRUE, escape = F, align = "lrrrrrrr",
+        col.names = linebreak(c("City", "PM10\nCoefficient", "Outcome\nUnexpected", "Predicted\nUnexpected", 
+                                "Correlation\nMortality\nPM10", "Correlation\nMortality\nTemperature",
+                                "Mortality\nOutlier", "PM10\nOutlier"))) |>
+  kableExtra::kable_styling(latex_options="scale_down") 
+```
+
+
+
+
 # Discussion {#sec-discussion}
 
 In this paper we have developed an approach to using analysis validation checks to externalize the assumptions about the data and analysis tools made during the data analysis process. These checks can serve as a useful summary of the analyst's thought process and can describe how characteristics of the data may lead to unexpected outcomes. Using logic regression, we can develop a graphical summary of the analysis validation checks as well as use the logic regression fitting process to choose the optimal set of checks. The logic regression model can also be used to develop summaries of the precision and recall of the collection of analysis validation checks in predicting the likelihood of an unexpected outcome. We demonstrated our method on an example relating daily mortality to outdoor air pollution data. The results from that example could be used to inform future analyses of air pollution and health data, perhaps in other cities or locations.

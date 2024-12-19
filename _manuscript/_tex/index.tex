@@ -80,15 +80,17 @@
 \makesavenoteenv{longtable}
 \usepackage{graphicx}
 \makeatletter
-\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
-\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
-\makeatother
-% Scale images if necessary, so that they will not overflow the page
-% margins by default, and it is still possible to overwrite the defaults
-% using explicit options in \includegraphics[width, height, ...]{}
-\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
 % Set default figure placement to htbp
-\makeatletter
 \def\fps@figure{htbp}
 \makeatother
 
@@ -149,9 +151,6 @@
 \@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
 \makeatother
 
-\ifLuaTeX
-  \usepackage{selnolig}  % disable illegal ligatures
-\fi
 \usepackage[]{natbib}
 \bibliographystyle{plainnat}
 \usepackage{bookmark}
@@ -208,21 +207,21 @@ daily mortality.
 
 In data analysis, experienced researchers often rely on their prior
 knowledge or domain expertise to quickly assess whether results align
-with their expectations. When a result falls outside of this interval,
-it prompts the researchers to investigate backwards on the data quality,
-the analysis steps, or the assumptions made during the analysis process.
-This mental process of where to diagnose unexpected outcomes is often
-difficult to trace and discuss in publications. As a result, readers are
-typically presented with the final outcomes of the analysis cycle where
-the results and expectations are aligned, achieved either by refining
-the analysis or updating the expectations based on statistical evidence
-\citep{grolemund_cognitive_2014}. These missing pieces of information
-provides little guidance for diagnosing issues in the analysis when the
-same methodology is applied to a new dataset that produces different
-outcomes. Similarly, when researchers with different background
-knowledge view results that they find to be unexpected, it becomes
-unclear whether discrepancies arise from differing expectations or from
-the use of statistical techniques.
+with their expectations. When a result falls outside of this
+expectation, it prompts the researchers to investigate backwards on the
+data quality, the analysis steps, or the assumptions made during the
+analysis process. This mental process of where to diagnose unexpected
+outcomes is often difficult to trace and document in publications. As a
+result, readers are typically presented with the final outcomes of the
+analysis cycle where the results and expectations are aligned, achieved
+either by refining the analysis or updating the expectations based on
+statistical evidence \citep{grolemund_cognitive_2014}. These missing
+pieces of information provide little guidance for diagnosing issues in
+the analysis when the same methodology is applied to a new dataset that
+produces different outcomes. Similarly, when researchers with different
+background knowledge view results that they find to be unexpected, it
+becomes unclear whether discrepancies arise from differing expectations
+or from the use of statistical techniques.
 
 One might gain insight into analysts' thought processes by speaking with
 them directly or watching them work via screencast videos they produce,
@@ -304,13 +303,16 @@ The skill of diagnosing unexpected data analysis results is not one that
 has received significant attention in the statistics literature. While
 the concept of diagnosis is often embedded in model checking or data
 visualization techniques, systematic approaches to identifying the root
-cause of an unexpected analysis result are typically not presented
-\citep{peng2022perspective}. \citet{peng_diagnosing_2021} proposed a
-series of exercises for training students in data analysis to diagnose
-different kinds of analysis problems such as coding errors or outliers.
-They provide a systematic approach involving working backwards from the
-analysis result to identify potential causes. There are parallels here
-to the concept of debugging and testing in software engineering
+cause of a general unexpected analysis result are typically not
+presented \citep{peng2022perspective}. Furthermore, if interesting
+information is discovered through model checking or data visualization,
+there is no formal way to document such discoveries for the next analyst
+to consider. \citet{peng_diagnosing_2021} proposed a series of exercises
+for training students in data analysis to diagnose different kinds of
+analysis problems such as coding errors or outliers. They provide a
+systematic approach involving working backwards from the analysis result
+to identify potential causes. There are parallels here to the concept of
+debugging and testing in software engineering
 \citep{donoghue2021teaching}. For example, \citet{li2019towards} found
 that experienced engineers were generally able to identify problems in
 code faster than novices, and that the ability to debug code required
@@ -373,8 +375,9 @@ itself. When observed outcomes deviate from these expectations, analysts
 often revisit the analysis process to identify potential issues, refine
 methods, or revise assumptions. Experienced analysts can typically
 identify issues quickly and correct them on the spot, but they often do
-so without discussing the underlying reasoning, making it harder for
-less experienced researchers to learn and master these skills.
+so without discussing the underlying reasoning, limiting transparency
+and making it harder for less experienced researchers to learn and
+master these skills.
 
 Here, we introduce the concept of \textbf{analysis validation checks},
 which frame these expectations or assumptions as explicit checks that
@@ -422,26 +425,25 @@ potential data generation process.
 
 \subsection{A Toy Example}\label{sec-toy}
 
-Consider a 30-day step count experiment in public health. Subjects are
-instructed to walk at least 8,000 steps each day, with an expected
-average of 9,000 steps, tracked by a step counter app. After 30 days, we
-review the data and examine the number of steps taken each day. With
-data of this nature, we may expect there to be occasional ``low'' days
-due to factors such as forgetting to wear their watch or unfavorable
-weather conditions limiting outdoor activities. We may also expect
-``high'' days recorded after an outdoor hike or intense workout. Given
-the requirements of the study, we expect that for a given subject the
-average step count would be between \([8500, 9500]\).
+Consider a 30-day step count experiment in a public health setting.
+Subjects are instructed to walk at least 8,000 steps each day, with an
+expected average of 9,000 steps, tracked by a step counter app. After 30
+days, we review the data and examine the number of steps taken each day.
+With data of this nature, we may expect there to be occasional ``low''
+days due to factors such as forgetting to wear their watch or
+unfavorable weather conditions limiting outdoor activities. We may also
+expect ``high'' days recorded after an outdoor hike or intense workout.
+Given the requirements of the study, we expect that for a given subject
+the average step count would be between \([8500, 9500]\).
 
 To diagnose potential reasons why this outcome expectation might fail,
 we can establish a few analysis validation checks in anticipation of
 seeing the data. For example, we can check the quantile of the step
-count, if more than a third of the days fall below 8,000, or more than
-two-thirds exceed 10,000 steps, this could indicate an excess of
-low-count or high-count days. Similarly, we may may expect the standard
-deviation of the step count not to be overly large. These considerations
-yield the following three analysis validation checks that \emph{fails}
-when:
+count, if more than a third of the days fall below 8,000, or more than a
+third exceed 10,000 steps, this could indicate an excess of low-count or
+high-count days. Similarly, we may may expect the standard deviation of
+the step count not to be overly large. These considerations yield the
+following three analysis validation checks that \emph{fail} when:
 
 \begin{itemize}
 \tightlist
@@ -465,7 +467,7 @@ optimized using the method presented in the next section.
 
 \centering{
 
-\includegraphics{index_files/figure-pdf/fig-step-count-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-step-count-1.pdf}}
 
 }
 
@@ -517,7 +519,7 @@ process.
 
 \centering{
 
-\includegraphics[width=1\textwidth,height=\textheight]{figures/metric-calc.png}
+\includegraphics[width=1\linewidth,height=\textheight,keepaspectratio]{figures/metric-calc.png}
 
 }
 
@@ -536,12 +538,13 @@ unexpected outcomes in the analysis.}
 
 \end{figure}%
 
-From the simulated data, the accuracy branch refers to a set of checks'
-ability to accurately detect unexpected outcomes while minimizing false
-positives and false negatives. While a false positive can raise caution
-or skepticism on the data, the presence of both false positives and
-false negatives suggest that the checks are overly sensitive or lack
-sensitivity to unexpected outcomes.
+From the simulated data, the accuracy branch in
+Figure~\ref{fig-metric-calc} refers to a set of checks' ability to
+accurately detect unexpected outcomes while minimizing false positives
+and false negatives. While a false positive can raise caution or
+skepticism about the data, the presence of both false positives and
+false negatives suggests that the checks are overly sensitive or lack
+sensitivity to unexpected outcomes, respectively.
 
 To incorporate the effect of multiple checks on the outcome, a logic
 regression model \citep{ruczinski_logic_2003} is fitted to the analysis
@@ -584,12 +587,12 @@ result based on the values of checks, and the prediction is compared to
 the actual analysis result in order to calculate the precision and
 recall of the checks.
 
-While checks may score high on accuracy, they may be less effective at
-explaining the various reasons behind unexpected results. This could
-happen if, for example, a set of checks are all tangentially related to
-the cause of the unexpected results, but none addresses the root cause.
-It may also occur if the checks are highly correlated with one another,
-leading to redundancy.
+While checks may score high on predictive accuracy, they may be less
+effective at explaining the various reasons behind unexpected results.
+This could happen if, for example, a set of checks are all tangentially
+related to the cause of the unexpected results, but none addresses the
+root cause. It may also occur if the checks are highly correlated with
+one another, leading to redundancy.
 
 To quantify redundancy, the concept of mutual information is used.
 Mutual information \(I(x, y)\) measures the amount of information shared
@@ -648,7 +651,7 @@ quantile of the step count falls below 8,000.
 
 \centering{
 
-\includegraphics{index_files/figure-pdf/fig-logic-reg-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-logic-reg-1.pdf}}
 
 }
 
@@ -671,12 +674,12 @@ Furthermore, 43.1\% of all \emph{predicted unexpected results} were in
 fact observed to be unexpected.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.5368}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1053}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0737}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0737}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0947}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1158}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.5368}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1053}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0737}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0737}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0947}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1158}}@{}}
 
 \caption{\label{tbl-logic-reg}Accuracy (precision and recall) and
 parsimony (independence) metrics for each individual check and the logic
@@ -737,7 +740,9 @@ mortality from all non-accidental causes \citep{samet2000fine}. For our
 second example, we use the problem of studying PM10 and mortality along
 with data from the National Morbidity, Mortality, and Air Pollution
 Study (NMMAPS) to demonstrate how our analysis validation checks
-described in Section~\ref{sec-method} can be applied.
+described in Section~\ref{sec-method} can be applied. The dataset is
+from New York City, and contains daily PM10, mortality, and temperature
+values from 1992--2000.
 
 The typical approach to studying the association between PM10 and
 mortality is to apply a generalized linear model with a Poisson link to
@@ -791,14 +796,14 @@ Sample size less than or equal to 200 \\
 Sample size less than or equal to 400 \\
 Sample size less than or equal to 600 \\
 Sample size less than or equal to 800 \\
-Mortality-PM10 correlation less than -0.03 \\
-Mortality-PM10 correlation less than -0.04 \\
-Mortality-PM10 correlation less than -0.05 \\
-Mortality-PM10 correlation less than -0.06 \\
-Mortality-temperature correlation greater than -0.3 \\
-Mortality-temperature correlation greater than -0.35 \\
-Mortality-temperature correlation greater than -0.4 \\
-Mortality-temperature correlation greater than -0.45 \\
+Mortality-PM10 correlation less than \$-\$0.03 \\
+Mortality-PM10 correlation less than \$-\$0.04 \\
+Mortality-PM10 correlation less than \$-\$0.05 \\
+Mortality-PM10 correlation less than \$-\$0.06 \\
+Mortality-temperature correlation greater than \$-\$0.3 \\
+Mortality-temperature correlation greater than \$-\$0.35 \\
+Mortality-temperature correlation greater than \$-\$0.4 \\
+Mortality-temperature correlation greater than \$-\$0.45 \\
 Outlier(s) are presented in the variable PM10 \\
 Outlier(s) are presented in the variable mortality \\
 \end{longtable}
@@ -818,21 +823,22 @@ exponential, weibull, and normal for PM10 and temperature; and beta for
 PM10 after rescaling the data to \([0,1]\).
 
 To ensure a reasonable likeness to data that might be used in such an
-analysis, we use characteristics of the observed dataset to refine our
-simulations. AIC is used to determine the best distribution fit for each
-variable with the QQ-plot presented in Figure~\ref{fig-dist-fit} to
-evaluate the fit. AIC suggests a negative binomial distribution for
-mortality, a beta distribution for PM10 (multiple by 100 to recover the
-original scale), and a Weibull distribution for temperature. To include
-the potential effect of outliers, we add a single outlier to the data
-for both the mortality and PM10 variables.
+analysis, we use characteristics of the observed New York City dataset
+to refine our simulations. AIC is used to determine the best
+distribution fit for each variable with the QQ-plot presented in
+Figure~\ref{fig-dist-fit} to evaluate the fit. AIC suggests a negative
+binomial distribution for mortality, a beta distribution for PM10
+(multiple by 100 to recover the original scale), and a Weibull
+distribution for temperature. To include the potential effect of
+outliers, we add a single outlier to the data for both the mortality and
+PM10 variables.
 
 \phantomsection\label{cell-fig-dist-fit}
 \begin{figure}[H]
 
 \centering{
 
-\includegraphics{index_files/figure-pdf/fig-dist-fit-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/fig-dist-fit-1.pdf}}
 
 }
 
@@ -854,7 +860,7 @@ calculated in Table~\ref{tbl-linear-reg}.
 
 \centering{
 
-\includegraphics{index_files/figure-pdf/unnamed-chunk-8-1.pdf}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/unnamed-chunk-8-1.pdf}}
 
 }
 
@@ -870,12 +876,12 @@ colored with a black background to distinguish it from other checks.}
 \end{figure}%
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.6106}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0885}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0619}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0619}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0796}}
-  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0973}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.6106}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0885}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0619}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0619}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0796}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0973}}@{}}
 
 \caption{\label{tbl-linear-reg}Accuracy (precision and recall) and
 parsimony (independence) metrics derived from the logic regression
@@ -950,6 +956,66 @@ predict an unexpected outcome. Given the high independence of the checks
 (Table~\ref{tbl-linear-reg}), this suggests that unexpected results are
 only likely after multiple anomalies are observed in the data.
 
+\subsection{subsection}\label{subsection}
+
+\begin{table}
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}{lrrrrrrr}
+\toprule
+City & \makecell[l]{PM10\\Coefficient} & \makecell[l]{Outcome\\Unexpected} & \makecell[l]{Predicted\\Unexpected} & \makecell[l]{Correlation\\Mortality\\PM10} & \makecell[l]{Correlation\\Mortality\\Temperature} & \makecell[l]{Mortality\\Outlier} & \makecell[l]{PM10\\Outlier}\\
+\midrule
+Atlanta & -0.0008 & T & T & --0.26 (T) & --0.16 (T) & F & F\\
+Austin & -0.0030 & T & T & --0.12 (T) & --0.11 (T) & F & T\\
+Baltimore & 0.0018 & F & F & --0.21 (T) & 0.01 (F) & T & T\\
+Boston & 0.0019 & F & F & --0.16 (T) & 0.02 (F) & F & T\\
+Buffalo & 0.0028 & F & F & --0.23 (T) & --0.02 (F) & F & T\\
+\addlinespace
+Chicago & 0.0011 & F & F & --0.38 (F) & --0.02 (F) & T & T\\
+Cincinnati & 0.0011 & F & T & --0.27 (T) & --0.06 (T) & T & T\\
+Cleveland & 0.0010 & F & F & --0.30 (F) & --0.02 (F) & T & T\\
+Columbus & 0.0004 & F & T & --0.20 (T) & --0.07 (T) & F & T\\
+Denver & 0.0010 & F & F & --0.23 (T) & 0.06 (F) & F & T\\
+\addlinespace
+Detroit & 0.0011 & F & F & --0.30 (T) & 0.04 (F) & F & T\\
+Dallas/Fort Worth & 0.0016 & F & T & --0.30 (F) & --0.03 (T) & T & T\\
+Honolulu & 0.0006 & F & F & --0.17 (T) & 0.05 (F) & T & T\\
+Houston & 0.0007 & F & F & --0.22 (T) & --0.03 (F) & F & T\\
+Indianapolis & 0.0014 & F & F & --0.13 (T) & 0.02 (F) & F & T\\
+\addlinespace
+Kansas City & 0.0022 & F & F & --0.20 (T) & 0.02 (F) & F & T\\
+Los Angeles & 0.0011 & F & F & --0.47 (F) & --0.01 (F) & T & T\\
+Las Vegas & 0.0008 & F & F & --0.27 (T) & 0.05 (F) & T & T\\
+Memphis & -0.0007 & T & T & --0.16 (T) & --0.10 (T) & F & T\\
+Miami & -0.0004 & T & F & --0.16 (T) & --0.02 (F) & F & T\\
+\addlinespace
+Milwaukee & 0.0026 & F & F & --0.22 (T) & 0.09 (F) & F & T\\
+Minneapolis/St. Paul & 0.0009 & F & F & --0.30 (F) & --0.01 (F) & T & T\\
+New York & 0.0022 & F & F & --0.46 (F) & --0.01 (F) & T & T\\
+Oakland & 0.0008 & F & F & --0.28 (T) & 0.04 (F) & F & T\\
+Orlando & -0.0008 & T & T & --0.21 (T) & --0.05 (T) & F & T\\
+\addlinespace
+Philadelphia & 0.0021 & F & F & --0.27 (T) & 0.11 (F) & T & T\\
+Phoenix & 0.0009 & F & F & --0.44 (F) & 0.07 (F) & T & T\\
+Pittsburgh & 0.0009 & F & T & --0.36 (F) & --0.08 (T) & T & T\\
+Riverside & 0.0001 & F & T & --0.27 (T) & --0.11 (T) & T & T\\
+Sacramento & 0.0005 & F & F & --0.30 (T) & 0.05 (F) & T & T\\
+\addlinespace
+Salt Lake City & -0.0004 & T & T & --0.19 (T) & --0.03 (T) & F & T\\
+San Antonio & -0.0021 & T & T & --0.22 (T) & --0.16 (T) & F & T\\
+San Bernardino & 0.0006 & F & T & --0.28 (T) & --0.09 (T) & T & T\\
+San Diego & 0.0011 & F & F & --0.33 (F) & 0.03 (F) & T & T\\
+San Jose & 0.0006 & F & F & --0.23 (T) & 0.08 (F) & F & T\\
+\addlinespace
+Seattle & 0.0003 & F & F & --0.24 (T) & 0.06 (F) & F & T\\
+Santa Ana/Anaheim & 0.0005 & F & T & --0.26 (T) & --0.04 (T) & T & T\\
+St. Petersburg & 0.0012 & F & F & --0.31 (F) & 0.01 (F) & F & T\\
+Tampa & -0.0003 & T & T & --0.20 (T) & --0.04 (T) & F & T\\
+Tucson & 0.0028 & F & F & --0.31 (F) & 0.18 (F) & T & T\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 \section{Discussion}\label{sec-discussion}
 
 In this paper we have developed an approach to using analysis validation
@@ -963,7 +1029,9 @@ choose the optimal set of checks. The logic regression model can also be
 used to develop summaries of the precision and recall of the collection
 of analysis validation checks in predicting the likelihood of an
 unexpected outcome. We demonstrated our method on an example relating
-daily mortality to outdoor air pollution data.
+daily mortality to outdoor air pollution data. The results from that
+example could be used to inform future analyses of air pollution and
+health data, perhaps in other cities or locations.
 
 With the analysis validation checks proposed in this paper, analysts may
 perform these checks \emph{ex ante} to identify and address potential
@@ -1012,13 +1080,14 @@ the R package \texttt{vdiffr} \citep{vdiffr} for software unit testing.
 The package saves a template plot and compares it to the current plot to
 determine whether the unit tests passes or fails.
 
-Systematically generating simulated data is a key component of our
-approach. In the PM10 example, the inverse transform method is used to
-preserve the correlation structure among mortality, PM10, and
-temperature. However, simulation can become complex when additional
-restrictions are imposed. In such cases, techniques like the
-acceptance-reject method or permutation may be used to generate the
-data.
+Systematically generating realistic simulated data is a key component of
+our approach and is deserving of further consideration. In the PM10
+example, the inverse transform method is used to preserve the
+correlation structure among mortality, PM10, and temperature. However,
+simulation can become complex when additional restrictions are imposed
+or when a greater range of scenarios is desired. In such cases,
+techniques like the acceptance-reject method or permutation may be used
+to generate the data.
 
 Analysis validation checks are closely related to the concept of unit
 testing in software engineering. While unit tests isolate and test
@@ -1029,6 +1098,15 @@ rules for determining failure, analysis validation checks are
 probabilistic. As a result, an analysis may fail several assumption
 checks yet produce an expected outcome, or pass all checks but yield an
 unexpected result.
+
+Communicating the process of data analysis is a key element to providing
+transparency, improving reproducibility, and building trust with a range
+of audiences. The analysis validation checks described here provide a
+general way to encode the assumptions that an data analyst makes about
+the data and statistical tools applied to the data. These assumptions
+can be studied or challenged, depending on the specific analyst's
+perspective, and can serve as a roadmap for diagnosing unexpected
+results.
 
 \section{Acknowledgement}\label{acknowledgement}
 
