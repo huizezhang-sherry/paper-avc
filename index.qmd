@@ -251,26 +251,28 @@ For comparison, the regression tree produces a similar prediction to the logic r
 
 # Application {#sec-pm10-mortality}
 
-In the study of the health effects of outdoor air pollution, one area of interest is the association between short-term, day-to-day changes in particulate matter air pollution and daily mortality counts. Substantial work has been done to study this question and to date, there appears to be strong evidence of an association between particulate matter less than 10 $\mu$g/m$^3$ in aerodynamic diameter (PM10) and daily mortality from all non-accidental causes [@samet2000fine]. For our second example, we use the problem of studying PM10 and mortality along with data from the National Morbidity, Mortality, and Air Pollution Study (NMMAPS) to demonstrate how our analysis validation checks described in @sec-method can be applied. The dataset is from New York City, and contains daily PM10, mortality, and temperature values from 1992--2000.
+In the study of the health effects of outdoor air pollution, one area of interest is the association between short-term, day-to-day changes in particulate matter air pollution and daily mortality counts. Substantial work has been done to study this question and to date, there appears to be strong evidence of an association between particulate matter less than 10 $\mu$g/m$^3$ in aerodynamic diameter (PM10) and daily mortality from all non-accidental causes [@samet2000fine]. For our second example, we use the problem of studying PM10 and mortality along with data from the National Morbidity, Mortality, and Air Pollution Study (NMMAPS) to demonstrate how our analysis validation checks described in @sec-method can be applied. The dataset that we use to develop our simulations and analysis checks is from New York City, and contains daily PM10, all-cause (non-accidental) mortality, and average temperature values from 1992--2000. We then will apply the analysis checks to similar data from 39 other cities from the NMMAPS study.
 
-The typical approach to studying the association between PM10 and mortality is to apply a generalized linear model with a Poisson link to relate daily mortality counts to daily measures of PM10. Based on previous work and the range of effect sizes published in the literature, an analyst might expect the coefficient for PM10 in this GLM to lie between $[0, 0.005]$, after adjusting for daily temperature [@samet2000fine; @welty2005acute]. Observing an estimated coefficient outside of this interval would be highly unusual and would warrant a serious re-examination of the analysis process. Therefore, our unexpected outcome in this analysis will be the binary indicator of whether the estimated coefficient for PM10 in the GLM lies outside of the interval $[0, 0.005]$. In addition to providing a more substantial problem for our methods, this example also demonstrates how the procedure presented in @sec-method can be used to select cutoff values in the analysis checks to diagnose an unexpected PM10 coefficient from the generalized linear model. 
+The typical approach to studying the association between PM10 and mortality is to apply a generalized linear model with a Poisson link to relate daily mortality counts to daily measures of PM10. Based on previous work and the range of effect sizes published in the literature, an analyst might expect the coefficient for PM10 in this GLM to lie between $[0, 0.005]$, after adjusting for daily temperature [@samet2000fine; @welty2005acute]. Note that the relatively simple modeling approach being used here is primarily for demonstration; typically far more sophisticated semi-parametric approaches are used in the literature [@peng2006model]. 
+
+For the purposes of this application, observing an estimated coefficient outside of the expected interval is considered unusual and might warrant a re-examination of the analysis process. Therefore, our unexpected outcome in this analysis will be the binary indicator of whether the estimated coefficient for PM10 in the GLM lies outside of the interval $[0, 0.005]$. In addition to providing a more substantial problem for our methods, this example also demonstrates how the procedure presented in @sec-method can be used to select cutoff values in the analysis checks to diagnose an unexpected PM10 coefficient from the generalized linear model. 
 
 This PM10 coefficient expectation can be framed as an analysis check that fails, labelled as 1, if the estimate of the PM10 coefficient (adjusted for temperature) is outside the range [0, 0.005], and 0 if it is within. Multiple factors can affect the estimated PM10 coefficient, such as the sample size, the strength of the correlation between mortality and PM10, and the strength of the correlation between mortality and temperature. Analysts may expect a reasonable sample size to ensure the reliability of the coefficient estimate. Outliers in the three variables can also leverage the coefficient. While these are possible factors that could affect the analysis result, it is not clear what the cutoff values for these checks should be to determine a failure. Here we consider a list of checks in @tbl-checks with varied cutoff values for each: 
 
-| the check fails if ... | 
+| The check fails if ... | 
 |--------------| 
 | Sample size less than or equal to 200 |
 | Sample size less than or equal to 400 |
 | Sample size less than or equal to 600 |
 | Sample size less than or equal to 800 |
-| Mortality-PM10 correlation less than $-$0.03 |
-| Mortality-PM10 correlation less than $-$0.04 |
-| Mortality-PM10 correlation less than $-$0.05 |
-| Mortality-PM10 correlation less than $-$0.06 |
-| Mortality-temperature correlation greater than $-$0.3 | 
-| Mortality-temperature correlation greater than $-$0.35 | 
-| Mortality-temperature correlation greater than $-$0.4 | 
-| Mortality-temperature correlation greater than $-$0.45 | 
+| Mortality-PM10 correlation less than $-0.03$ |
+| Mortality-PM10 correlation less than $-0.04$ |
+| Mortality-PM10 correlation less than $-0.05$ |
+| Mortality-PM10 correlation less than $-0.06$ |
+| Mortality-temperature correlation greater than $-0.3$ | 
+| Mortality-temperature correlation greater than $-0.35$ | 
+| Mortality-temperature correlation greater than $-0.4$ | 
+| Mortality-temperature correlation greater than $-0.45$ | 
 | Outlier(s) are presented in the variable PM10 | 
 | Outlier(s) are presented in the variable mortality | 
 
@@ -464,9 +466,13 @@ The tree structure suggests checking mortality-PM10 correlation and a sample siz
 
 As shown in @fig-linear-reg-tree, there is no single analysis check in the tree that predicts an unexpected outcome. rather at least three checks in the tree must be TRUE in order for the model to predict an unexpected outcome. Given the high independence of the checks (@tbl-linear-reg), this suggests that unexpected results are only likely after multiple anomalies are observed in the data.
 
-## subsection 
+## Additional Cities 
+
+In order to test our development of analysis validation checks based on the New York City data, we incorporate data from 39 additional cities from the original NMMAPS study and apply our checks to those data. These cities (along with New York City) represent approximately the largest 40 metropolitan areas in the United States. The complete list of cities used are presented in @tbl-all-cities. For each city, we had daily data on all-cause mortality, PM10, and average temperature for the years 1992--2000.
 
 ```{r}
+#| label: tbl-all-cities
+
 pm10 <- read_csv("data/pm10.csv") |> filter(!is.na(pm10)) |> filter(!is.na(temp))
 files <- list.files(path = "data", pattern = "csv", full.names = TRUE)[-1]
 pred_res <- files |> map_dfr(function(raw){
@@ -506,15 +512,17 @@ tibble(city = str_remove(files, "data/pm10-") |> str_remove(".csv")) |> bind_col
   mutate(cor_m_tmp = paste0(cor_m_tmp, " (", lgl_cor_m_tmp, ")"),
          cor_m_pm10 = paste0(cor_m_pm10, " (", lgl_cor_m_pm10, ")")) |> 
   dplyr::select(-lgl_cor_m_tmp, -lgl_cor_m_pm10) |>
-  kable(format = "latex", booktabs = TRUE, escape = F, align = "lrrrrrrr",
+  kable(format = "latex", booktabs = TRUE, escape = F, 
+        align = "lrccrrcc",
         col.names = linebreak(c("City", "PM10\nCoefficient", "Outcome\nUnexpected", "Predicted\nUnexpected", 
                                 "Correlation\nMortality\nPM10", "Correlation\nMortality\nTemperature",
                                 "Mortality\nOutlier", "PM10\nOutlier"))) |>
   kableExtra::kable_styling(latex_options="scale_down") 
 ```
 
+We applied each of the analysis validation checks and the fitted logic regression model separately to each of the cities' data to make predictions of whether the outcome will be unexpected or not. We also applied the generalized linear model to the data from each of the cities to estimate the association between PM10 and mortality in each city. The estimates of the association and the results of each of the analysis validation checks for each city are shown in @tbl-all-cities. 
 
-
+[Sherry: Summarize the results from the 40 cities, along with 2x2 table of outcome vs. predicted]
 
 # Discussion {#sec-discussion}
 
