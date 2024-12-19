@@ -8,7 +8,7 @@ cities <- meta |>
   arrange(desc(pop)) |>
   slice(1:38) |>
   pull(city) |>
-  c("balt",)
+  c("balt", "bost")
 
 # cities0 <- c("ny", "det", "chic", "la", "balt",
 #             "seat", "pitt", "bost", "denv", "phoe")
