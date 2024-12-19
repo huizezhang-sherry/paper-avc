@@ -36,3 +36,10 @@ for(city in cities) {
 
   write_csv(dat, file = sprintf("data/pm10-%s.csv", city))
 }
+
+
+meta |>
+  select(city, cityname) |>
+  distinct() |>
+  filter(city %in% cities) |>
+  write_csv("city_name_map.csv")
