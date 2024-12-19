@@ -1,8 +1,18 @@
 library(tidyverse)
 
+meta <- read_csv("~/projects/nmmaps1987_2005/meta/nmmaps_cities.csv")
+cities <- meta |>
+  select(city, pop) |>
+  group_by(city) |>
+  summarize(pop = sum(pop)) |>
+  arrange(desc(pop)) |>
+  slice(1:38) |>
+  pull(city) |>
+  c("balt",)
 
-cities <- c("ny", "det", "chic", "la", "balt",
-            "seat", "pitt", "bost", "denv", "phoe")
+# cities0 <- c("ny", "det", "chic", "la", "balt",
+#             "seat", "pitt", "bost", "denv", "phoe")
+# all(cities0 %in% cities)
 
 for(city in cities) {
   message(city)
