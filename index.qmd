@@ -207,7 +207,7 @@ In other words, we would predict an unexpected outcome in the analysis if the st
 #| label: fig-logic-reg
 #| fig.width: 8
 #| fig.heigh: 2
-#| fig-cap: Logic regression model fitted to the three checks. The model suggests the rule (quantile(step, 0.6) > 10,000 OR quantile(step, 0.4) < 8,000) AND (NOT sd(step) > 2,500). The NOT operator applied to `sd(step) > 2,500)` is colored with a black background to distinguish it from other checks.
+#| fig-cap: Logic regression model fitted to the three checks. The model suggests the rule (quantile(step, 0.6) > 10,000 OR quantile(step, 0.4) < 8,000) AND (NOT sd(step) > 2,500). The NOT operator applied to `sd(step) > 2,500` is colored with a black background to distinguish it from other checks.
 fit <- step_count |> fit_logic_reg(unexpect, `q(step, 0.6) > 10000`:`sd(step) > 2500`, seed = 1, nleaves = 3)
 plot_logicreg(fit)
 ```
@@ -223,10 +223,11 @@ regtree_df <- step_count |> dplyr::select(unexpect) |> bind_cols(pred_vec) |>
   calc_metrics(metrics = c("harmonic", "arithmetic"))
 ```
 
-@tbl-logic-reg presents the calculated precision, recall, and independence for the three individual checks and the check rule found by the logic regression. The harmonic and arithmetic means are included to combine the three measures. The results show that the two checks produced by the logic regression can accurately predict 86.1% cases of all *actual unexpected results* in the simulation data. Furthermore, 43.1% of all *predicted unexpected results* were in fact observed to be unexpected.  
+@tbl-logic-reg presents the calculated precision, recall, and independence for the three individual checks and the check rule found by the logic regression. The harmonic and arithmetic means are included to combine the three measures. The results show that the three checks produced by the logic regression can accurately predict 86.1% cases of all *actual unexpected results* in the simulation data. Furthermore, 43.1% of all *predicted unexpected results* were in fact observed to be unexpected.  
 
 ```{r}
 #| label: tbl-logic-reg
+#| tbl-cap: "Accuracy (precision and recall) and parsimony (independence) metrics for each individual check and the logic regression check rule. The harmonic and arithmetic means of the three metrics are included to evaluate the quality of the checks in  diagnosing unexpected step counts (more than five days with fewer than 8,000 steps)."
 list(tibble(.fitted = step_count$`q(step, 0.6) > 10000`, unexpect = step_count$unexpect),
      tibble(.fitted = step_count$`q(step, 0.4) < 8000`, unexpect = step_count$unexpect),
      tibble(.fitted = step_count$`sd(step) > 2500`, unexpect = step_count$unexpect)
@@ -234,20 +235,21 @@ list(tibble(.fitted = step_count$`q(step, 0.6) > 10000`, unexpect = step_count$u
   map_dfr(~.x |> calc_miscla_rate(unexpect, .fitted) |> 
             mutate(independence = 1) |> 
             calc_metrics(metrics = c("harmonic", "arithmetic"))) |> 
-  mutate(checks = c("check 1: q(step, 0.6) > 10000", "check 2: q(step, 0.4) < 8000", "check 3: sd(step) > 2500")) |>
+  mutate(checks = c("Check 1: q(step, 0.6) > 10000", "Check 2: q(step, 0.4) < 8000", "Check 3: sd(step) > 2500")) |>
   bind_rows(augment(fit) |> 
-              calc_miscla_rate(unexpect, .fitted) |> 
+              calc_miscla_rate(.fitted, unexpect) |> 
               calc_independence() |> 
               calc_metrics(metrics = c("harmonic", "arithmetic")) |> 
-              mutate(checks = "logic regression: (check 1 OR check 2) AND check 3") |> 
+              mutate(checks = "Logic regression: (check 1 OR check 2) AND (not check 3)") |> 
               dplyr::select(-overlapping)) |> 
   bind_rows(regtree_df |>
               dplyr::select(-overlapping) |>
-              mutate(checks = "regression tree")) |>
+              mutate(checks = "Regression tree")) |>
   dplyr::select(checks, precision:arithmetic) |> 
   dplyr::rename(`indep.` = independence) |> 
-  kable(digits = 3, 
-        caption = "Accuracy (precision and recall) and parsimony (independence) metrics for each individual check and the logic regression check rule. The harmonic and arithmetic means of the three metrics are included to evaluate the quality of the checks in  diagnosing unexpected step counts (more than five days with fewer than 8,000 steps).")
+  kable(digits = 3, escape = FALSE, format = "latex", booktab = TRUE) |> 
+  kableExtra::kable_styling(latex_options="scale_down") |> 
+  column_spec(1, width = '17em')
 ```
 
 For comparison, the regression tree produces a similar prediction to the logic regression, however, we argue that the logic regression tree shown in @fig-logic-reg is more interpretable for our purposes because it provides a direct representation of which combinations of analysis checks lead to unexpected outcomes. The logic regression tree is also directly comparable to other diagnostic techniques, which we discuss further in @sec-discussion.
@@ -260,18 +262,14 @@ The typical approach to studying the association between PM10 and mortality is t
 
 For the purposes of this application, observing an estimated coefficient outside of the expected interval is considered unusual and might warrant a re-examination of the analysis process. Therefore, our unexpected outcome in this analysis will be the binary indicator of whether the estimated coefficient for PM10 in the GLM lies outside of the interval $[0, 0.005]$. In addition to providing a more substantial problem for our methods, this example also demonstrates how the procedure presented in @sec-method can be used to select cutoff values in the analysis checks to diagnose an unexpected PM10 coefficient from the generalized linear model. 
 
-This PM10 coefficient expectation can be framed as an analysis check that fails, labelled as 1, if the estimate of the PM10 coefficient (adjusted for temperature) is outside the range [0, 0.005], and 0 if it is within. Multiple factors can affect the estimated PM10 coefficient, such as the sample size, the strength of the correlation between mortality and PM10, and the strength of the correlation between mortality and temperature. Analysts may expect a reasonable sample size to ensure the reliability of the coefficient estimate. Outliers in the three variables can also leverage the coefficient. While these are possible factors that could affect the analysis result, it is not clear what the cutoff values for these checks should be to determine a failure. Here we consider a list of checks in @tbl-checks with varied cutoff values for each: 
+This PM10 coefficient expectation can be framed as an analysis check that fails, labelled as 1, if the estimate of the PM10 coefficient (adjusted for temperature) is outside the range [0, 0.005], and 0 if it is within. Multiple factors can affect the estimated PM10 coefficient, such as the strength of the correlation between mortality and PM10, or between mortality and temperature. Outliers in the three variables can also leverage the coefficient. While these are possible factors that could affect the analysis result, it is not clear what the cutoff values for these checks should be to determine a failure. Here we consider a list of checks in @tbl-checks with varied cutoff values for each: 
 
-| The check fails if ... | 
+| The check fails (encoded as 1) if ... | 
 |--------------| 
-| Sample size less than or equal to 200 |
-| Sample size less than or equal to 400 |
-| Sample size less than or equal to 600 |
-| Sample size less than or equal to 800 |
-| Mortality-PM10 correlation less than $-0.03$ |
-| Mortality-PM10 correlation less than $-0.04$ |
 | Mortality-PM10 correlation less than $-0.05$ |
-| Mortality-PM10 correlation less than $-0.06$ |
+| Mortality-PM10 correlation less than $-0.03$ |
+| Mortality-PM10 correlation greater than $0.03$ |
+| Mortality-PM10 correlation greater than $0.05$ |
 | Mortality-temperature correlation greater than $-0.3$ | 
 | Mortality-temperature correlation greater than $-0.35$ | 
 | Mortality-temperature correlation greater than $-0.4$ | 
@@ -332,140 +330,143 @@ p1 | p2 | p3
 # cor(pm10$pm10, pm10$mortality)
 # cor(pm10$temp, pm10$mortality)
 # cor(pm10$temp, pm10$pm10)
-corr_grid <- expand.grid(seq(0.01, 0.2, by = 0.02),                         
-                         seq(0.25, 0.5, by = 0.05),                           
-                         seq(0.25, 0.45, by = 0.05))  
+corr_grid <- expand.grid(#seq(0.01, 0.2, by = 0.02),
+                         seq(-0.1, 0.1, by = 0.02),
+                         seq(0.1, 0.5, by = 0.05),
+                         seq(0.25, 0.45, by = 0.05))
 
-gen_corr_mtx <- function(r1, r2, r3) {   
+gen_corr_mtx <- function(r1, r2, r3) {
   # correlation between mortality and pm10 are negative - r1
   # correlation between mortality and temp are negative - r2
-  cor_matrix <- matrix(c(1, -r1, -r2,                          
-                         -r1, 1, r3,                          
-                         -r2, r3, 1), nrow = 3, byrow = TRUE)          
-  if (all(eigen(cor_matrix)$values > 0)) return(cor_matrix) 
-  }  
+  cor_matrix <- matrix(c(1, r1, -r2,
+                         r1, 1, r3,
+                         -r2, r3, 1), nrow = 3, byrow = TRUE)
+  if (all(eigen(cor_matrix)$values > 0)) return(cor_matrix)
+}
 
-corr_mtx <- lapply(1:nrow(corr_grid), function(i) {   
-  gen_corr_mtx(corr_grid[i, 1], corr_grid[i, 2], corr_grid[i, 3]) }) 
-corr_mtx <- corr_mtx[map_lgl(corr_mtx, ~!is.null(.x))]  
-sample_size <- c(200, 400, 600, 800, 1000)
-outlier <- c(TRUE, FALSE)  
+corr_mtx <- lapply(1:nrow(corr_grid), function(i) {
+  gen_corr_mtx(corr_grid[i, 1], corr_grid[i, 2], corr_grid[i, 3]) })
+corr_mtx <- corr_mtx[map_lgl(corr_mtx, ~!is.null(.x))]
+sample_size <- c(500, 3000)
+outlier <- c(TRUE, FALSE)
 
-generate_data <- function(n, mtx, seed = 123, outlier = FALSE) {   
-  mu <- c(0, 0, 0)   
-  set.seed(seed)  
-  data <- mvrnorm(n, mu, mtx, empirical = TRUE)   
-  U <- pnorm(data, mean = 0, sd = 1)   
-  
+generate_data <- function(n, mtx, seed = 123, outlier = FALSE) {
+  mu <- c(0, 0, 0)
+  set.seed(seed)
+  data <- mvrnorm(n, mu, mtx, empirical = TRUE)
+  U <- pnorm(data, mean = 0, sd = 1)
+
   if (!outlier) {
-   tibble(mortality = qnbinom(U[,1], size = 74, mu = 183),           
-         pm10 = qbeta(U[,2], shape1 = 4.21, shape2 = 11.67) * 100,           
-         temp = qweibull(U[,3], shape = 3.8, scale = 61))    
+    tibble(mortality = qnbinom(U[,1], size = 74, mu = 183),
+           pm10 = qbeta(U[,2], shape1 = 4.21, shape2 = 11.67) * 100,
+           temp = qweibull(U[,3], shape = 3.8, scale = 61))
   } else{
     pm10_vec <- qbeta(U[,2], shape1 = 4.21, shape2 = 11.67) * 100
     tibble(
       mortality = c(qnbinom(U[,1], size = 74, mu = 183)[-1],
-                    rnorm(n = 1, mean = 300, sd = 10)),           
-      pm10 = c(pm10_vec[-1], rnorm(n = 1, mean = 100, sd = 10)),           
+                    rnorm(n = 1, mean = 300, sd = 10)),
+      pm10 = c(pm10_vec[-1], rnorm(n = 1, mean = 100, sd = 10)),
       temp = qweibull(U[,3], shape = 3.8, scale = 61)
-      )    
+    )
   }
-  
+
 }
 
-res <- tibble(corr_mtx = corr_mtx) |> 
-  mutate(id = row_number()) |> 
-  crossing(sample_size, outlier) |> 
-  rowwise() |>   
-  mutate(data = list(generate_data(n = sample_size, mtx = corr_mtx, outlier = outlier)),          
-         fit = list(summary(glm(mortality ~ pm10 + temp, family = "poisson", data))$coefficients))  
+res <- tibble(corr_mtx = corr_mtx) |>
+  mutate(id = row_number()) |>
+  crossing(sample_size, outlier) |>
+  rowwise() |>
+  mutate(data = list(generate_data(n = sample_size, mtx = corr_mtx, outlier = outlier)),
+         fit = list(summary(glm(mortality ~ pm10 + temp, family = "poisson", data))$coefficients))
 
-pm10_df <- res |>   
-  mutate(     
-    p_value = fit[2,4],     
-    coef = fit[2,1],     
-    mor_pm10_correlation = corr_mtx[1, 2],     
-    mor_temp_correlation = corr_mtx[1, 3],     
-    temp_pm10_yz_correlation = corr_mtx[2, 3],     
+pm10_df <- res |>
+  mutate(
+    p_value = fit[2,4],
+    coef = fit[2,1],
+    mor_pm10_correlation = corr_mtx[1, 2],
+    mor_temp_correlation = corr_mtx[1, 3],
+    temp_pm10_yz_correlation = corr_mtx[2, 3],
     unexpect = ifelse(between(coef, 0, 0.005), 0, 1),
-    `smpl_size <= 200` = ifelse(sample_size <= 200, 1, 0),
-    `smpl_size <= 400` = ifelse(sample_size <= 400, 1, 0),
-    `smpl_size <= 600` = ifelse(sample_size <= 600, 1, 0),
-    `smpl_size <= 800` = ifelse(sample_size <= 800, 1, 0),
-    `cor(m, PM10) < -0.03` = ifelse(mor_pm10_correlation < -0.03, 1, 0),
-    `cor(m, PM10) < -0.04` = ifelse(mor_pm10_correlation < -0.04, 1, 0),
     `cor(m, PM10) < -0.05` = ifelse(mor_pm10_correlation < -0.05, 1, 0),
-    `cor(m, PM10) < -0.06` = ifelse(mor_pm10_correlation < -0.06, 1, 0),
+    `cor(m, PM10) < -0.03` = ifelse(mor_pm10_correlation < -0.03, 1, 0),
+    `cor(m, PM10) > 0.03` = ifelse(mor_pm10_correlation > 0.03, 1, 0),
+    `cor(m, PM10) > 0.05` = ifelse(mor_pm10_correlation > 0.05, 1, 0),
     `cor(m, tmp) > -0.3` = ifelse(mor_temp_correlation > -0.3, 1, 0),
     `cor(m, tmp) > -0.35` = ifelse(mor_temp_correlation > -0.35, 1, 0),
     `cor(m, tmp) > -0.4` = ifelse(mor_temp_correlation > -0.4, 1, 0),
     `cor(m, tmp) > -0.45` = ifelse(mor_temp_correlation > -0.45, 1, 0)
-  ) |>    
-  ungroup() 
-
-pm10_df <- pm10_df |> 
-  rowwise() |> 
-  mutate(`PM10 outlier` = ifelse(any(scale(data$pm10) > 4), 1, 0),
-         `mortality_outlier` = ifelse(any(scale(data$mortality) > 4), 1, 0)
-         ) |> 
+  ) |>
   ungroup()
+
+pm10_df <- pm10_df |>
+  rowwise() |>
+  mutate(PM10_outlier = ifelse(any(scale(data$pm10) > 4), 1, 0),
+         mortality_outlier = ifelse(any(scale(data$mortality) > 4), 1, 0)
+  ) |>
+  ungroup()
+
+unexpect_df <- tibble(
+  unexpect = c(0, 1),
+  n = pm10_df$unexpect |> table() |> as.numeric() |> rev(),
+  wgt = n/sum(n))
+wgt_vec <- pm10_df |> dplyr::select(unexpect) |> left_join(unexpect_df) |> pull(wgt)
 ```
 
-A logic regression is fitted using all variations of the checks in @tbl-checks to predict whether the PM10 coefficient is unexpected. @fig-linear-reg-tree shows the optimal logic regression tree from the fitted model. Precision, recall, and independence score, along with their harmonic and arithmetic mean are calculated in @tbl-linear-reg. 
+A logic regression is fitted using all variations of the checks in @tbl-checks to predict whether the PM10 coefficient is unexpected. Given the imbalance of outcome (expected vs. unexpected), inverse weights proportional to the number of observations in each outcome are applied during the logic regression fit. @fig-linear-reg-tree shows the optimal logic regression tree from the fitted model. Precision, recall, and independence score, along with their harmonic and arithmetic mean are calculated in @tbl-linear-reg. 
 
 
 ::: {#fig-linear-reg-tree}
 
 ```{r}
-#| fig.width: 9
+#| fig.width: 12
 #| fig.height: 4
-fit <- pm10_df |> fit_logic_reg(unexpect, `smpl_size <= 200`:`mortality_outlier`, 
-                                seed = 6, nleaves = 4)
-plot_logicreg(fit) 
+fit <- pm10_df |> fit_logic_reg(unexpect, `cor(m, PM10) < -0.05`:mortality_outlier,
+                                seed = 7, nleaves = 4, wgt = wgt_vec)
+plot_logicreg(fit)
 ```
 
-Logic regression model fitted to the fourteen checks and the outcome expectation (unexpected) as the response variable. The model suggests the relationship: (NOT sample size less than or equal to 200 AND mortality-PM10 correlation < -0.04) AND (mortality-temperature correlation > -0.35 OR there exist mortality outlier) to predict the unexpected PM10 coefficient. The NOT operator applied to `smpl_size <= 200` is colored with a black background to distinguish it from other checks.
+Logic regression model fitted to the fourteen checks and the outcome expectation (unexpected) as the response variable. The model suggests the relationship:  (mortality-PM10 correlation < -0.03) AND (mortality-temperature correlation > -0.3 OR (there exist mortality outlier AND there exist PM10 outlier)) to predict the unexpected PM10 coefficient.
 :::
 
 
 
 ```{r}
 #| label: tbl-linear-reg
-library(kableExtra)
+#| tbl-cap: "Accuracy (precision and recall) and parsimony (independence) metrics derived from the logic regression model (last row) and individual checks, along with harmonic and arithmetic means."
 df <- list(
-  tibble(.fitted = pm10_df$`smpl_size <= 200`, 
-         unexpect = pm10_df$unexpect),
   tibble(.fitted = pm10_df$`cor(m, PM10) < -0.03`, 
          unexpect = pm10_df$unexpect),
-  tibble(.fitted = pm10_df$`cor(m, tmp) > -0.35`, 
+  tibble(.fitted = pm10_df$`cor(m, tmp) > -0.3`, 
          unexpect = pm10_df$unexpect),
   tibble(.fitted = pm10_df$mortality_outlier, 
          unexpect = pm10_df$unexpect),
+  tibble(.fitted = pm10_df$PM10_outlier, 
+         unexpect = pm10_df$unexpect),
   augment(fit)) |>
-  map_dfr(~.x |> calc_miscla_rate(unexpect, .fitted) |> 
+  map_dfr(~.x |> calc_miscla_rate(.fitted, unexpect) |> 
             mutate(overlapping = 0, independence = 1) |> 
             calc_metrics(metrics = c("harmonic", "arithmetic")), .id = "id") 
 
-tbl <- tibble(check = c("check 1: sample size <= 200", "check 2: cor(m, PM10) < -0.03",
-                        "check 3: cor(m, tmp) > -0.35", "check 4: mortality_outlier", 
-                        "logic regression: (not check 1 AND check 2) AND (check 3 OR check 4)")) |> 
+tbl <- tibble(check = c("Check 1: cor(m, PM10) < -0.03", "Check 2: cor(m, tmp) > -0.35",
+                        "Check 3: mortality outlier", "Check 4: PM10 outlier", 
+                        "Logic regression: (check 1) AND ((check 2) OR (check 3 AND check 4))")) |> 
   bind_cols(df |> dplyr::select(-id, -overlapping)) |> rename(`indep.` = independence) 
 
 tbl |> 
-  kable(digits = 3, escape = FALSE,
-        caption = "Accuracy (precision and recall) and parsimony (independence) metrics derived from the logic regression model, along with harmonic and arithmetic means, for individual checks (1: sample size, 2: mortality-PM10 correlation, 3: mortality-temperature correlation,  4: mortality outlier), and the combined check rule 5: (sample size AND mortality-PM10 correlation) AND (mortality-temperature correlation OR mortality outlier.") 
+  kable(digits = 3, escape = FALSE, format = "latex", booktab = TRUE) |> 
+  kableExtra::kable_styling(latex_options="scale_down") |> 
+  column_spec(1, width = '18em')
 
 ```
 
 As indicated in @fig-linear-reg-tree, the logic regression model picks up the following cutoff values for each type of check:
 
--   sample size *larger than* 200
--   mortality-temperature correlation greater than $-0.35$
--   mortality-PM10 correlation less than $-0.04$
+-   mortality-PM10 correlation less than $-0.03$
+-   mortality-temperature correlation greater than $-0.3$
+-   PM10 data contains outliers that are detected by the univariate outlier detection
 -   mortality data contains outliers that are detected by the univariate outlier detection
 
-<!-- (mortality-temperature correlation > -0.35 OR there exist mortality outlier) and (mortality-PM10 correlation < -0.04 AND (not sample size less than 200) )  -->
-The tree structure suggests checking mortality-PM10 correlation and a sample size larger than 200 with an additional check of either outlier on mortality or correlation between mortality and temperature. This combined check rule generates a precision of `r round(as.numeric(df[5, "precision"]), 3)` and a recall of `r round(as.numeric(df[5, "recall"]), 3)` for predicting the unexpected PM10 coefficient. The single check, `cor(m, PM10) < -0.03`, is also powerful with a high precision of `r round(as.numeric(df[2, "precision"]), 3)`, but the low recall value of `r round(as.numeric(df[2, "recall"]), 3)` suggests its high false positive rate, as compared to the combined rule suggested by the logic regression. 
+The tree structure suggests checking mortality-PM10 correlation and a sample size larger than 200 with an additional check of either outlier on mortality or correlation between mortality and temperature. This combined check rule generates a precision of `r round(as.numeric(df[5, "precision"]), 3)` and a recall of `r round(as.numeric(df[5, "recall"]), 3)` for predicting the unexpected PM10 coefficient. 
 
 As shown in @fig-linear-reg-tree, there is no single analysis check in the tree that predicts an unexpected outcome. rather at least three checks in the tree must be TRUE in order for the model to predict an unexpected outcome. Given the high independence of the checks (@tbl-linear-reg), this suggests that unexpected results are only likely after multiple anomalies are observed in the data.
 

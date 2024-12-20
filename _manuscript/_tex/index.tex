@@ -243,7 +243,7 @@ potential to improve the trustworthiness of analyses in general
 such as machine learning models, that may be built on such analyses.
 While publication of analysis code and data is now a common a
 requirement for the sake of reproducibility
-\citep{peng2011reproducible}, the publication code alone is often
+\citep{peng2011reproducible}, the published code alone is often
 insufficient for understanding the thought process behind an analysis.
 Code corresponding to published analyses often reflect the final
 decisions made about analysis and do not reveal the decisions or
@@ -596,9 +596,9 @@ one another, leading to redundancy.
 
 To quantify redundancy, the concept of mutual information is used.
 Mutual information \(I(x, y)\) measures the amount of information shared
-between two random variables and is defined as the KL-distance
-\(D(p \parallel q)\) between the joint distribution of the two variables
-and the product of the marginal distributions:
+between two random variables and is defined as the Kullback-Leibler
+distance \(D(p \parallel q)\) between the joint distribution of the two
+variables and the product of the marginal distributions:
 
 \[I(x,y) = D\big(p(x,y) \parallel p(x)p(y)\big) = \sum_x \sum_y p(x,y) \log \frac{p(x,y)}{p(x)p(y)}\]
 
@@ -659,7 +659,7 @@ quantile of the step count falls below 8,000.
 checks. The model suggests the rule (quantile(step, 0.6) \textgreater{}
 10,000 OR quantile(step, 0.4) \textless{} 8,000) AND (NOT sd(step)
 \textgreater{} 2,500). The NOT operator applied to
-\texttt{sd(step)\ \textgreater{}\ 2,500)} is colored with a black
+\texttt{sd(step)\ \textgreater{}\ 2,500} is colored with a black
 background to distinguish it from other checks.}
 
 \end{figure}%
@@ -667,19 +667,13 @@ background to distinguish it from other checks.}
 Table~\ref{tbl-logic-reg} presents the calculated precision, recall, and
 independence for the three individual checks and the check rule found by
 the logic regression. The harmonic and arithmetic means are included to
-combine the three measures. The results show that the two checks
+combine the three measures. The results show that the three checks
 produced by the logic regression can accurately predict 86.1\% cases of
 all \emph{actual unexpected results} in the simulation data.
 Furthermore, 43.1\% of all \emph{predicted unexpected results} were in
 fact observed to be unexpected.
 
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.5368}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1053}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0737}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0737}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0947}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1158}}@{}}
+\begin{table}
 
 \caption{\label{tbl-logic-reg}Accuracy (precision and recall) and
 parsimony (independence) metrics for each individual check and the logic
@@ -688,37 +682,25 @@ metrics are included to evaluate the quality of the checks in diagnosing
 unexpected step counts (more than five days with fewer than 8,000
 steps).}
 
-\tabularnewline
+\centering{
 
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-checks
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-precision
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-recall
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-indep.
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-harmonic
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-arithmetic
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-check 1: q(step, 0.6) \textgreater{} 10000 & 0.319 & 0.575 & 1.000 &
-0.511 & 0.631 \\
-check 2: q(step, 0.4) \textless{} 8000 & 0.264 & 0.613 & 1.000 & 0.467 &
-0.626 \\
-check 3: sd(step) \textgreater{} 2500 & 0.153 & 0.289 & 1.000 & 0.273 &
-0.481 \\
-logic regression: (check 1 OR check 2) AND check 3 & 0.431 & 0.861 &
-0.998 & 0.669 & 0.763 \\
-regression tree & 0.542 & 0.780 & 1.000 & 0.727 & 0.774 \\
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}{>{\raggedright\arraybackslash}p{17em}rrrrr}
+\toprule
+checks & precision & recall & indep. & harmonic & arithmetic\\
+\midrule
+Check 1: q(step, 0.6) > 10000 & 0.319 & 0.575 & 1.000 & 0.511 & 0.631\\
+Check 2: q(step, 0.4) < 8000 & 0.264 & 0.613 & 1.000 & 0.467 & 0.626\\
+Check 3: sd(step) > 2500 & 0.153 & 0.289 & 1.000 & 0.273 & 0.481\\
+Logic regression: (check 1 OR check 2) AND (not check 3) & 0.861 & 0.431 & 0.998 & 0.669 & 0.763\\
+Regression tree & 0.542 & 0.780 & 1.000 & 0.727 & 0.774\\
+\bottomrule
+\end{tabular}}
 
-\end{longtable}
+}
+
+\end{table}%
 
 For comparison, the regression tree produces a similar prediction to the
 logic regression, however, we argue that the logic regression tree shown
@@ -773,15 +755,13 @@ This PM10 coefficient expectation can be framed as an analysis check
 that fails, labelled as 1, if the estimate of the PM10 coefficient
 (adjusted for temperature) is outside the range {[}0, 0.005{]}, and 0 if
 it is within. Multiple factors can affect the estimated PM10
-coefficient, such as the sample size, the strength of the correlation
-between mortality and PM10, and the strength of the correlation between
-mortality and temperature. Analysts may expect a reasonable sample size
-to ensure the reliability of the coefficient estimate. Outliers in the
-three variables can also leverage the coefficient. While these are
-possible factors that could affect the analysis result, it is not clear
-what the cutoff values for these checks should be to determine a
-failure. Here we consider a list of checks in Table~\ref{tbl-checks}
-with varied cutoff values for each:
+coefficient, such as the strength of the correlation between mortality
+and PM10, or between mortality and temperature. Outliers in the three
+variables can also leverage the coefficient. While these are possible
+factors that could affect the analysis result, it is not clear what the
+cutoff values for these checks should be to determine a failure. Here we
+consider a list of checks in Table~\ref{tbl-checks} with varied cutoff
+values for each:
 
 \begin{longtable}[]{@{}l@{}}
 \caption{A list of checks considered for the generalized linear model of
@@ -791,23 +771,19 @@ mortality and temperature, and univariate outlier detection. Multiple
 cutoff values are specified for each check to determine a
 failure.}\label{tbl-checks}\tabularnewline
 \toprule\noalign{}
-The check fails if \ldots{} \\
+The check fails (encoded as 1) if \ldots{} \\
 \midrule\noalign{}
 \endfirsthead
 \toprule\noalign{}
-The check fails if \ldots{} \\
+The check fails (encoded as 1) if \ldots{} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Sample size less than or equal to 200 \\
-Sample size less than or equal to 400 \\
-Sample size less than or equal to 600 \\
-Sample size less than or equal to 800 \\
-Mortality-PM10 correlation less than \(-0.03\) \\
-Mortality-PM10 correlation less than \(-0.04\) \\
 Mortality-PM10 correlation less than \(-0.05\) \\
-Mortality-PM10 correlation less than \(-0.06\) \\
+Mortality-PM10 correlation less than \(-0.03\) \\
+Mortality-PM10 correlation greater than \(0.03\) \\
+Mortality-PM10 correlation greater than \(0.05\) \\
 Mortality-temperature correlation greater than \(-0.3\) \\
 Mortality-temperature correlation greater than \(-0.35\) \\
 Mortality-temperature correlation greater than \(-0.4\) \\
@@ -859,10 +835,13 @@ data to assess the distribution fit.}
 
 A logic regression is fitted using all variations of the checks in
 Table~\ref{tbl-checks} to predict whether the PM10 coefficient is
-unexpected. Figure~\ref{fig-linear-reg-tree} shows the optimal logic
-regression tree from the fitted model. Precision, recall, and
-independence score, along with their harmonic and arithmetic mean are
-calculated in Table~\ref{tbl-linear-reg}.
+unexpected. Given the imbalance of outcome (expected vs.~unexpected),
+inverse weights proportional to the number of observations in each
+outcome are applied during the logic regression fit.
+Figure~\ref{fig-linear-reg-tree} shows the optimal logic regression tree
+from the fitted model. Precision, recall, and independence score, along
+with their harmonic and arithmetic mean are calculated in
+Table~\ref{tbl-linear-reg}.
 
 \begin{figure}
 
@@ -874,62 +853,39 @@ calculated in Table~\ref{tbl-linear-reg}.
 
 \caption{\label{fig-linear-reg-tree}Logic regression model fitted to the
 fourteen checks and the outcome expectation (unexpected) as the response
-variable. The model suggests the relationship: (NOT sample size less
-than or equal to 200 AND mortality-PM10 correlation \textless{} -0.04)
-AND (mortality-temperature correlation \textgreater{} -0.35 OR there
-exist mortality outlier) to predict the unexpected PM10 coefficient. The
-NOT operator applied to \texttt{smpl\_size\ \textless{}=\ 200} is
-colored with a black background to distinguish it from other checks.}
+variable. The model suggests the relationship: (mortality-PM10
+correlation \textless{} -0.03) AND (mortality-temperature correlation
+\textgreater{} -0.3 OR (there exist mortality outlier AND there exist
+PM10 outlier)) to predict the unexpected PM10 coefficient.}
 
 \end{figure}%
 
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.6106}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0885}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0619}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0619}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0796}}
-  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0973}}@{}}
+\begin{table}
 
 \caption{\label{tbl-linear-reg}Accuracy (precision and recall) and
-parsimony (independence) metrics derived from the logic regression
-model, along with harmonic and arithmetic means, for individual checks
-(1: sample size, 2: mortality-PM10 correlation, 3: mortality-temperature
-correlation, 4: mortality outlier), and the combined check rule 5:
-(sample size AND mortality-PM10 correlation) AND (mortality-temperature
-correlation OR mortality outlier.}
+parsimony (independence) metrics derived from the logic regression model
+(last row) and individual checks, along with harmonic and arithmetic
+means.}
 
-\tabularnewline
+\centering{
 
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-check
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-precision
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-recall
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-indep.
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-harmonic
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
-arithmetic
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-check 1: sample size \textless= 200 & 0.087 & 0.215 & 1 & 0.175 &
-0.434 \\
-check 2: cor(m, PM10) \textless{} -0.03 & 0.988 & 0.610 & 1 & 0.822 &
-0.866 \\
-check 3: cor(m, tmp) \textgreater{} -0.35 & 0.392 & 0.581 & 1 & 0.569 &
-0.658 \\
-check 4: mortality\_outlier & 0.649 & 0.641 & 1 & 0.732 & 0.763 \\
-logic regression: (not check 1 AND check 2) AND (check 3 OR check 4) &
-0.760 & 0.880 & 1 & 0.869 & 0.880 \\
+\centering
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\begin{tabular}{>{\raggedright\arraybackslash}p{18em}rrrrr}
+\toprule
+check & precision & recall & indep. & harmonic & arithmetic\\
+\midrule
+Check 1: cor(m, PM10) < -0.03 & 0.551 & 0.894 & 1 & 0.763 & 0.815\\
+Check 2: cor(m, tmp) > -0.35 & 0.281 & 0.556 & 1 & 0.472 & 0.612\\
+Check 3: mortality outlier & 0.302 & 0.775 & 1 & 0.536 & 0.692\\
+Check 4: PM10 outlier & 0.305 & 0.766 & 1 & 0.537 & 0.690\\
+Logic regression: (check 1) AND ((check 2) OR (check 3 AND check 4)) & 0.722 & 0.876 & 1 & 0.851 & 0.866\\
+\bottomrule
+\end{tabular}}
 
-\end{longtable}
+}
+
+\end{table}%
 
 As indicated in Figure~\ref{fig-linear-reg-tree}, the logic regression
 model picks up the following cutoff values for each type of check:
@@ -937,11 +893,12 @@ model picks up the following cutoff values for each type of check:
 \begin{itemize}
 \tightlist
 \item
-  sample size \emph{larger than} 200
+  mortality-PM10 correlation less than \(-0.03\)
 \item
-  mortality-temperature correlation greater than \(-0.35\)
+  mortality-temperature correlation greater than \(-0.3\)
 \item
-  mortality-PM10 correlation less than \(-0.04\)
+  PM10 data contains outliers that are detected by the univariate
+  outlier detection
 \item
   mortality data contains outliers that are detected by the univariate
   outlier detection
@@ -950,12 +907,8 @@ model picks up the following cutoff values for each type of check:
 The tree structure suggests checking mortality-PM10 correlation and a
 sample size larger than 200 with an additional check of either outlier
 on mortality or correlation between mortality and temperature. This
-combined check rule generates a precision of 0.76 and a recall of 0.88
-for predicting the unexpected PM10 coefficient. The single check,
-\texttt{cor(m,\ PM10)\ \textless{}\ -0.03}, is also powerful with a high
-precision of 0.988, but the low recall value of 0.61 suggests its high
-false positive rate, as compared to the combined rule suggested by the
-logic regression.
+combined check rule generates a precision of 0.722 and a recall of 0.876
+for predicting the unexpected PM10 coefficient.
 
 As shown in Figure~\ref{fig-linear-reg-tree}, there is no single
 analysis check in the tree that predicts an unexpected outcome. rather
@@ -970,14 +923,17 @@ In order to test our development of analysis validation checks based on
 the New York City data, we incorporate data from 39 additional cities
 from the original NMMAPS study and apply our checks to those data. These
 cities (along with New York City) represent approximately the largest 40
-metropolitan areas in the United States. The complete list of cities
-used are presented in Table~\ref{tbl-all-cities}. For each city, we had
-daily data on all-cause mortality, PM10, and average temperature for the
-years 1992--2000.
+metropolitan areas in the United States by population. The complete list
+of cities used are presented in Table~\ref{tbl-all-cities}. For each
+city, we had daily data on all-cause mortality, PM10, and average
+temperature for the years 1992--2000.
 
 \begin{table}
 
-\caption{\label{tbl-all-cities}}
+\caption{\label{tbl-all-cities}Results from full analysis of 40 cities
+from the NMMAPS air pollution and mortality study. In the table, a ``T''
+indicates that a check failed and an ``F'' indicates that a check
+passed.}
 
 \centering{
 
@@ -985,7 +941,7 @@ years 1992--2000.
 \resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
 \begin{tabular}{lrccrrcc}
 \toprule
-City & \makecell[l]{PM10\\Coefficient} & \makecell[l]{Outcome\\Unexpected} & \makecell[l]{Predicted\\Unexpected} & \makecell[l]{Correlation\\Mortality\\PM10} & \makecell[l]{Correlation\\Mortality\\Temperature} & \makecell[l]{Mortality\\Outlier} & \makecell[l]{PM10\\Outlier}\\
+City & \makecell[l]{PM10\\Estimated\\Coefficient} & \makecell[l]{Outcome\\Observed\\Unexpected} & \makecell[l]{Logic Regression\\Predicted\\Unexpected} & \makecell[l]{Correlation:\\Mortality-\\Temperature} & \makecell[l]{Correlation:\\Mortality-\\PM10} & \makecell[l]{Mortality\\Outlier} & \makecell[l]{PM10\\Outlier}\\
 \midrule
 Atlanta & -0.0008 & T & T & --0.26 (T) & --0.16 (T) & F & F\\
 Austin & -0.0030 & T & T & --0.12 (T) & --0.11 (T) & F & T\\
@@ -1045,23 +1001,24 @@ We applied each of the analysis validation checks and the fitted logic
 regression model separately to each of the cities' data to make
 predictions of whether the outcome will be unexpected or not. We also
 applied the generalized linear model to the data from each of the cities
-to estimate the association between PM10 and mortality in each city. The
-estimates of the association and the results of each of the analysis
-validation checks for each city are shown in Table~\ref{tbl-all-cities}.
+to estimate the association between PM10 and mortality in each city,
+adjusted for temperature. The estimates of the association and the
+results of each of the analysis validation checks for each city are
+shown in Table~\ref{tbl-all-cities}.
 
 \begin{table}
 
-\caption{\label{tbl-accuracy}}
+\caption{\label{tbl-accuracy}Summary of the observed and the predicted
+unexpected PM10 coefficient results from the 40 NMMAPS cities using the
+logic regression model.}
 
 \centering{
 
-\caption{A 2x2 table of the outcome and the predicted unexpected results from the 40 cities.}
-\centering
-\begin{tabular}[t]{lrr}
+\begin{tabular}{lrr}
 \toprule
-\multicolumn{1}{c}{} & \multicolumn{2}{c}{Prediction} \\
+\multicolumn{1}{c}{} & \multicolumn{2}{c}{Predicted} \\
 \cmidrule(l{3pt}r{3pt}){2-3}
-Actual & FALSE & TRUE\\
+Observed & FALSE & TRUE\\
 \midrule
 FALSE & 25 & 7\\
 TRUE & 1 & 7\\
@@ -1072,21 +1029,28 @@ TRUE & 1 & 7\\
 
 \end{table}%
 
-Table~\ref{tbl-accuracy} summaries the prediction accuracy of the logic
-regression model for the 40 cities. The model correctly predicts
-unexpected outcomes in 32 cities, producing an accuracy of 80\%. Among
-the 8 cities with an unexpected outcome (PM10 coefficient outside {[}0,
-0.005{]}), the model correctly identifies 7 (Atlanta, Austin, Memphis,
-Orlando, Salt Lake City, San Antonio, Tampa), giving a recall of 88\%.
-These cities are flagged due to failure in both mortality-PM10
-correlation and mortality-temperature correlation checks. Out of the 14
-cities with positive predictions from the model, 7 cities (Cincinnati,
+It is clear from Table~\ref{tbl-all-cities} that some of the estimated
+PM10 coefficients are outside the expected range of {[}0, 0.005{]}.
+Eight of the 40 cities had negative estimated coefficients and were
+therefore considered unexpected by our original criterion. (It is
+perhaps worth noting that none of the unexpected outcomes was in the
+positive direction.) Table~\ref{tbl-accuracy} summarizes the prediction
+accuracy of the logic regression model for the 40 cities. The model
+correctly predicts the PM10 coefficient status of 32 cities, producing
+an accuracy rate of 80\%. Among the 8 cities with an unexpected outcome
+(PM10 coefficient outside {[}0, 0.005{]}), the model correctly
+identifies 7 (Atlanta, Austin, Memphis, Orlando, Salt Lake City, San
+Antonio, Tampa), giving a recall of 88\% (only Miami was not properly
+classified by the logic regression model). These cities were flagged due
+to failures in both the mortality-PM10 correlation and
+mortality-temperature correlation analysis checks. Out of the 14 cities
+with positive predictions from the model, 7 cities (Cincinnati,
 Columbus, Dallas/Fort Worth, Pittsburgh, Riverside, San Bernardino,
-Santa Ana/Anaheim) were a false positive, resulting in a precision of
-50\%.
-
-{[}Sherry: Summarize the results from the 40 cities, along with 2x2
-table of outcome vs.~predicted{]}
+Santa Ana/Anaheim) were false positives, resulting in a precision of
+only 50\%. This precision value is substantially lower than what was
+estimated by the simulation procedure (see Table~\ref{tbl-linear-reg})
+and suggests that the simulation does not adequately capture some
+features of the data generation process.
 
 \section{Discussion}\label{sec-discussion}
 
@@ -1114,6 +1078,23 @@ clarify assumptions made during the analysis, and enhance transparency
 and communication among stakeholders. They also support students and
 junior researchers develop the skills needed to independently diagnose
 issues in analyses.
+
+In Section~\ref{sec-pm10-mortality} we used the analysis checks in a
+diagnostic manner to examine the eight cities whose PM10 coefficients
+were unexpected. There, we found that seven of the cities had a
+mortality-PM10 correlation that was more negative than expected while
+also having a mortality-temperature correlation that was somewhat larger
+(less negative) than expected. What this result implies for the broader
+analysis depends on a number of factors, but the interplay between
+mortality, PM10, and temperature may warrant further investigation
+\citep[see e.g.][]{welty2005acute}. Note that simply because the PM10
+coefficient estimates were unexpected by our criterion, we do not mean
+to imply that they are ``wrong'' in any sense. Indeed, negative
+estimated coefficients have been found in other studies of this nature
+\citep{bell2004ozone}. Rather, in this type of analysis, it may be that
+the interval for expected results needs to be revised. Further, it may
+be necessary to incorporate other outputs from the analysis, such as
+measures of uncertainty.
 
 An interesting connection can be drawn between our logic regression
 trees and a tool used in systems engineering known as a fault tree. A
@@ -1154,12 +1135,21 @@ determine whether the unit tests passes or fails.
 
 Systematically generating realistic simulated data is a key component of
 our approach and is deserving of further consideration. In the PM10
-example, the inverse transform method is used to preserve the
-correlation structure among mortality, PM10, and temperature. However,
-simulation can become complex when additional restrictions are imposed
-or when a greater range of scenarios is desired. In such cases,
-techniques like the acceptance-reject method or permutation may be used
-to generate the data.
+example in Section~\ref{sec-pm10-mortality}, the inverse transform
+method was used to preserve the correlation structure among mortality,
+PM10, and temperature. However, the simulation process can become
+complex when additional restrictions are imposed or when a greater range
+of scenarios is desired. In such cases, techniques like the
+acceptance-reject method or permutation may be used to generate the
+data. The results in Section~\ref{sec-pm10-mortality} on the broader
+NMMAPS dataset suggest that our simulation procedure may have been
+inadequate in reflecting the range of possible configurations that the
+data could take. In particular, our split-data approach, using New York
+City to guide the simulation and then applying the analysis checks to
+other cities, may not have been ideal. It may be worth exploring some
+recent work in data thinning \citep{neufeld2024data} and data fission
+\citep{leiner2023data} to create training datasets that are more
+representative of future data.
 
 Analysis validation checks are closely related to the concept of unit
 testing in software engineering. While unit tests isolate and test
