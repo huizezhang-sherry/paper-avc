@@ -740,9 +740,12 @@ mortality from all non-accidental causes \citep{samet2000fine}. For our
 second example, we use the problem of studying PM10 and mortality along
 with data from the National Morbidity, Mortality, and Air Pollution
 Study (NMMAPS) to demonstrate how our analysis validation checks
-described in Section~\ref{sec-method} can be applied. The dataset is
-from New York City, and contains daily PM10, mortality, and temperature
-values from 1992--2000.
+described in Section~\ref{sec-method} can be applied. The dataset that
+we use to develop our simulations and analysis checks is from New York
+City, and contains daily PM10, all-cause (non-accidental) mortality, and
+average temperature values from 1992--2000. We then will apply the
+analysis checks to similar data from 39 other cities from the NMMAPS
+study.
 
 The typical approach to studying the association between PM10 and
 mortality is to apply a generalized linear model with a Poisson link to
@@ -750,16 +753,21 @@ relate daily mortality counts to daily measures of PM10. Based on
 previous work and the range of effect sizes published in the literature,
 an analyst might expect the coefficient for PM10 in this GLM to lie
 between \([0, 0.005]\), after adjusting for daily temperature
-\citep{samet2000fine, welty2005acute}. Observing an estimated
-coefficient outside of this interval would be highly unusual and would
-warrant a serious re-examination of the analysis process. Therefore, our
-unexpected outcome in this analysis will be the binary indicator of
-whether the estimated coefficient for PM10 in the GLM lies outside of
-the interval \([0, 0.005]\). In addition to providing a more substantial
-problem for our methods, this example also demonstrates how the
-procedure presented in Section~\ref{sec-method} can be used to select
-cutoff values in the analysis checks to diagnose an unexpected PM10
-coefficient from the generalized linear model.
+\citep{samet2000fine, welty2005acute}. Note that the relatively simple
+modeling approach being used here is primarily for demonstration;
+typically far more sophisticated semi-parametric approaches are used in
+the literature \citep{peng2006model}.
+
+For the purposes of this application, observing an estimated coefficient
+outside of the expected interval is considered unusual and might warrant
+a re-examination of the analysis process. Therefore, our unexpected
+outcome in this analysis will be the binary indicator of whether the
+estimated coefficient for PM10 in the GLM lies outside of the interval
+\([0, 0.005]\). In addition to providing a more substantial problem for
+our methods, this example also demonstrates how the procedure presented
+in Section~\ref{sec-method} can be used to select cutoff values in the
+analysis checks to diagnose an unexpected PM10 coefficient from the
+generalized linear model.
 
 This PM10 coefficient expectation can be framed as an analysis check
 that fails, labelled as 1, if the estimate of the PM10 coefficient
@@ -783,11 +791,11 @@ mortality and temperature, and univariate outlier detection. Multiple
 cutoff values are specified for each check to determine a
 failure.}\label{tbl-checks}\tabularnewline
 \toprule\noalign{}
-the check fails if \ldots{} \\
+The check fails if \ldots{} \\
 \midrule\noalign{}
 \endfirsthead
 \toprule\noalign{}
-the check fails if \ldots{} \\
+The check fails if \ldots{} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
@@ -796,14 +804,14 @@ Sample size less than or equal to 200 \\
 Sample size less than or equal to 400 \\
 Sample size less than or equal to 600 \\
 Sample size less than or equal to 800 \\
-Mortality-PM10 correlation less than \$-\$0.03 \\
-Mortality-PM10 correlation less than \$-\$0.04 \\
-Mortality-PM10 correlation less than \$-\$0.05 \\
-Mortality-PM10 correlation less than \$-\$0.06 \\
-Mortality-temperature correlation greater than \$-\$0.3 \\
-Mortality-temperature correlation greater than \$-\$0.35 \\
-Mortality-temperature correlation greater than \$-\$0.4 \\
-Mortality-temperature correlation greater than \$-\$0.45 \\
+Mortality-PM10 correlation less than \(-0.03\) \\
+Mortality-PM10 correlation less than \(-0.04\) \\
+Mortality-PM10 correlation less than \(-0.05\) \\
+Mortality-PM10 correlation less than \(-0.06\) \\
+Mortality-temperature correlation greater than \(-0.3\) \\
+Mortality-temperature correlation greater than \(-0.35\) \\
+Mortality-temperature correlation greater than \(-0.4\) \\
+Mortality-temperature correlation greater than \(-0.45\) \\
 Outlier(s) are presented in the variable PM10 \\
 Outlier(s) are presented in the variable mortality \\
 \end{longtable}
@@ -956,12 +964,26 @@ predict an unexpected outcome. Given the high independence of the checks
 (Table~\ref{tbl-linear-reg}), this suggests that unexpected results are
 only likely after multiple anomalies are observed in the data.
 
-\subsection{subsection}\label{subsection}
+\subsection{Additional Cities}\label{additional-cities}
+
+In order to test our development of analysis validation checks based on
+the New York City data, we incorporate data from 39 additional cities
+from the original NMMAPS study and apply our checks to those data. These
+cities (along with New York City) represent approximately the largest 40
+metropolitan areas in the United States. The complete list of cities
+used are presented in Table~\ref{tbl-all-cities}. For each city, we had
+daily data on all-cause mortality, PM10, and average temperature for the
+years 1992--2000.
 
 \begin{table}
+
+\caption{\label{tbl-all-cities}}
+
+\centering{
+
 \centering
 \resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
-\begin{tabular}{lrrrrrrr}
+\begin{tabular}{lrccrrcc}
 \toprule
 City & \makecell[l]{PM10\\Coefficient} & \makecell[l]{Outcome\\Unexpected} & \makecell[l]{Predicted\\Unexpected} & \makecell[l]{Correlation\\Mortality\\PM10} & \makecell[l]{Correlation\\Mortality\\Temperature} & \makecell[l]{Mortality\\Outlier} & \makecell[l]{PM10\\Outlier}\\
 \midrule
@@ -1014,7 +1036,57 @@ Tampa & -0.0003 & T & T & --0.20 (T) & --0.04 (T) & F & T\\
 Tucson & 0.0028 & F & F & --0.31 (F) & 0.18 (F) & T & T\\
 \bottomrule
 \end{tabular}}
-\end{table}
+
+}
+
+\end{table}%
+
+We applied each of the analysis validation checks and the fitted logic
+regression model separately to each of the cities' data to make
+predictions of whether the outcome will be unexpected or not. We also
+applied the generalized linear model to the data from each of the cities
+to estimate the association between PM10 and mortality in each city. The
+estimates of the association and the results of each of the analysis
+validation checks for each city are shown in Table~\ref{tbl-all-cities}.
+
+\begin{table}
+
+\caption{\label{tbl-accuracy}}
+
+\centering{
+
+\caption{A 2x2 table of the outcome and the predicted unexpected results from the 40 cities.}
+\centering
+\begin{tabular}[t]{lrr}
+\toprule
+\multicolumn{1}{c}{} & \multicolumn{2}{c}{Prediction} \\
+\cmidrule(l{3pt}r{3pt}){2-3}
+Actual & FALSE & TRUE\\
+\midrule
+FALSE & 25 & 7\\
+TRUE & 1 & 7\\
+\bottomrule
+\end{tabular}
+
+}
+
+\end{table}%
+
+Table~\ref{tbl-accuracy} summaries the prediction accuracy of the logic
+regression model for the 40 cities. The model correctly predicts
+unexpected outcomes in 32 cities, producing an accuracy of 80\%. Among
+the 8 cities with an unexpected outcome (PM10 coefficient outside {[}0,
+0.005{]}), the model correctly identifies 7 (Atlanta, Austin, Memphis,
+Orlando, Salt Lake City, San Antonio, Tampa), giving a recall of 88\%.
+These cities are flagged due to failure in both mortality-PM10
+correlation and mortality-temperature correlation checks. Out of the 14
+cities with positive predictions from the model, 7 cities (Cincinnati,
+Columbus, Dallas/Fort Worth, Pittsburgh, Riverside, San Bernardino,
+Santa Ana/Anaheim) were a false positive, resulting in a precision of
+50\%.
+
+{[}Sherry: Summarize the results from the 40 cities, along with 2x2
+table of outcome vs.~predicted{]}
 
 \section{Discussion}\label{sec-discussion}
 

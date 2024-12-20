@@ -48,6 +48,9 @@ library(knitr)
 library(rpart)
 library(infotheo)
 library(patchwork)
+library(readr)
+library(kableExtra)
+library(scales)
 pm10 <- read_csv(here::here("data", "pm10.csv")) |> 
   filter(!is.na(pm10)) |>    
   mutate(season = as.factor(season))  
@@ -494,15 +497,16 @@ pred_res <- files |> map_dfr(function(raw){
         ss = nrow(data)
         )
     })
-
-library(readr)
-library(kableExtra)
 city_name_map <- read_csv(here::here("data/city_name_map.csv"))
-tibble(city = str_remove(files, "data/pm10-") |> str_remove(".csv")) |> bind_cols(pred_res) |>
+
+
+df <- tibble(city = str_remove(files, "data/pm10-") |> str_remove(".csv")) |> bind_cols(pred_res) |>
   left_join(city_name_map) |> 
   filter(city != "data/pm10") |> 
   dplyr::select(cityname, pm10, unexpect, .pred, cor_m_tmp, lgl_cor_m_tmp,
-                cor_m_pm10, lgl_cor_m_pm10, mort_outlier, pm10_outlier) |>
+                cor_m_pm10, lgl_cor_m_pm10, mort_outlier, pm10_outlier)
+
+df |>
   mutate(pm10 = format(round(pm10, 4), nsmall = 4),
          cor_m_tmp = format(round(cor_m_tmp, 2), nsmall = 2),
          cor_m_pm10 = format(round(cor_m_pm10, 2), nsmall = 2),
@@ -511,7 +515,7 @@ tibble(city = str_remove(files, "data/pm10-") |> str_remove(".csv")) |> bind_col
                 ~ifelse(.x, "T", "F"))) |>
   mutate(cor_m_tmp = paste0(cor_m_tmp, " (", lgl_cor_m_tmp, ")"),
          cor_m_pm10 = paste0(cor_m_pm10, " (", lgl_cor_m_pm10, ")")) |> 
-  dplyr::select(-lgl_cor_m_tmp, -lgl_cor_m_pm10) |>
+  dplyr::select(-lgl_cor_m_tmp, -lgl_cor_m_pm10) |> 
   kable(format = "latex", booktabs = TRUE, escape = F, 
         align = "lrccrrcc",
         col.names = linebreak(c("City", "PM10\nCoefficient", "Outcome\nUnexpected", "Predicted\nUnexpected", 
@@ -522,7 +526,20 @@ tibble(city = str_remove(files, "data/pm10-") |> str_remove(".csv")) |> bind_col
 
 We applied each of the analysis validation checks and the fitted logic regression model separately to each of the cities' data to make predictions of whether the outcome will be unexpected or not. We also applied the generalized linear model to the data from each of the cities to estimate the association between PM10 and mortality in each city. The estimates of the association and the results of each of the analysis validation checks for each city are shown in @tbl-all-cities. 
 
-[Sherry: Summarize the results from the 40 cities, along with 2x2 table of outcome vs. predicted]
+```{r}
+#| label: tbl-accuracy
+df |> 
+  dplyr::select(unexpect, .pred) |> 
+  table() |> 
+  as_tibble() |> 
+  rename(Actual = unexpect) |> 
+  pivot_wider(names_from = .pred, values_from = n) |> 
+  kable(caption = "A 2x2 table of the outcome and the predicted unexpected results from the 40 cities.", 
+        format = "latex", booktabs = TRUE) |> 
+   add_header_above(c("", "Prediction"=2), escape = FALSE) 
+```
+
+@tbl-accuracy summaries the prediction accuracy of the logic regression model for the 40 cities. The model correctly predicts `r accurate <- df |> filter(unexpect == .pred) |> nrow(); accurate` cities, producing an accuracy of `r label_percent()(accurate/nrow(df))`. Among the `r df |> filter(unexpect) |> nrow()` cities with an unexpected outcome (PM10 coefficient outside [0, 0.005]), the model correctly identifies `r df |> filter(unexpect, .pred) |> nrow()` (`r df |> filter(unexpect, .pred) |> pull(cityname)`), giving a recall of `r recall <- as.numeric(df |> calc_miscla_rate(.pred, unexpect) |> pull(recall)); label_percent()(recall)`. These cities are flagged due to failure in both mortality-PM10 correlation and mortality-temperature correlation checks. Out of the `r df |> filter(.pred) |> nrow()` cities with positive predictions from the model, `r df |> filter(unexpect != .pred, !unexpect) |> nrow()` cities (`r df |> filter(unexpect != .pred, !unexpect) |> pull(cityname)`) were a false positive, resulting in a precision of `r pres <- as.numeric(df |> calc_miscla_rate(.pred, unexpect) |> pull(precision)); label_percent()(pres)`.
 
 # Discussion {#sec-discussion}
 
