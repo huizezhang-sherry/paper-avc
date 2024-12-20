@@ -62,7 +62,7 @@ In data analysis, experienced researchers often rely on their prior knowledge or
 
 One might gain insight into analysts' thought processes by speaking with them directly or watching them work via screencast videos they produce, such as, TidyTuesday screencast videos or think-aloud type studies [e.g. @gu2024data]. However, direct observation of analysis is not scalable and may not always be feasible; creating educational screencast videos requires significant effort from the researchers. Ideally, there could be a way to make expectations about data analysis explicit and accessible to others. Even better, if the encoding were machine-readable, we could analyze these expectations and learn from the analysis itself. For example, we could answer questions about whether the checks also apply to other researchers analyzing new data in the same context, whether they reflect common practices in the field, or whether they are specific to the data or analysis at hand. 
 
-The externalization of the data analysis process is a practice that has potential to improve the trustworthiness of analyses in general [@yu2024veridical] and the trustworthiness of subsequent products, such as machine learning models, that may be built on such analyses. While publication of analysis code and data is now a common a requirement for the sake of reproducibility [@peng2011reproducible], the publication code alone is often insufficient for understanding the thought process behind an analysis. Code corresponding to published analyses often reflect the final decisions made about analysis and do not reveal the decisions or assumptions made about the data processing. Thus, a reader looking at published code can often be left with many questions about why certain choices were made. Developing an approach to reveal some of this process without requiring a reader to essentially reconstruct the analysis process from the raw data would provide an improved basis for trusting an analysis result [@peng2021reproducible].
+The externalization of the data analysis process is a practice that has potential to improve the trustworthiness of analyses in general [@yu2024veridical] and the trustworthiness of subsequent products, such as machine learning models, that may be built on such analyses. While publication of analysis code and data is now a common a requirement for the sake of reproducibility [@peng2011reproducible], the published code alone is often insufficient for understanding the thought process behind an analysis. Code corresponding to published analyses often reflect the final decisions made about analysis and do not reveal the decisions or assumptions made about the data processing. Thus, a reader looking at published code can often be left with many questions about why certain choices were made. Developing an approach to reveal some of this process without requiring a reader to essentially reconstruct the analysis process from the raw data would provide an improved basis for trusting an analysis result [@peng2021reproducible].
 
 In this paper, we conceptualize these internal expectations and assumptions as *analysis validation checks*, which allows us to examine the assumptions made during an analysis and to diagnose unexpected outcomes. We then introduce a procedure that provides a quantitative measure of how violations in a tree of analysis checks, derived from individual checks, will lead to an unexpected result. The procedure, based on simulations of the original data, calculates the accuracy and redundancy of the analysis checks. Accuracy is determined using binary classification metrics, precision and recall, from a logic regression fit [@ruczinski_logic_2003], while redundancy is measured using mutual information. The proposed workflow offers a numerical guarantee that the analysis will produce the expected results, assuming the assumptions about the data generating mechanism hold.
 
@@ -183,7 +183,7 @@ Compared to other tree-based methods for binary-binary prediction, the Boolean c
 
 While checks may score high on predictive accuracy, they may be less effective at explaining the various reasons behind unexpected results. This could happen if, for example, a set of checks are all tangentially related to the cause of the unexpected results, but none addresses the root cause. It may also occur if the checks are highly correlated with one another, leading to redundancy.
 
-To quantify redundancy, the concept of mutual information is used. Mutual information $I(x, y)$ measures the amount of information shared between two random variables and is defined as the KL-distance $D(p \parallel q)$ between the joint distribution of the two variables and the product of the marginal distributions:
+To quantify redundancy, the concept of mutual information is used. Mutual information $I(x, y)$ measures the amount of information shared between two random variables and is defined as the Kullback-Leibler distance $D(p \parallel q)$ between the joint distribution of the two variables and the product of the marginal distributions:
 
 $$I(x,y) = D\big(p(x,y) \parallel p(x)p(y)\big) = \sum_x \sum_y p(x,y) \log \frac{p(x,y)}{p(x)p(y)}$$
 
@@ -471,10 +471,11 @@ As shown in @fig-linear-reg-tree, there is no single analysis check in the tree 
 
 ## Additional Cities 
 
-In order to test our development of analysis validation checks based on the New York City data, we incorporate data from 39 additional cities from the original NMMAPS study and apply our checks to those data. These cities (along with New York City) represent approximately the largest 40 metropolitan areas in the United States. The complete list of cities used are presented in @tbl-all-cities. For each city, we had daily data on all-cause mortality, PM10, and average temperature for the years 1992--2000.
+In order to test our development of analysis validation checks based on the New York City data, we incorporate data from 39 additional cities from the original NMMAPS study and apply our checks to those data. These cities (along with New York City) represent approximately the largest 40 metropolitan areas in the United States by population. The complete list of cities used are presented in @tbl-all-cities. For each city, we had daily data on all-cause mortality, PM10, and average temperature for the years 1992--2000.
 
 ```{r}
 #| label: tbl-all-cities
+#| tbl-cap: Results from full analysis of 40 cities from the NMMAPS air pollution and mortality study. In the table, a "T" indicates that a check failed and an "F" indicates that a check passed.
 
 pm10 <- read_csv("data/pm10.csv") |> filter(!is.na(pm10)) |> filter(!is.na(temp))
 files <- list.files(path = "data", pattern = "csv", full.names = TRUE)[-1]
@@ -503,8 +504,10 @@ city_name_map <- read_csv(here::here("data/city_name_map.csv"))
 df <- tibble(city = str_remove(files, "data/pm10-") |> str_remove(".csv")) |> bind_cols(pred_res) |>
   left_join(city_name_map) |> 
   filter(city != "data/pm10") |> 
-  dplyr::select(cityname, pm10, unexpect, .pred, cor_m_tmp, lgl_cor_m_tmp,
-                cor_m_pm10, lgl_cor_m_pm10, mort_outlier, pm10_outlier)
+  dplyr::select(cityname, pm10, unexpect, .pred, 
+                cor_m_tmp, lgl_cor_m_tmp,                
+                cor_m_pm10, lgl_cor_m_pm10, 
+                mort_outlier, pm10_outlier)
 
 df |>
   mutate(pm10 = format(round(pm10, 4), nsmall = 4),
@@ -518,28 +521,48 @@ df |>
   dplyr::select(-lgl_cor_m_tmp, -lgl_cor_m_pm10) |> 
   kable(format = "latex", booktabs = TRUE, escape = F, 
         align = "lrccrrcc",
-        col.names = linebreak(c("City", "PM10\nCoefficient", "Outcome\nUnexpected", "Predicted\nUnexpected", 
-                                "Correlation\nMortality\nPM10", "Correlation\nMortality\nTemperature",
-                                "Mortality\nOutlier", "PM10\nOutlier"))) |>
+        col.names = linebreak(c("City", 
+                                "PM10\nEstimated\nCoefficient",
+                                "Outcome\nObserved\nUnexpected", 
+                                "Logic Regression\nPredicted\nUnexpected", 
+                                "Correlation:\nMortality-\nTemperature",
+                                "Correlation:\nMortality-\nPM10",
+                                "Mortality\nOutlier", 
+                                "PM10\nOutlier"))) |>
   kableExtra::kable_styling(latex_options="scale_down") 
 ```
 
-We applied each of the analysis validation checks and the fitted logic regression model separately to each of the cities' data to make predictions of whether the outcome will be unexpected or not. We also applied the generalized linear model to the data from each of the cities to estimate the association between PM10 and mortality in each city. The estimates of the association and the results of each of the analysis validation checks for each city are shown in @tbl-all-cities. 
+We applied each of the analysis validation checks and the fitted logic regression model separately to each of the cities' data to make predictions of whether the outcome will be unexpected or not. We also applied the generalized linear model to the data from each of the cities to estimate the association between PM10 and mortality in each city, adjusted for temperature. The estimates of the association and the results of each of the analysis validation checks for each city are shown in @tbl-all-cities. 
 
 ```{r}
 #| label: tbl-accuracy
+#| tbl-cap: Summary of the observed and the predicted unexpected PM10 coefficient results from the 40 NMMAPS cities using the logic regression model.
+
+
 df |> 
   dplyr::select(unexpect, .pred) |> 
   table() |> 
   as_tibble() |> 
-  rename(Actual = unexpect) |> 
+  rename(Observed = unexpect) |> 
   pivot_wider(names_from = .pred, values_from = n) |> 
-  kable(caption = "A 2x2 table of the outcome and the predicted unexpected results from the 40 cities.", 
-        format = "latex", booktabs = TRUE) |> 
-   add_header_above(c("", "Prediction"=2), escape = FALSE) 
+  kable(format = "latex", 
+        booktabs = TRUE) |> 
+   add_header_above(c("", "Predicted"=2), 
+                    escape = FALSE) 
 ```
 
-@tbl-accuracy summaries the prediction accuracy of the logic regression model for the 40 cities. The model correctly predicts `r accurate <- df |> filter(unexpect == .pred) |> nrow(); accurate` cities, producing an accuracy of `r label_percent()(accurate/nrow(df))`. Among the `r df |> filter(unexpect) |> nrow()` cities with an unexpected outcome (PM10 coefficient outside [0, 0.005]), the model correctly identifies `r df |> filter(unexpect, .pred) |> nrow()` (`r df |> filter(unexpect, .pred) |> pull(cityname)`), giving a recall of `r recall <- as.numeric(df |> calc_miscla_rate(.pred, unexpect) |> pull(recall)); label_percent()(recall)`. These cities are flagged due to failure in both mortality-PM10 correlation and mortality-temperature correlation checks. Out of the `r df |> filter(.pred) |> nrow()` cities with positive predictions from the model, `r df |> filter(unexpect != .pred, !unexpect) |> nrow()` cities (`r df |> filter(unexpect != .pred, !unexpect) |> pull(cityname)`) were a false positive, resulting in a precision of `r pres <- as.numeric(df |> calc_miscla_rate(.pred, unexpect) |> pull(precision)); label_percent()(pres)`.
+```{r,include=FALSE}
+cities_accurate <- df |> 
+  filter(unexpect, .pred) |> 
+  pull(cityname)
+cities_missed <- df |> 
+  filter(unexpect, !.pred) |> 
+  pull(cityname)
+```
+
+It is clear from @tbl-all-cities that some of the estimated PM10 coefficients are outside the expected range of [0, 0.005]. Eight of the 40 cities had negative estimated coefficients and were therefore considered unexpected by our original criterion. (It is perhaps worth noting that none of the unexpected outcomes was in the positive direction.) @tbl-accuracy summarizes the prediction accuracy of the logic regression model for the 40 cities. The model correctly predicts the PM10 coefficient status of `r accurate <- df |> filter(unexpect == .pred) |> nrow(); accurate` cities, producing an accuracy rate of `r label_percent()(accurate/nrow(df))`. Among the `r df |> filter(unexpect) |> nrow()` cities with an unexpected outcome (PM10 coefficient outside [0, 0.005]), the model correctly identifies `r df |> filter(unexpect, .pred) |> nrow()` (`r cities_accurate`), giving a recall of `r recall <- as.numeric(df |> calc_miscla_rate(.pred, unexpect) |> pull(recall)); label_percent()(recall)` (only `r cities_missed` was not properly classified by the logic regression model). These cities were flagged due to failures in both the mortality-PM10 correlation and mortality-temperature correlation analysis checks. Out of the `r df |> filter(.pred) |> nrow()` cities with positive predictions from the model, `r df |> filter(unexpect != .pred, !unexpect) |> nrow()` cities (`r df |> filter(unexpect != .pred, !unexpect) |> pull(cityname)`) were false positives, resulting in a precision of only `r pres <- as.numeric(df |> calc_miscla_rate(.pred, unexpect) |> pull(precision)); label_percent()(pres)`. This precision value is substantially lower than what was estimated by the simulation procedure (see @tbl-linear-reg) and suggests that the simulation does not adequately capture some features of the data generation process.
+
+
 
 # Discussion {#sec-discussion}
 
@@ -547,11 +570,13 @@ In this paper we have developed an approach to using analysis validation checks 
 
 With the analysis validation checks proposed in this paper, analysts may perform these checks *ex ante* to identify and address potential issues before proceeding with the analysis or use them *ex post* to diagnose the analysis when an unexpected outcome occurs. Theses checks act as checkpoints designed by analysts to flag potential issues, clarify assumptions made during the analysis, and enhance transparency and communication among stakeholders. They also support students and junior researchers develop the skills needed to independently diagnose issues in analyses.
 
+In @sec-pm10-mortality we used the analysis checks in a diagnostic manner to examine the eight cities whose PM10 coefficients were unexpected. There, we found that seven of the cities had a mortality-PM10 correlation that was more negative than expected while also having a mortality-temperature correlation that was somewhat larger (less negative) than expected. What this result implies for the broader analysis depends on a number of factors, but the interplay between mortality, PM10, and temperature may warrant further investigation [see e.g. @welty2005acute]. Note that simply because the PM10 coefficient estimates were unexpected by our criterion, we do not mean to imply that they are ``wrong" in any sense. Indeed, negative estimated coefficients have been found in other studies of this nature [@bell2004ozone]. Rather, in this type of analysis, it may be that the interval for expected results needs to be revised. Further, it may be necessary to incorporate other outputs from the analysis, such as measures of uncertainty.
+
 An interesting connection can be drawn between our logic regression trees and a tool used in systems engineering known as a fault tree. A fault tree is used for conducting a structured risk assessment and has a long history in aviation, aerospace, and nuclear power applications [@vesely1981fault]. A fault tree is a graphical tool that describes the possible combinations of causes and effects that lead to an anomaly. At the top of the tree is a description of an anomaly. The subsequent branches of the tree below the top event indicate possible causes of the event immediately above it in the tree. The tree can then be built recursively until we reach a root cause that cannot be further investigated. Each level of the tree is connected together using logic gates such as AND and OR gates. The leaf nodes of the tree indicate the root causes that may lead to an anomaly. While the logic regression tress are not identical to fault trees, they share many properties, such as the tree-based structure and the indicator of root causes at the leaf nodes. Perhaps more critically, both serve as graphical summaries of the assumptions made in a problem and the specific violations of those assumptions that could lead to an unexpected result. While fault trees are often used to discover the root cause of an anomaly after it occurs, an important use case for fault trees is to develop a comprehensive understanding of a system *before* an anomaly occurs [@michael2002fault].
 
 Visualization methods are also valuable tools for assessing data assumptions and can potentially be formalized as analysis validation checks. For instance, plotting a variable's distribution using a histogram, density plot, or bee swarm plot can reveal outliers or deviations from normality. These visualizations could be re-framed as checks that fail when the data does not conform to the expected distribution. However, translating visualization results into binary checks that return (TRUE, FALSE) remains an open challenge, requiring either manual verification or the development of automated methods to interpret visualization outputs. An existing example of visual test is the R package `vdiffr` [@vdiffr] for software unit testing. The package saves a template plot and compares it to the current plot to determine whether the unit tests passes or fails.
 
-Systematically generating realistic simulated data is a key component of our approach and is deserving of further consideration. In the PM10 example, the inverse transform method is used to preserve the correlation structure among mortality, PM10, and temperature. However, simulation can become complex when additional restrictions are imposed or when a greater range of scenarios is desired. In such cases, techniques like the acceptance-reject method or permutation may be used to generate the data.
+Systematically generating realistic simulated data is a key component of our approach and is deserving of further consideration. In the PM10 example in @sec-pm10-mortality, the inverse transform method was used to preserve the correlation structure among mortality, PM10, and temperature. However, the simulation process can become complex when additional restrictions are imposed or when a greater range of scenarios is desired. In such cases, techniques like the acceptance-reject method or permutation may be used to generate the data. The results in @sec-pm10-mortality on the broader NMMAPS dataset suggest that our simulation procedure may have been inadequate in reflecting the range of possible configurations that the data could take. In particular, our split-data approach, using New York City to guide the simulation and then applying the analysis checks to other cities, may not have been ideal. It may be worth exploring some recent work in data thinning [@neufeld2024data] and data fission [@leiner2023data] to create training datasets that are more representative of future data.
 
 Analysis validation checks are closely related to the concept of unit testing in software engineering. While unit tests isolate and test specific lines of the code, analysis validation checks focus on the assumptions underlying the analysis rather than the explicit code itself. Moreover, while software testing is deterministic, with clear rules for determining failure, analysis validation checks are probabilistic. As a result, an analysis may fail several assumption checks yet produce an expected outcome, or pass all checks but yield an unexpected result.
 
