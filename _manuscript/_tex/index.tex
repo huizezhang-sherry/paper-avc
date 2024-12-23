@@ -184,86 +184,73 @@ Peng. Email: \href{mailto:roger.peng@austin.utexas.edu}{\nolinkurl{roger.peng@au
 Sciences, University of Texas at Austin, Texas, United States
 \begin{abstract}
 In data analysis, unexpected results often prompt researchers to revisit
-their procedures to identify potential issues. While experienced
-researchers can often quickly diagnose problems by checking a few key
-assumptions, others may struggle to identify the root causes. These
+their procedures to identify potential issues. While some researchers
+may struggle to identify the root causes, experienced researchers can
+often quickly diagnose problems by checking a few key assumptions. These
 checked assumptions, or expectations, are typically informal, difficult
 to trace, and rarely discussed in publications. In this paper, we
-formalize these informal assumptions by framing them as binary
-\emph{analysis validation checks}. We then introduce a procedure to
-quantify how violations of these checks may lead to unexpected results
-in the analysis. The procedure relies on simulations of the original
-data and evaluates both accuracy and redundancy. Accuracy is calculated
-through a binary classification metric, while redundancy is measured
-using mutual information. We demonstrate this approach with a toy
-example based on fitness step count data and a generalized linear model
-example examining the effect of particulate matter air pollution on
-daily mortality.
+introduce the term \emph{analysis validation checks} to formalize and
+externalize these informal assumptions. We then introduce a procedure to
+identify a subset of checks that best predict the occurrence of
+unexpected outcomes, based on simulations of the original data. The
+checks are evaluated in terms of accuracy, determined by binary
+classification metrics, and redundancy, which measures the shared
+information among checks using mutual information. We demonstrate this
+approach with a toy example using step count data and a generalized
+linear model example examining the effect of particulate matter air
+pollution on daily mortality.
 \end{abstract}
 
 
 \setstretch{1.15}
 \section{Introduction}\label{introduction}
 
-In data analysis, experienced researchers often rely on their prior
-knowledge or domain expertise to quickly assess whether results align
-with their expectations. When a result falls outside of this
-expectation, it prompts the researchers to investigate backwards on the
-data quality, the analysis steps, or the assumptions made during the
-analysis process. This mental process of where to diagnose unexpected
-outcomes is often difficult to trace and document in publications. As a
-result, readers are typically presented with the final outcomes of the
-analysis cycle where the results and expectations are aligned, achieved
-either by refining the analysis or updating the expectations based on
-statistical evidence \citep{grolemund_cognitive_2014}. These missing
-pieces of information provide little guidance for diagnosing issues in
-the analysis when the same methodology is applied to a new dataset that
-produces different outcomes. Similarly, when researchers with different
-background knowledge view results that they find to be unexpected, it
-becomes unclear whether discrepancies arise from differing expectations
-or from the use of statistical techniques.
+In data analysis, researchers often rely on their prior knowledge or
+domain expertise to form expectations and assess whether results align
+with them. When results deviate from these expectations, experienced
+researchers check assumptions made about the data and during the
+analysis, but these assumptions checked are often difficult to trace and
+are seldom documented in publications. While publication of analysis
+code and data is now a common a requirement for the sake of
+reproducibility \citep{peng2011reproducible}, the published code alone
+is often insufficient for understanding the thought process behind an
+analysis. Code corresponding to published analyses often reflect the
+final decisions made about analysis and do not reveal the decisions or
+assumptions made about the data during the analysis. Thus, a reader
+looking at published code can often be left with many questions about
+why certain choices were made.
 
-One might gain insight into analysts' thought processes by speaking with
+We might gain insight into analysts' thought processes by speaking with
 them directly or watching them work via screencast videos they produce,
 such as, TidyTuesday screencast videos or think-aloud type studies
 \citep[e.g.][]{gu2024data}. However, direct observation of analysis is
 not scalable and may not always be feasible; creating educational
-screencast videos requires significant effort from the researchers.
-Ideally, there could be a way to make expectations about data analysis
-explicit and accessible to others. Even better, if the encoding were
-machine-readable, we could analyze these expectations and learn from the
-analysis itself. For example, we could answer questions about whether
-the checks also apply to other researchers analyzing new data in the
-same context, whether they reflect common practices in the field, or
-whether they are specific to the data or analysis at hand.
+screencast videos requires significant effort from the analysts.
+Ideally, there could be a way to explicitly communciate these throught
+processes in the data analysis to others. Even better, if these
+expectations were machine-readable, we could analyze them and learn from
+the analysis itself. For example, we could answer questions about
+whether the checks also apply to other researchers analyzing new data in
+the same context, whether they reflect common practices in the field, or
+whether they are specific to the data or analysis at hand. Externalizing
+these thought processes is a practice that has potential to improve the
+trustworthiness of the analyses \citep{yu2024veridical} in general and
+the trustworthiness of subsequent products, such as machine learning
+models, that may be built on such analyses. Developing an approach to
+reveal some of this process without requiring a reader to essentially
+reconstruct the analysis process from the raw data would provide an
+improved basis for trusting an analysis result
+\citep{peng2021reproducible}.
 
-The externalization of the data analysis process is a practice that has
-potential to improve the trustworthiness of analyses in general
-\citep{yu2024veridical} and the trustworthiness of subsequent products,
-such as machine learning models, that may be built on such analyses.
-While publication of analysis code and data is now a common a
-requirement for the sake of reproducibility
-\citep{peng2011reproducible}, the published code alone is often
-insufficient for understanding the thought process behind an analysis.
-Code corresponding to published analyses often reflect the final
-decisions made about analysis and do not reveal the decisions or
-assumptions made about the data processing. Thus, a reader looking at
-published code can often be left with many questions about why certain
-choices were made. Developing an approach to reveal some of this process
-without requiring a reader to essentially reconstruct the analysis
-process from the raw data would provide an improved basis for trusting
-an analysis result \citep{peng2021reproducible}.
-
-In this paper, we conceptualize these internal expectations and
-assumptions as \emph{analysis validation checks}, which allows us to
-examine the assumptions made during an analysis and to diagnose
-unexpected outcomes. We then introduce a procedure that provides a
-quantitative measure of how violations in a tree of analysis checks,
-derived from individual checks, will lead to an unexpected result. The
-procedure, based on simulations of the original data, calculates the
-accuracy and redundancy of the analysis checks. Accuracy is determined
-using binary classification metrics, precision and recall, from a logic
-regression fit \citep{ruczinski_logic_2003}, while redundancy is
+In this paper, we conceptualize these inexplicit expectations as
+\emph{analysis validation checks}, which allows us to examine the
+assumptions made about the data during an analysis. We then introduce a
+procedure to identify the subset of checks that best predict the
+occurrence of unexpected outcomes. The procedure, based on simulations
+of the original data, compares the accuracy and redundancy of different
+combinations of analysis validation checks. Accuracy is determined using
+binary classification metrics (precision and recall) from a logic
+regression model \citep{ruczinski_logic_2003}, while redundancy is
 measured using mutual information. The proposed workflow offers a
 numerical guarantee that the analysis will produce the expected results,
 assuming the assumptions about the data generating mechanism hold.
@@ -272,14 +259,13 @@ The rest of the paper is organized as follows:
 Section~\ref{sec-lit-review} reviews the concepts of diagnosing
 unexpected outcomes and general data quality checks.
 Section~\ref{sec-plan} introduces the concept of analysis validation
-checks, illustrated with a toy example based on fitness step count data.
-Section~\ref{sec-method} describes the procedure that quantifies how
-analysis validation checks combined using logical operators can predict
-unexpected outcomes in an analysis. Section~\ref{sec-pm10-mortality}
-applies this procedure to a larger example that estimates the effect of
-particulate matter air pollution on daily mortality.
-Section~\ref{sec-discussion} summarises teh paper and discusses a few
-key considerations.
+checks, illustrated with a toy example based on step count data.
+Section~\ref{sec-method} describes the procedure that selects the best
+subset of checks for understanding the occurrence of unexpected
+outcomes. Section~\ref{sec-pm10-mortality} applies this procedure to a
+larger example that estimates the effect of particulate matter air
+pollution on daily mortality. Section~\ref{sec-discussion} summarises
+the paper and discusses a few key considerations.
 
 \section{Related Work}\label{sec-lit-review}
 
@@ -328,28 +314,26 @@ cause unexpected results to occur.
 
 \subsection{Data analysis checks}\label{data-analysis-checks}
 
-A substantial body of literature has addressed the definition of data
-quality and has developed frameworks that include dimensions,
-attributes, and measures to evaluate and improve data quality
-\citep{8642813, batini2009methodologies, cai2015challenges, wang1996beyond, 6204995, woodall2014classification}.
-These frameworks are often used in information systems and database
-management and support business decision-making in various industries.
-For example, such data validation systems are applied in the Google
-Tensorflow framework \citep{polyzotis2019data} and Amazon
-\citep{schelter2018automating}. For research purposes, high-quality data
-ensures the credibility of scientific findings and supports
-reproducibility and re-usability in future studies. With the growing
-prevalence of open data in scientific research, the consumers or users
-of the data typically are no longer the producers or collectors of the
-data who would have the full knowledge of data in hand, prompting more
-interest towards data quality checks in the data analysis process. In R,
-there are some packages, like \texttt{skimr} \citep{skimr} and
-\texttt{dataMaid} \citep{dataMaid}, that provide basic data screening
-and reporting tools, while another class of packages,
-e.g.~\texttt{assertr} \citep{assertr}, \texttt{validate}
-\citep{validate}, and \texttt{pointblank} \citep{pointblank} focuses on
-providing data validation tools, allowing users to define customized
-data quality checks based on the applications.
+The concept of data quality has been studied in the literature, with
+earlier work focusing on defining frameworks -- such as dimensions,
+attributes, and measures -- to improve data quality in database and
+information systems
+\citep{wang1996beyond, batini2009methodologies, 6204995, woodall2014classification, cai2015challenges, 8642813}.
+More recently, data validation has been incorporated into frameworks
+like Google TensorFlow \citep{polyzotis2019data} to ensure the quality
+of data for training machine learning models, as well as for supporting
+business decision-making \citep{schelter2018automating}. With the
+increasing availability of open data in scientific research, the users
+of the data are often not the original data collector and may not be
+aware of all the details or nuances of the data. This encourages
+researchers to conduct data quality checks before beginning the analytic
+process, helping to avoid unexpected discoveries later on. In R,
+packages like \texttt{skimr} \citep{skimr} and \texttt{dataMaid}
+\citep{dataMaid} provide basic data screening and data quality reports,
+while packages such as \texttt{assertr} \citep{assertr},
+\texttt{validate} \citep{validate}, and \texttt{pointblank}
+\citep{pointblank} focuse on providing infustructures that allow users
+to define customized data quality checks.
 
 The literature on data quality typically focuses on the intrinsic or
 inherent quality of the data themselves, rather than the data's
