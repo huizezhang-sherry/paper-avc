@@ -194,11 +194,11 @@ externalize these informal assumptions. We then introduce a procedure to
 identify a subset of checks that best predict the occurrence of
 unexpected outcomes, based on simulations of the original data. The
 checks are evaluated in terms of accuracy, determined by binary
-classification metrics, and redundancy, which measures the shared
-information among checks using mutual information. We demonstrate this
-approach with a toy example using step count data and a generalized
-linear model example examining the effect of particulate matter air
-pollution on daily mortality.
+classification metrics, and independence, which measures the shared
+information among checks. We demonstrate this approach with a toy
+example using step count data and a generalized linear model example
+examining the effect of particulate matter air pollution on daily
+mortality.
 \end{abstract}
 
 
@@ -247,13 +247,14 @@ In this paper, we conceptualize these inexplicit expectations as
 assumptions made about the data during an analysis. We then introduce a
 procedure to identify the subset of checks that best predict the
 occurrence of unexpected outcomes. The procedure, based on simulations
-of the original data, compares the accuracy and redundancy of different
-combinations of analysis validation checks. Accuracy is determined using
-binary classification metrics (precision and recall) from a logic
-regression model \citep{ruczinski_logic_2003}, while redundancy is
-measured using mutual information. The proposed workflow offers a
-numerical guarantee that the analysis will produce the expected results,
-assuming the assumptions about the data generating mechanism hold.
+of the original data, compares the accuracy and independence of
+different combinations of analysis validation checks. Accuracy is
+determined using binary classification metrics (precision and recall)
+from a logic regression model \citep{ruczinski_logic_2003}, while
+independence is measures the shared information among checks. The
+proposed workflow offers a numerical guarantee that the analysis will
+produce the expected results, assuming the assumptions about the data
+generating mechanism hold.
 
 The rest of the paper is organized as follows:
 Section~\ref{sec-lit-review} reviews the concepts of diagnosing
@@ -467,28 +468,21 @@ unexpected outcome in this scenario.}
 
 \section{Method}\label{sec-method}
 
-While some checks may be crucial and directly indicate an unexpected
-outcome, others may be tangential to the problem at hand and not
-indicate a root cause of an unexpected outcome. In this section, we
-propose a procedure to measure the effectiveness of checks that, when
-combined using logical operators, contribute to an unexpected outcome. A
-small set of independent checks is considered effective if it translates
-to unexpected outcomes.
+While not all analysis validation checks are equally important, some may
+be more useful at diagnosing unexpected outcomes than others. This
+section introduces a procedure to identify a subset of analysis
+validation checks that best predict the occurence of unexpected
+outcomes.
 
-The approach relies on the use of simulated datasets that are generated
-based on the analyst's knowledge and assumptions about the data
-generation mechanism. Datasets are simulated to have the same structure
-and characteristics of the observed data that will be analyzed at some
-point in the future. For each simulated dataset, we can apply a
-collection of analysis validation checks to the dataset and record which
-ones were TRUE and which were FALSE. We can also compute the outcome of
-the analysis to see whether the outcome is unexpected in a given
-simulated datsets. We can then generate many datasets, each time
-applying the analysis validation checks and computing the outcome. After
-generating many datasets, we can relate the patterns in the analysis
-validation checks to the likely that the outcome will be unexpected in a
-given dataset. Figure~\ref{fig-metric-calc} provides an overview of the
-process.
+The approach uses simulated datasets that have the same structure and
+characteristics of the observed data to be analyzed in the future. For
+each simulated dataset, analysis validation checks are applied to record
+their TRUE or FALSE values. The outcome of the analysis is also computed
+to determine whether it is unexpected (1) or expected (0). By generating
+many datasets, each time applying the analysis validation checks and
+computing the outcome, we can relate the patterns in the checks to the
+likely that the outcome will be unexpected. Figure~\ref{fig-metric-calc}
+provides an overview of the process.
 
 \phantomsection\label{cell-fig-metric-calc}
 \begin{figure}[H]
@@ -514,113 +508,96 @@ unexpected outcomes in the analysis.}
 
 \end{figure}%
 
+\subsection{Accuracy}\label{accuracy}
+
 From the simulated data, the accuracy branch in
-Figure~\ref{fig-metric-calc} refers to a set of checks' ability to
-accurately detect unexpected outcomes while minimizing false positives
-and false negatives. While a false positive can raise caution or
-skepticism about the data, the presence of both false positives and
-false negatives suggests that the checks are overly sensitive or lack
-sensitivity to unexpected outcomes, respectively.
+Figure~\ref{fig-metric-calc} refers to the set of checks' ability to
+detect unexpected outcomes accurately. To relate multiple checks to the
+outcome, a logic regression model \citep{ruczinski_logic_2003} is used.
+Originally developed for SNP microarray data, logic regression
+constructs Boolean combinations of binary variables,
+\(\mathcal{L}(X_1, X_2, \cdots, X_n)\), to predict classification or
+regression outcomes. The logical operations allowed to construct
+\(\mathcal{L(\cdot)}\) includes AND (\(\land\)), OR (\(\lor\)), and NOT
+(\(\neg\)) and an example of the Boolean combination of
+\(\mathcal{L(\cdot)}\) is \(X_1 \text{ AND } (X_2 \text{ OR } X_3)\). In
+our binary-binary classification problem, the logic regression model can
+be written as follows:
 
-To incorporate the effect of multiple checks on the outcome, a logic
-regression model \citep{ruczinski_logic_2003} is fitted to the analysis
-validation checks. Originally developed for SNP microarray data, logic
-regression constructs Boolean combinations of binary variables,
-\(\mathcal{L}(X_1, X_2, \cdots, X_n)\), to predict both binary and
-numerical outcomes. In our case,
+\[E(Y) = \mathcal{L}(X_1, X_2, \cdots, X_n)\]
 
-\begin{itemize}
-\tightlist
-\item
-  the outcome, \(Y\), is a binary variable indicating whether the result
-  is \emph{unexpected} (1) or \emph{expected} (0),
-\item
-  \(X_1, X_2, \cdots, X_n\) represent the binary analysis validation
-  checks, where each check is labeled as 1 if it fails and 0 if it
-  passes.
-\end{itemize}
+where the outcome, \(Y\), indicates whether the outcome is
+\emph{unexpected} (1) or \emph{expected} (0), and the analysis
+validation checks, \(X_1, X_2, \cdots, X_n\), are labeled as 1 if they
+fail and 0 if they pass.
 
-For classification problems, the logic regression model is reduced to
-the following form:
+This objective function is optimized using simulated annealing algorithm
+to minimize the misclassification error and the following 6 moves are
+permitted during the optimization to grow or purne the tree (as detailed
+in Figure 2 of \citet{ruczinski_logic_2003}): 1) replacing a leaf node,
+2) replacing an operator, 3) growing a branch, 4) pruning a branch, 5)
+splitting a leaf node, and 6) deleting a leaf node. Predictions from the
+logic regression model is then used, along with the observed outcome, to
+calculate the precision and recall of the optimized Boolean combination
+of checks. Compared to other tree-based methods for binary-binary
+prediction, the Boolean combinations from the logic regression model
+produce a tree structure that can be directly interpreted as the
+possible combination of checks leading to an unexpected outcome, without
+the need to invert the tree as required in classic tree-based recursive
+partitioning methods.
 
-\[E(Y) = \mathcal{L}(X_1, X_2, \cdots, X_n)\] The logical operations of
-the binary variables \(X_1, X_2, \cdots, X_n\), including AND
-(\(\land\)), OR (\(\lor\)), and NOT (\(\neg\)) and an example of such
-logic combination can be \(X_1 \text{ AND } (X_2 \text{ OR } X_3)\).
-Simulated annealing is used to explore the search space by minimizing
-the mis-classification error. The following 6 moves are permitted during
-the search (as detailed in Figure 2 of \citet{ruczinski_logic_2003}): 1)
-replacing a leaf node, 2) replacing an operator, 3) growing a branch, 4)
-pruning a branch, 5) splitting a leaf node, and 6) deleting a leaf node.
+\subsection{Independence}\label{independence}
 
-Compared to other tree-based methods for binary-binary prediction, the
-Boolean combinations from the logic regression model produce a tree
-structure that can be directly interpreted as the possible combination
-of checks leading to an unexpected outcome, without the need to invert
-the tree as required in classic tree-based recursive partitioning
-methods. The logic regression model is then used to predict the analysis
-result based on the values of checks, and the prediction is compared to
-the actual analysis result in order to calculate the precision and
-recall of the checks.
+While checks may score high on predictive accuracy, they may be
+correlated and less useful to provide actions to act on the analysis.
+This could happen if a set of checks are all tangentially related to the
+cause of the unexpected results, but none addresses the root cause. The
+independence score in Figure~\ref{fig-metric-calc} is defined as 1 -
+total correlation per observation.
 
-While checks may score high on predictive accuracy, they may be less
-effective at explaining the various reasons behind unexpected results.
-This could happen if, for example, a set of checks are all tangentially
-related to the cause of the unexpected results, but none addresses the
-root cause. It may also occur if the checks are highly correlated with
-one another, leading to redundancy.
-
-To quantify redundancy, the concept of mutual information is used.
-Mutual information \(I(x, y)\) measures the amount of information shared
-between two random variables and is defined as the Kullback-Leibler
-distance \(D(p \parallel q)\) between the joint distribution of the two
-variables and the product of the marginal distributions:
-
-\[I(x,y) = D\big(p(x,y) \parallel p(x)p(y)\big) = \sum_x \sum_y p(x,y) \log \frac{p(x,y)}{p(x)p(y)}\]
-
-This concept extends naturally to multiple variables through total
-correlation, \(C(X_1, X_2, \cdots, X_n)\), which captures redundancy
-across a set of \(n\) variables:
+Total correlation is a generalization of mutual information that
+measures the amount of shared information across multiple variables
+multiple variables based on Kullback-Leibler distance:
 
 \[C(X_1, X_2, \cdots, X_n) = \sum_{x_1} \sum_{x_2} \cdots \sum_{x_n} p(x_1, x_2, \cdots, x_n) \log \frac{p(x_1, x_2, \cdots, x_n)}{p(x_1)p(x_2) \cdots p(x_n)}\]
 
-A high mutual information value indicates redundancy among the checks,
-while a low value suggests that the checks are independent and provides
-unique information to diagnose the unexpected outcome. To standardize
-this measure, the total correlation \emph{per observation} is
-calculated, and an independence score, ranging between 0 and 1, is
-defined as 1 - mutual information.
+A high total correlation value indicates overlapping of information
+among the analysis validation checks, while a low value suggests that
+the checks are independent and provides unique information to diagnose
+the unexpected outcome. To standardize this measure, the total
+correlation \emph{per observation} is used in calculating the
+independence score.
 
-To combine precision, recall, and independence into a single metric, we
-can combine the three scores using the arithmetic mean, harmonic mean,
-or quadratic mean. The differences among these means are minimal when
-the three metrics are similar. However, as the differences among the
-metrics increases, the harmonic mean tends to produce the smallest
-overall score, as it penalizes low values, while the quadratic mean
-tends to produce the largest score by rewarding higher values more. For
-simple interpretation of the score, the arithmetic mean is preferred,
-while in applications where the difference between precision, recall,
-and independence need to be penalized or rewarded more, the harmonic and
+The three metrics (precision, recall, and independence) can be combiend
+into a single metric using the arithmetic mean, harmonic mean, or
+quadratic mean. The differences among these means are minimal when the
+three metrics are similar. However, as the differences among the metrics
+increases, the harmonic mean tends to produce the smallest overall
+score, as it penalizes low values, while the quadratic mean tends to
+produce the largest score by rewarding higher values more. For simple
+interpretation of the score, the arithmetic mean is preferred, while in
+applications where the difference between precision, recall, and
+independence need to be penalized or rewarded more, the harmonic and
 quadratic mean should be considered.
 
 \subsection{Toy Example Revisited}\label{toy-example-revisited}
 
 Returning to the step count example introduced in Section~\ref{sec-toy},
-the logic regression model is fitted to the three analysis checks
-described previously to generate the prediction of the unexpected
-outcome, whether the average number of step falls within the {[}8,500,
-9,500{]} interval. The predictions from the logic regression model can
-be compared with the simulated true outcome for calculating the
-precision and recall metrics. Figure~\ref{fig-logic-reg} shows the
-best-fitting logic regression model as
+the logic regression model is fitted to the three validation checks
+described previously to predict the outcome, whether the average number
+of step falls within the {[}8,500, 9,500{]} interval.
+Figure~\ref{fig-logic-reg} shows the best-fitting logic regression model
+as
 
+\begin{quote}
 (quantile(step, 0.6) \textgreater{} 10,000 OR quantile(step, 0.4)
-\textless{} 8,000) AND sd(step) \textless{} 2,500
+\textless{} 8,000) AND (NOT sd(step) \textgreater{} 2,500)
+\end{quote}
 
-In other words, we would predict an unexpected outcome in the analysis
-if the standard deviation of the step count is not too large (2,500) and
-either the 60\% quantile of the step count exceeds 10,000 or the 40\%
-quantile of the step count falls below 8,000.
+We would predict an unexpected outcome in the analysis if the standard
+deviation of the step count is not too large (2,500) and either the 60\%
+quantile of the step count exceeds 10,000 or the 40\% quantile of the
+step count falls below 8,000.
 
 \phantomsection\label{cell-fig-logic-reg}
 \begin{figure}[H]
@@ -645,18 +622,17 @@ independence for the three individual checks and the check rule found by
 the logic regression. The harmonic and arithmetic means are included to
 combine the three measures. The results show that the three checks
 produced by the logic regression can accurately predict 86.1\% cases of
-all \emph{actual unexpected results} in the simulation data.
-Furthermore, 43.1\% of all \emph{predicted unexpected results} were in
-fact observed to be unexpected.
+all \emph{predicted unexpected results} in the simulation data.
+Furthermore, 43.1\% of all \emph{actual unexpected results} were in fact
+observed to be unexpected.
 
 \begin{table}
 
-\caption{\label{tbl-logic-reg}Accuracy (precision and recall) and
-parsimony (independence) metrics for each individual check and the logic
-regression check rule. The harmonic and arithmetic means of the three
-metrics are included to evaluate the quality of the checks in diagnosing
-unexpected step counts (more than five days with fewer than 8,000
-steps).}
+\caption{\label{tbl-logic-reg}Precision, recall, and independence
+calculated for each individual check and the logic regression check
+rule. The harmonic and arithmetic means of the three metrics are
+included to evaluate the quality of the checks in diagnosing unexpected
+step counts (more than five days with fewer than 8,000 steps).}
 
 \centering{
 
@@ -664,7 +640,7 @@ steps).}
 \resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
 \begin{tabular}{>{\raggedright\arraybackslash}p{17em}rrrrr}
 \toprule
-checks & precision & recall & indep. & harmonic & arithmetic\\
+Checks & Precision & Recall & Independence & Harmonic & Arithmetic\\
 \midrule
 Check 1: q(step, 0.6) > 10000 & 0.319 & 0.575 & 1.000 & 0.511 & 0.631\\
 Check 2: q(step, 0.4) < 8000 & 0.264 & 0.613 & 1.000 & 0.467 & 0.626\\
@@ -849,7 +825,7 @@ means.}
 \resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
 \begin{tabular}{>{\raggedright\arraybackslash}p{18em}rrrrr}
 \toprule
-check & precision & recall & indep. & harmonic & arithmetic\\
+Checks & Precision & Recall & Independence & Harmonic & Arithmetic\\
 \midrule
 Check 1: cor(m, PM10) < -0.03 & 0.551 & 0.894 & 1 & 0.763 & 0.815\\
 Check 2: cor(m, tmp) > -0.35 & 0.281 & 0.556 & 1 & 0.472 & 0.612\\
