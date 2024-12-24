@@ -674,12 +674,16 @@ mortality from all non-accidental causes \citep{samet2000fine}. For our
 second example, we use the problem of studying PM10 and mortality along
 with data from the National Morbidity, Mortality, and Air Pollution
 Study (NMMAPS) to demonstrate how our analysis validation checks
-described in Section~\ref{sec-method} can be applied. The dataset that
-we use to develop our simulations and analysis checks is from New York
-City, and contains daily PM10, all-cause (non-accidental) mortality, and
-average temperature values from 1992--2000. We then will apply the
-analysis checks to similar data from 39 other cities from the NMMAPS
-study.
+described in Section~\ref{sec-method} can be applied. In addition to
+providing a more substantial problem for our methods, this example also
+demonstrates how the procedure presented in Section~\ref{sec-method} can
+be used to select cutoff values in the analysis checks to diagnose an
+unexpected PM10 coefficient from the generalized linear model. The
+dataset that we use to develop our simulations and analysis checks is
+from New York City, and contains daily PM10, all-cause (non-accidental)
+mortality, and average temperature values from 1992--2000. We then will
+apply the analysis checks to similar data from 39 other cities from the
+NMMAPS study.
 
 The typical approach to studying the association between PM10 and
 mortality is to apply a generalized linear model with a Poisson link to
@@ -692,28 +696,13 @@ modeling approach being used here is primarily for demonstration;
 typically far more sophisticated semi-parametric approaches are used in
 the literature \citep{peng2006model}.
 
-For the purposes of this application, observing an estimated coefficient
-outside of the expected interval is considered unusual and might warrant
-a re-examination of the analysis process. Therefore, our unexpected
-outcome in this analysis will be the binary indicator of whether the
-estimated coefficient for PM10 in the GLM lies outside of the interval
-\([0, 0.005]\). In addition to providing a more substantial problem for
-our methods, this example also demonstrates how the procedure presented
-in Section~\ref{sec-method} can be used to select cutoff values in the
-analysis checks to diagnose an unexpected PM10 coefficient from the
-generalized linear model.
-
-This PM10 coefficient expectation can be framed as an analysis check
-that fails, labelled as 1, if the estimate of the PM10 coefficient
-(adjusted for temperature) is outside the range {[}0, 0.005{]}, and 0 if
-it is within. Multiple factors can affect the estimated PM10
-coefficient, such as the strength of the correlation between mortality
-and PM10, or between mortality and temperature. Outliers in the three
-variables can also leverage the coefficient. While these are possible
-factors that could affect the analysis result, it is not clear what the
-cutoff values for these checks should be to determine a failure. Here we
-consider a list of checks in Table~\ref{tbl-checks} with varied cutoff
-values for each:
+Multiple factors can affect the estimated PM10 coefficient, such as the
+strength of the correlation between mortality and PM10, or between
+mortality and temperature. Outliers in the variables can also leverage
+the coefficient. While these are possible factors that could affect the
+analysis result, it is not clear what the cutoff values for these checks
+should be to determine a failure. Here we consider a list of checks in
+Table~\ref{tbl-checks} with varied cutoff values:
 
 \begin{longtable}[]{@{}l@{}}
 \caption{A list of checks considered for the generalized linear model of
@@ -792,7 +781,7 @@ inverse weights proportional to the number of observations in each
 outcome are applied during the logic regression fit.
 Figure~\ref{fig-linear-reg-tree} shows the optimal logic regression tree
 from the fitted model. Precision, recall, and independence score, along
-with their harmonic and arithmetic mean are calculated in
+with their harmonic and arithmetic mean are presented in
 Table~\ref{tbl-linear-reg}.
 
 \begin{figure}
@@ -814,10 +803,9 @@ PM10 outlier)) to predict the unexpected PM10 coefficient.}
 
 \begin{table}
 
-\caption{\label{tbl-linear-reg}Accuracy (precision and recall) and
-parsimony (independence) metrics derived from the logic regression model
-(last row) and individual checks, along with harmonic and arithmetic
-means.}
+\caption{\label{tbl-linear-reg}Precision, recall, and independence
+metrics derived from the logic regression model and each individual
+check, along with harmonic and arithmetic means.}
 
 \centering{
 
@@ -849,23 +837,26 @@ model picks up the following cutoff values for each type of check:
 \item
   mortality-temperature correlation greater than \(-0.3\)
 \item
-  PM10 data contains outliers that are detected by the univariate
-  outlier detection
+  PM10 data contains outliers detected by the univariate outlier
+  detection
 \item
-  mortality data contains outliers that are detected by the univariate
-  outlier detection
+  mortality data contains outliers detected by the univariate outlier
+  detection
 \end{itemize}
 
-The tree structure suggests checking mortality-PM10 correlation and a
-sample size larger than 200 with an additional check of either outlier
-on mortality or correlation between mortality and temperature. This
-combined check rule generates a precision of 0.722 and a recall of 0.876
-for predicting the unexpected PM10 coefficient.
+The fitted logic regression model is
 
-As shown in Figure~\ref{fig-linear-reg-tree}, there is no single
-analysis check in the tree that predicts an unexpected outcome. rather
-at least three checks in the tree must be TRUE in order for the model to
-predict an unexpected outcome. Given the high independence of the checks
+\begin{quote}
+(cor(mortality, PM10) \textless{} -0.03) AND (cor(mortality, tmp)
+\textgreater{} -0.3 OR (mortality outlier AND PM10 outlier))
+\end{quote}
+
+This generates a precision of 0.722 and a recall of 0.876 for predicting
+the unexpected PM10 coefficient. As shown in
+Figure~\ref{fig-linear-reg-tree}, there is no single analysis check in
+the tree that predicts an unexpected outcome. rather at least three
+checks in the tree must be TRUE in order for the model to predict an
+unexpected outcome. Given the high independence of the checks
 (Table~\ref{tbl-linear-reg}), this suggests that unexpected results are
 only likely after multiple anomalies are observed in the data.
 
@@ -989,12 +980,11 @@ perhaps worth noting that none of the unexpected outcomes was in the
 positive direction.) Table~\ref{tbl-accuracy} summarizes the prediction
 accuracy of the logic regression model for the 40 cities. The model
 correctly predicts the PM10 coefficient status of 32 cities, producing
-an accuracy rate of 80\%. Among the 8 cities with an unexpected outcome
-(PM10 coefficient outside {[}0, 0.005{]}), the model correctly
-identifies 7 (Atlanta, Austin, Memphis, Orlando, Salt Lake City, San
-Antonio, Tampa), giving a recall of 88\% (only Miami was not properly
-classified by the logic regression model). These cities were flagged due
-to failures in both the mortality-PM10 correlation and
+an accuracy rate of 80\%. Among the 8 cities with an unexpected outcome,
+the model correctly identifies 7 (Atlanta, Austin, Memphis, Orlando,
+Salt Lake City, San Antonio, Tampa), giving a recall of 88\% (only Miami
+was not properly classified by the logic regression model). These cities
+were flagged due to failures in both the mortality-PM10 correlation and
 mortality-temperature correlation analysis checks. Out of the 14 cities
 with positive predictions from the model, 7 cities (Cincinnati,
 Columbus, Dallas/Fort Worth, Pittsburgh, Riverside, San Bernardino,
@@ -1020,16 +1010,6 @@ unexpected outcome. We demonstrated our method on an example relating
 daily mortality to outdoor air pollution data. The results from that
 example could be used to inform future analyses of air pollution and
 health data, perhaps in other cities or locations.
-
-With the analysis validation checks proposed in this paper, analysts may
-perform these checks \emph{ex ante} to identify and address potential
-issues before proceeding with the analysis or use them \emph{ex post} to
-diagnose the analysis when an unexpected outcome occurs. Theses checks
-act as checkpoints designed by analysts to flag potential issues,
-clarify assumptions made during the analysis, and enhance transparency
-and communication among stakeholders. They also support students and
-junior researchers develop the skills needed to independently diagnose
-issues in analyses.
 
 In Section~\ref{sec-pm10-mortality} we used the analysis checks in a
 diagnostic manner to examine the eight cities whose PM10 coefficients
@@ -1076,13 +1056,13 @@ assumptions and can potentially be formalized as analysis validation
 checks. For instance, plotting a variable's distribution using a
 histogram, density plot, or bee swarm plot can reveal outliers or
 deviations from normality. These visualizations could be re-framed as
-checks that fail when the data does not conform to the expected
-distribution. However, translating visualization results into binary
-checks that return (TRUE, FALSE) remains an open challenge, requiring
-either manual verification or the development of automated methods to
-interpret visualization outputs. An existing example of visual test is
-the R package \texttt{vdiffr} \citep{vdiffr} for software unit testing.
-The package saves a template plot and compares it to the current plot to
+analysis checks that fail when the data does not conform to the visual
+expectation. However, translating visualization results into binary
+checks remains an open challenge, requiring either manual verification
+or the development of automated methods to interpret visualization
+outputs. An existing example of visual test is the R package
+\texttt{vdiffr} \citep{vdiffr} for graphic software unit testing. The
+package saves a template plot and compares it to the current plot to
 determine whether the unit tests passes or fails.
 
 Systematically generating realistic simulated data is a key component of
