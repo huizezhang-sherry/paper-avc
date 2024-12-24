@@ -205,17 +205,17 @@ pollution on daily mortality.
 \setstretch{1.15}
 \section{Introduction}\label{introduction}
 
-In data analysis, researchers often rely on their prior knowledge or
-domain expertise to form expectations and assess whether results align
-with them. When results deviate from these expectations, experienced
-researchers check assumptions made about the data and during the
-analysis, but these assumptions checked are often difficult to trace and
-are seldom documented in publications. While publication of analysis
-code and data is now a common a requirement for the sake of
-reproducibility \citep{peng2011reproducible}, the published code alone
-is often insufficient for understanding the thought process behind an
-analysis. Code corresponding to published analyses often reflect the
-final decisions made about analysis and do not reveal the decisions or
+In data analysis, analysts often rely on their prior knowledge or domain
+expertise to form expectations and assess whether results align with
+them. When results deviate from these expectations, experienced analysts
+check assumptions made about the data and during the analysis, but often
+do so without discussing the underlying reasoning in the publications.
+While publication of analysis code and data is now a common a
+requirement for the sake of reproducibility
+\citep{peng2011reproducible}, the published code alone is often
+insufficient for understanding the thought process behind an analysis.
+Code corresponding to published analyses often reflect the final
+decisions made about analysis and do not reveal the decisions or
 assumptions made about the data during the analysis. Thus, a reader
 looking at published code can often be left with many questions about
 why certain choices were made.
@@ -353,29 +353,18 @@ optimizing the collection of checks defined for a specific analysis.
 
 \section{Analysis validation checks}\label{sec-plan}
 
-Expectations represent our understanding of certain aspects of the
-analysis and the data, independent of the results of the analysis
-itself. When observed outcomes deviate from these expectations, analysts
-often revisit the analysis process to identify potential issues, refine
-methods, or revise assumptions. Experienced analysts can typically
-identify issues quickly and correct them on the spot, but they often do
-so without discussing the underlying reasoning, limiting transparency
-and making it harder for less experienced researchers to learn and
-master these skills.
-
-Here, we introduce the concept of \textbf{analysis validation checks},
-which frame these expectations or assumptions as explicit checks that
-return a TRUE or FALSE result given the data analyzed at hand. Inspired
-by the concept of data validation checks \citep{validate}, which are
-designed to ensure that datasets meet expected formats and quality,
-analysis validation checks reverse the approach: they validate the
-assumptions about the data necessary for the analysis to produce the
-\emph{expected results}, as defined by the analyst. The focus on
-expected results allows the concept of analysis validation checks to
-encompass a broad range of checks, such as data quality (i.e.~missing
-data, how the data are structured), data distribution and outliers,
-bivariate and multivariate relationships between variables, and other
-contextual information.
+Analysis validation checks are assumptions made by the analysts during
+the analysis, framed as explicit checks that return a binary TRUE or
+FALSE value based on the data. Inspired by the concept of data
+validation checks \citep{validate}, which are designed to ensure that
+datasets meet expected quality before the analysis begins, analysis
+validation checks reverse the approach: they validate the assumptions
+about the data necessary for the analysis to produce the \emph{expected
+results}, as defined by the analyst. The focus on expected results
+allows analysis validation checks to encompass a wide range of checks,
+such as data quality, variable distributions and outliers, bivariate and
+multivariate relationships, and contextual information relevant to the
+analysis.
 
 Our proposed analysis validation checks provide insights into an
 analyst's thought process and offer the following benefits:
@@ -399,7 +388,7 @@ analyst's thought process and offer the following benefits:
 \end{enumerate}
 
 In addition to the above benefits, the development and publication of
-analysis checks has the potential to help students, inexperienced
+analysis checks have the potential to help students, inexperienced
 analysts, and junior researchers develop the skills needed to diagnose
 unexpected analysis results for a given type of data because the
 assumptions made about the data are made transparent. The analysis
@@ -411,40 +400,51 @@ potential data generation process.
 
 Consider a 30-day step count experiment in a public health setting.
 Subjects are instructed to walk at least 8,000 steps each day, with an
-expected average of 9,000 steps, tracked by a step counter app. After 30
-days, we review the data and examine the number of steps taken each day.
-With data of this nature, we may expect there to be occasional ``low''
-days due to factors such as forgetting to wear their watch or
-unfavorable weather conditions limiting outdoor activities. We may also
-expect ``high'' days recorded after an outdoor hike or intense workout.
-Given the requirements of the study, we expect that for a given subject
-the average step count would be between \([8500, 9500]\).
+expected average of 9,000 steps, tracked by a step counter app. With
+data of this nature, we may expect there to be occasional ``low'' days
+due to factors such as unfavorable weather conditions limiting outdoor
+activities. We may also expect ``high'' days recorded after an outdoor
+activities or intense workout. Given the requirements of the study, we
+form our expectation as follows:
 
-To diagnose potential reasons why this outcome expectation might fail,
-we can establish a few analysis validation checks in anticipation of
-seeing the data. For example, we can check the quantile of the step
-count, if more than a third of the days fall below 8,000, or more than a
-third exceed 10,000 steps, this could indicate an excess of low-count or
-high-count days. Similarly, we may may expect the standard deviation of
-the step count not to be overly large. These considerations yield the
-following three analysis validation checks that \emph{fail} when:
+\begin{quote}
+Expectation: The average step count of a given subject is between
+\([8,500, 9,500]\)
+\end{quote}
+
+To diagnose potential reasons why this expectation might fail, we can
+establish a few analysis validation checks in anticipation of seeing the
+data. For example, we can check the quantile of the step count, if more
+than a third of the days fall below 8,000, or more than a third exceed
+10,000 steps, this could indicate an excess of low-count or high-count
+days. Similarly, we may may expect the standard deviation of the step
+count not to be overly large. These considerations yield the following
+three analysis validation checks that \emph{fail} when:
 
 \begin{itemize}
 \tightlist
 \item
-  check 1: the 60\% quantile of the observed step counts is greater than
+  Check 1: the 60\% quantile of the observed step counts is greater than
   10,000
 \item
-  check 2: the 40\% quantile of the observed step counts is less than
+  Check 2: the 40\% quantile of the observed step counts is less than
   8,000, and
 \item
-  check 3: the standard deviation of the observed step counts exceeds
+  Check 3: the standard deviation of the observed step counts exceeds
   2,500.
 \end{itemize}
 
-The cutoff values chosen for these checks would presumably be chosen
-based on prior experience with these kinds of data, but could also be
-optimized using the method presented in the next section.
+The cutoff values for these checks would presumably be chosen based on
+prior experience with these kinds of data, but could also be optimized
+using the method presented in the next section.
+
+To simulate this data, three normal distributions are used for the daily
+step counts: \(\mathcal{N}(6,000, 200)\) for low days,
+\(\mathcal{N}(12,000, 200)\) for high days, and
+\(\mathcal{N}(9,000, 300)\) for typical days. The number of low and high
+days can be simulated from a Poisson distribution with \(\lambda = 8\).
+Figure~\ref{fig-step-count} displays average step count across 300
+simulated 30-day periods.
 
 \phantomsection\label{cell-fig-step-count}
 \begin{figure}[H]
@@ -457,21 +457,13 @@ optimized using the method presented in the next section.
 
 \caption{\label{fig-step-count}Beeswarm plot of average step counts
 across 300 simulated 30-day periods. Each point represents the average
-step count from one simulation. While similar to a boxplot or violin
-plot, the beeswarm plot also displays the distribution of each
-individual data point. The orange points indicate instances where the
-average step count fails outside the {[}8,500, 9,500{]} interval,
-representing an unexpected outcome in this scenario.}
+step count from one simulation. Similar to a boxplot or violin plot, the
+beeswarm plot also displays the distribution of each individual data
+point. The orange points indicate instances where the average step count
+fails outside the {[}8,500, 9,500{]} interval, representing an
+unexpected outcome in this scenario.}
 
 \end{figure}%
-
-To simulate this data, three normal distributions are used for the daily
-step counts: \(\mathcal{N}(6000, 200)\) for low days,
-\(\mathcal{N}(12000, 200)\) for high days, and
-\(\mathcal{N}(9000, 300)\) for typical days. The number of low and high
-days can be simulated from a Poisson distribution with \(\lambda = 8\).
-Figure~\ref{fig-step-count} displays average step count across 300
-simulated 30-day periods.
 
 \section{Method}\label{sec-method}
 
