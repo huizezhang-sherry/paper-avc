@@ -1,4 +1,5 @@
 % Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
@@ -6,22 +7,22 @@
 \documentclass[
   12pt,
 ]{interact}
-
+\usepackage{xcolor}
 \usepackage{amsmath,amssymb}
-\usepackage{setspace}
+\setcounter{secnumdepth}{5}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
 \else % if luatex or xetex
-  \usepackage{unicode-math}
+  \usepackage{unicode-math} % this also loads fontspec
   \defaultfontfeatures{Scale=MatchLowercase}
   \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
 \fi
 \usepackage{lmodern}
-\ifPDFTeX\else  
-    % xetex/luatex font selection
+\ifPDFTeX\else
+  % xetex/luatex font selection
 \fi
 % Use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
@@ -29,6 +30,7 @@
   \usepackage[]{microtype}
   \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
+\usepackage{setspace}
 \makeatletter
 \@ifundefined{KOMAClassName}{% if non-KOMA class
   \IfFileExists{parskip.sty}{%
@@ -39,9 +41,6 @@
 }{% if KOMA class
   \KOMAoptions{parskip=half}}
 \makeatother
-\usepackage{xcolor}
-\setlength{\emergencystretch}{3em} % prevent overfull lines
-\setcounter{secnumdepth}{5}
 % Make \paragraph and \subparagraph free-standing
 \makeatletter
 \ifx\paragraph\undefined\else
@@ -67,8 +66,7 @@
 \makeatother
 
 
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
 \usepackage{etoolbox}
@@ -93,6 +91,22 @@
 % Set default figure placement to htbp
 \def\fps@figure{htbp}
 \makeatother
+
+
+
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+\usepackage[]{natbib}
+\bibliographystyle{plainnat}
+
 
 \usepackage{booktabs}
 \usepackage{longtable}
@@ -150,13 +164,9 @@
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
 \makeatother
-
-\usepackage[]{natbib}
-\bibliographystyle{plainnat}
 \usepackage{bookmark}
-
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
-\urlstyle{same} % disable monospaced font for URLs
+\urlstyle{same}
 \hypersetup{
   pdftitle={Inside Out: Externalizing Assumptions in Data Analysis as Validation Checks},
   pdfauthor={H. Sherry Zhang; Roger D. Peng},
@@ -226,7 +236,7 @@ such as, TidyTuesday screencast videos or think-aloud type studies
 \citep[e.g.][]{gu2024data}. However, direct observation of analysis is
 not scalable and may not always be feasible; creating educational
 screencast videos requires significant effort from the analysts.
-Ideally, there could be a way to explicitly communciate these throught
+Ideally, there could be a way to explicitly communicate these thought
 processes in the data analysis to others. Even better, if these
 expectations were machine-readable, we could analyze them and learn from
 the analysis itself. For example, we could answer questions about
@@ -242,7 +252,7 @@ reconstruct the analysis process from the raw data would provide an
 improved basis for trusting an analysis result
 \citep{peng2021reproducible}.
 
-In this paper, we conceptualize these inexplicit expectations as
+In this paper, we conceptualize these implicit expectations as
 \emph{analysis validation checks}, which allows us to examine the
 assumptions made about the data during an analysis. We then introduce a
 procedure to identify the subset of checks that best predict the
@@ -251,10 +261,10 @@ of the original data, compares the accuracy and independence of
 different combinations of analysis validation checks. Accuracy is
 determined using binary classification metrics (precision and recall)
 from a logic regression model \citep{ruczinski_logic_2003}, while
-independence is measures the shared information among checks. The
-proposed workflow offers a numerical guarantee that the analysis will
-produce the expected results, assuming the assumptions about the data
-generating mechanism hold.
+independence measures the shared information among checks. The proposed
+workflow offers a numerical guarantee that the analysis will produce the
+expected results, assuming the assumptions about the data generating
+mechanism hold.
 
 The rest of the paper is organized as follows:
 Section~\ref{sec-lit-review} reviews the concepts of diagnosing
@@ -333,7 +343,7 @@ packages like \texttt{skimr} \citep{skimr} and \texttt{dataMaid}
 \citep{dataMaid} provide basic data screening and data quality reports,
 while packages such as \texttt{assertr} \citep{assertr},
 \texttt{validate} \citep{validate}, and \texttt{pointblank}
-\citep{pointblank} focuse on providing infustructures that allow users
+\citep{pointblank} focus on providing infrastructures that allow users
 to define customized data quality checks.
 
 The literature on data quality typically focuses on the intrinsic or
@@ -471,7 +481,7 @@ unexpected outcome in this scenario.}
 While not all analysis validation checks are equally important, some may
 be more useful at diagnosing unexpected outcomes than others. This
 section introduces a procedure to identify a subset of analysis
-validation checks that best predict the occurence of unexpected
+validation checks that best predict the occurrence of unexpected
 outcomes.
 
 The approach uses simulated datasets that have the same structure and
@@ -514,7 +524,7 @@ From the simulated data, the accuracy branch in
 Figure~\ref{fig-metric-calc} refers to the set of checks' ability to
 detect unexpected outcomes accurately. To relate multiple checks to the
 outcome, a logic regression model \citep{ruczinski_logic_2003} is used.
-Originally developed for SNP microarray data, logic regression
+Originally developed for SNP micro-array data, logic regression
 constructs Boolean combinations of binary variables,
 \(\mathcal{L}(X_1, X_2, \cdots, X_n)\), to predict classification or
 regression outcomes. The logical operations allowed to construct
@@ -533,7 +543,7 @@ fail and 0 if they pass.
 
 This objective function is optimized using simulated annealing algorithm
 to minimize the misclassification error and the following 6 moves are
-permitted during the optimization to grow or purne the tree (as detailed
+permitted during the optimization to grow or prune the tree (as detailed
 in Figure 2 of \citet{ruczinski_logic_2003}): 1) replacing a leaf node,
 2) replacing an operator, 3) growing a branch, 4) pruning a branch, 5)
 splitting a leaf node, and 6) deleting a leaf node. Predictions from the
@@ -552,23 +562,23 @@ While checks may score high on predictive accuracy, they may be
 correlated and less useful to provide actions to act on the analysis.
 This could happen if a set of checks are all tangentially related to the
 cause of the unexpected results, but none addresses the root cause. The
-independence score in Figure~\ref{fig-metric-calc} is defined as 1 -
+independence score in Figure~\ref{fig-metric-calc} is defined as 1 minus
 total correlation per observation.
 
 Total correlation is a generalization of mutual information that
 measures the amount of shared information across multiple variables
 multiple variables based on Kullback-Leibler distance:
 
-\[C(X_1, X_2, \cdots, X_n) = \sum_{x_1} \sum_{x_2} \cdots \sum_{x_n} p(x_1, x_2, \cdots, x_n) \log \frac{p(x_1, x_2, \cdots, x_n)}{p(x_1)p(x_2) \cdots p(x_n)}\]
+\[C(X_1, X_2, \cdots, X_n) = \sum_{x_1} \sum_{x_2} \cdots \sum_{x_n} p(x_1, x_2, \cdots, x_n) \log \frac{p(x_1, x_2, \cdots, x_n)}{p(x_1)p(x_2) \cdots p(x_n)},\]
 
-A high total correlation value indicates overlapping of information
-among the analysis validation checks, while a low value suggests that
-the checks are independent and provides unique information to diagnose
-the unexpected outcome. To standardize this measure, the total
-correlation \emph{per observation} is used in calculating the
-independence score.
+where \(p(.)\) is the TODO. A high total correlation value indicates
+overlapping of information among the analysis validation checks, while a
+low value suggests that the checks are independent and provides unique
+information to diagnose the unexpected outcome. To standardize this
+measure, the total correlation \emph{per observation} is used in
+calculating the independence score.
 
-The three metrics (precision, recall, and independence) can be combiend
+The three metrics (precision, recall, and independence) can be combined
 into a single metric using the arithmetic mean, harmonic mean, or
 quadratic mean. The differences among these means are minimal when the
 three metrics are similar. However, as the differences among the metrics
@@ -670,20 +680,20 @@ particulate matter air pollution and daily mortality counts. Substantial
 work has been done to study this question and to date, there appears to
 be strong evidence of an association between particulate matter less
 than 10 \(\mu\)g/m\(^3\) in aerodynamic diameter (PM10) and daily
-mortality from all non-accidental causes \citep{samet2000fine}. For our
-second example, we use the problem of studying PM10 and mortality along
-with data from the National Morbidity, Mortality, and Air Pollution
-Study (NMMAPS) to demonstrate how our analysis validation checks
-described in Section~\ref{sec-method} can be applied. In addition to
-providing a more substantial problem for our methods, this example also
-demonstrates how the procedure presented in Section~\ref{sec-method} can
-be used to select cutoff values in the analysis checks to diagnose an
-unexpected PM10 coefficient from the generalized linear model. The
-dataset that we use to develop our simulations and analysis checks is
-from New York City, and contains daily PM10, all-cause (non-accidental)
-mortality, and average temperature values from 1992--2000. We then will
-apply the analysis checks to similar data from 39 other cities from the
-NMMAPS study.
+mortality from all non-accidental causes \citep{samet2000fine}. In the
+following example, we use the problem of studying PM10 and mortality
+along with data from the National Morbidity, Mortality, and Air
+Pollution Study (NMMAPS) to demonstrate how our analysis validation
+checks described in Section~\ref{sec-method} can be applied. In addition
+to providing a more substantial problem for our methods, this example
+also demonstrates how the procedure presented in
+Section~\ref{sec-method} can be used to select cutoff values in the
+analysis checks to diagnose an unexpected PM10 coefficient from the
+generalized linear model. The dataset that we use to develop our
+simulations and analysis checks is from New York City, and contains
+daily PM10, all-cause (non-accidental) mortality, and average
+temperature values from 1992--2000. We then will apply the analysis
+checks to similar data from 39 other cities from the NMMAPS study.
 
 The typical approach to studying the association between PM10 and
 mortality is to apply a generalized linear model with a Poisson link to
@@ -788,16 +798,17 @@ Table~\ref{tbl-linear-reg}.
 
 \centering{
 
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/unnamed-chunk-8-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/unnamed-chunk-3-1.pdf}}
 
 }
 
 \caption{\label{fig-linear-reg-tree}Logic regression model fitted to the
 fourteen checks and the outcome expectation (unexpected) as the response
 variable. The model suggests the relationship: (mortality-PM10
-correlation \textless{} -0.03) AND (mortality-temperature correlation
-\textgreater{} -0.3 OR (there exist mortality outlier AND there exist
-PM10 outlier)) to predict the unexpected PM10 coefficient.}
+correlation \textless{} \(-0.03\)) AND (mortality-temperature
+correlation \textgreater{} \(-0.3\) OR (there exist mortality outlier
+AND there exist PM10 outlier)) to predict the unexpected PM10
+coefficient.}
 
 \end{figure}%
 
@@ -1111,7 +1122,7 @@ paper can be found at:
 
 
 \renewcommand\refname{References}
-  \bibliography{references.bib}
+\bibliography{references.bib}
 
 
 

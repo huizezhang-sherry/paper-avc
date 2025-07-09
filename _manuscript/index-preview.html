@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="generator" content="quarto-1.7.30">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+    <meta name="author" content="H. Sherry Zhang">
+    <meta name="author" content="Roger D. Peng">
+
+    <title>My wonderful paper</title>
+    <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      div.columns{display: flex; gap: min(4vw, 1.5em);}
+      div.column{flex: auto; overflow-x: auto;}
+      div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+      ul.task-list{list-style: none;}
+      ul.task-list li input[type="checkbox"] {
+        width: 0.8em;
+        margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+        vertical-align: middle;
+      }
+      /* CSS for syntax highlighting */
+      html { -webkit-text-size-adjust: 100%; }
+      pre > code.sourceCode { white-space: pre; position: relative; }
+      pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+      pre > code.sourceCode > span:empty { height: 1.2em; }
+      .sourceCode { overflow: visible; }
+      code.sourceCode > span { color: inherit; text-decoration: inherit; }
+      div.sourceCode { margin: 1em 0; }
+      pre.sourceCode { margin: 0; }
+      @media screen {
+      div.sourceCode { overflow: auto; }
+      }
+      @media print {
+      pre > code.sourceCode { white-space: pre-wrap; }
+      pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+      }
+      pre.numberSource code
+        { counter-reset: source-line 0; }
+      pre.numberSource code > span
+        { position: relative; left: -4em; counter-increment: source-line; }
+      pre.numberSource code > span > a:first-child::before
+        { content: counter(source-line);
+          position: relative; left: -1em; text-align: right; vertical-align: baseline;
+          border: none; display: inline-block;
+          -webkit-touch-callout: none; -webkit-user-select: none;
+          -khtml-user-select: none; -moz-user-select: none;
+          -ms-user-select: none; user-select: none;
+          padding: 0 4px; width: 4em;
+        }
+      pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+      div.sourceCode
+        {   }
+      @media screen {
+      pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+      }
+    </style>
+
+    <style>
+      body.hypothesis-enabled #quarto-embed-header {
+        padding-right: 36px;
+      }
+
+      #quarto-embed-header {
+        height: 3em;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: solid 1px;
+      }
+
+      #quarto-embed-header h6 {
+        font-size: 1.1em;
+        padding-top: 0.6em;
+        margin-left: 1em;
+        margin-right: 1em;
+        font-weight: 400;
+      }
+
+      #quarto-embed-header a.quarto-back-link,
+      #quarto-embed-header a.quarto-download-embed {
+        font-size: 0.8em;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        margin-left: 1em;
+        margin-right: 1em;
+      }
+
+      .quarto-back-container {
+        padding-left: 0.5em;
+        display: flex;
+      }
+
+      .headroom {
+          will-change: transform;
+          transition: transform 200ms linear;
+      }
+
+      .headroom--pinned {
+          transform: translateY(0%);
+      }
+
+      .headroom--unpinned {
+          transform: translateY(-100%);
+      }      
+    </style>
+
+    <script>
+    window.document.addEventListener("DOMContentLoaded", function () {
+
+      var header = window.document.querySelector("#quarto-embed-header");
+      const titleBannerEl = window.document.querySelector("body > #title-block-header");
+      if (titleBannerEl) {
+        titleBannerEl.style.paddingTop = header.clientHeight + "px";
+      }
+      const contentEl = window.document.getElementById('quarto-content');
+      for (const child of contentEl.children) {
+        child.style.paddingTop = header.clientHeight + "px";
+        child.style.marginTop = "1em";
+      }
+
+      // Use the article root if the `back` call doesn't work. This isn't perfect
+      // but should typically work
+      window.quartoBackToArticle = () => {
+        var currentUrl = window.location.href;
+        window.history.back();
+        setTimeout(() => {
+            // if location was not changed in 100 ms, then there is no history back
+            if(currentUrl === window.location.href){              
+                // redirect to site root
+                window.location.href = "index.html";
+            }
+        }, 100);
+      }
+
+      const headroom = new window.Headroom(header, {
+        tolerance: 5,
+        onPin: function () {
+        },
+        onUnpin: function () {
+        },
+      });
+      headroom.init();
+    });
+    </script>
+
+    
+<script src="site_libs/manuscript-notebook/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-de070a7b0ab54f8780927367ac907214.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-8a894fcc3cb5e37eb5bf30def131be2f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+     <script async="" src="https://hypothes.is/embed.js"></script>
+<script>
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    document.body.classList.add('hypothesis-enabled');
+  });
+</script>   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script> 
+      <meta name="citation_title" content="My wonderful paper">
+<meta name="citation_abstract" content="This is the abstract">
+<meta name="citation_author" content="H. Sherry Zhang">
+<meta name="citation_author" content="Roger D. Peng">
+<meta name="citation_language" content="en">
+<meta name="citation_reference" content="citation_title=Methodologies for data quality assessment and improvement;,citation_author=Carlo Batini;,citation_author=Cinzia Cappiello;,citation_author=Chiara Francalanci;,citation_author=Andrea Maurino;,citation_publication_date=2009;,citation_cover_date=2009;,citation_year=2009;,citation_issue=3;,citation_volume=41;,citation_journal_title=ACM computing surveys (CSUR);,citation_publisher=ACM New York, NY, USA;">
+<meta name="citation_reference" content="citation_title=Ozone and short-term mortality in 95 US urban communities, 1987-2000;,citation_author=Michelle L Bell;,citation_author=Aidan McDermott;,citation_author=Scott L Zeger;,citation_author=Jonathan M Samet;,citation_author=Francesca Dominici;,citation_publication_date=2004;,citation_cover_date=2004;,citation_year=2004;,citation_issue=19;,citation_volume=292;,citation_journal_title=Jama;,citation_publisher=American Medical Association;">
+<meta name="citation_reference" content="citation_title=Model choice in time series studies of air pollution and mortality;,citation_author=Roger D Peng;,citation_author=Francesca Dominici;,citation_author=Thomas A Louis;,citation_publication_date=2006;,citation_cover_date=2006;,citation_year=2006;,citation_issue=2;,citation_volume=169;,citation_journal_title=Journal of the Royal Statistical Society Series A: Statistics in Society;,citation_publisher=Oxford University Press;">
+<meta name="citation_reference" content="citation_title=Data fission: Splitting a single data point;,citation_author=James Leiner;,citation_author=Boyan Duan;,citation_author=Larry Wasserman;,citation_author=Aaditya Ramdas;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_journal_title=Journal of the American Statistical Association;,citation_publisher=Taylor &amp;amp;amp; Francis;">
+<meta name="citation_reference" content="citation_title=Data thinning for convolution-closed distributions;,citation_author=Anna Neufeld;,citation_author=Ameer Dharamshi;,citation_author=Lucy L Gao;,citation_author=Daniela Witten;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;,citation_issue=57;,citation_volume=25;,citation_journal_title=Journal of Machine Learning Research;">
+<meta name="citation_reference" content="citation_title=Are the acute effects of particulate matter on mortality in the national morbidity, mortality, and air pollution study the result of inadequate control for weather and season? A sensitivity analysis using flexible distributed lag models;,citation_author=Leah J Welty;,citation_author=Scott L Zeger;,citation_publication_date=2005;,citation_cover_date=2005;,citation_year=2005;,citation_issue=1;,citation_volume=162;,citation_journal_title=American journal of epidemiology;,citation_publisher=Oxford University Press;">
+<meta name="citation_reference" content="citation_title=Data validation for machine learning;,citation_author=Neoklis Polyzotis;,citation_author=Martin Zinkevich;,citation_author=Sudip Roy;,citation_author=Eric Breck;,citation_author=Steven Whang;,citation_publication_date=2019;,citation_cover_date=2019;,citation_year=2019;,citation_volume=1;,citation_journal_title=Proceedings of machine learning and systems;">
+<meta name="citation_reference" content="citation_title=Automating large-scale data quality verification;,citation_author=Sebastian Schelter;,citation_author=Dustin Lange;,citation_author=Philipp Schmidt;,citation_author=Meltem Celikel;,citation_author=Felix Biessmann;,citation_author=Andreas Grafberger;,citation_publication_date=2018;,citation_cover_date=2018;,citation_year=2018;,citation_issue=12;,citation_volume=11;,citation_journal_title=Proceedings of the VLDB Endowment;,citation_publisher=VLDB Endowment;">
+<meta name="citation_reference" content="citation_title=Veridical data science: The practice of responsible data analysis and decision making;,citation_author=Bin Yu;,citation_author=Rebecca L Barter;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;">
+<meta name="citation_reference" content="citation_title=Vdiffr: Visual regression testing and graphical diffing;,citation_author=Lionel Henry;,citation_author=Thomas Lin Pedersen;,citation_author=T Jake Luciani;,citation_author=Matthieu Decorde;,citation_author=Vaudor Lise;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_fulltext_html_url=https://CRAN.R-project.org/package=vdiffr;">
+<meta name="citation_reference" content="citation_title=An overview of data quality frameworks;,citation_author=Corinna Cichy;,citation_author=Stefan Rass;,citation_publication_date=2019;,citation_cover_date=2019;,citation_year=2019;,citation_doi=10.1109/ACCESS.2019.2899751;,citation_volume=7;,citation_journal_title=IEEE Access;">
+<meta name="citation_reference" content="citation_title=The challenges of data quality and data quality assessment in the big data era;,citation_author=Li Cai;,citation_author=Yangyong Zhu;,citation_publication_date=2015;,citation_cover_date=2015;,citation_year=2015;,citation_volume=14;,citation_journal_title=Data science journal;">
+<meta name="citation_reference" content="citation_title=A classification of data quality assessment and improvement methods;,citation_author=Philip Woodall;,citation_author=Martin Oberhofer;,citation_author=Alexander Borek;,citation_publication_date=2014;,citation_cover_date=2014;,citation_year=2014;,citation_issue=4;,citation_volume=3;,citation_journal_title=International Journal of Information Quality 16;,citation_publisher=Inderscience Publishers Ltd;">
+<meta name="citation_reference" content="citation_title=Data quality: A survey of data quality dimensions;,citation_author=Fatimah Sidi;,citation_author=Payam Hassany Shariat Panahy;,citation_author=Lilly Suriani Affendey;,citation_author=Marzanah A. Jabar;,citation_author=Hamidah Ibrahim;,citation_author=Aida Mustapha;,citation_publication_date=2012;,citation_cover_date=2012;,citation_year=2012;,citation_doi=10.1109/InfRKM.2012.6204995;,citation_conference_title=2012 international conference on information retrieval &amp;amp;amp; knowledge management;">
+<meta name="citation_reference" content="citation_title=Beyond accuracy: What data quality means to data consumers;,citation_author=Richard Y Wang;,citation_author=Diane M Strong;,citation_publication_date=1996;,citation_cover_date=1996;,citation_year=1996;,citation_issue=4;,citation_volume=12;,citation_journal_title=Journal of management information systems;,citation_publisher=Taylor &amp;amp;amp; Francis;">
+<meta name="citation_reference" content="citation_title=Skimr: Compact and flexible summaries of data;,citation_author=Elin Waring;,citation_author=Michael Quinn;,citation_author=Amelia McNamara;,citation_author=Eduardo Arino de la Rubia;,citation_author=Hao Zhu;,citation_author=Shannon Ellis;,citation_publication_date=2022;,citation_cover_date=2022;,citation_year=2022;,citation_fulltext_html_url=https://CRAN.R-project.org/package=skimr;">
+<meta name="citation_reference" content="citation_title=dataMaid: Your assistant for documenting supervised data quality screening in r;,citation_author=Anne Helby Petersen;,citation_author=Claus Thorn Ekstrøm;,citation_publication_date=2019;,citation_cover_date=2019;,citation_year=2019;,citation_volume=90;,citation_journal_title=Journal of Statistical Software;">
+<meta name="citation_reference" content="citation_title=Methodology for data validation 1.0;,citation_author=M. Di Zio;,citation_author=N. Fursova;,citation_author=T. Gelsema;,citation_author=S. Giessing;,citation_author=U. Guarnera;,citation_author=J. Petrauskiene;,citation_author=L. Q. Kalben;,citation_author=M. Scanu;,citation_author=K. Bosch;,citation_author=M. Van der Loo;,citation_author=K. Walsdorfer;,citation_publication_date=2016;,citation_cover_date=2016;,citation_year=2016;,citation_fulltext_html_url=https://ec.europa.eu/eurostat/documents/7755309/7769541/Methodology_for_data_validation_V1.0_REV-2016-06_FINAL.pdf/ed7abb5d-6f1f-4e92-9a72-40d8a7fe0b85;,citation_technical_report_institution=ESSNet on Validation;">
+<meta name="citation_reference" content="citation_title=Data validation infrastructure for r;,citation_author=Mark PJ Loo;,citation_author=Edwin Jonge;,citation_publication_date=2021;,citation_cover_date=2021;,citation_year=2021;,citation_fulltext_html_url=https://www.jstatsoft.org/article/view/v097i10;,citation_doi=10.18637/jss.v097.i10;,citation_volume=97;,citation_journal_title=Journal of Statistical Software;">
+<meta name="citation_reference" content="citation_title=Fault tree handbook;,citation_author=William E Vesely;,citation_author=Francine F Goldberg;,citation_author=Norman H Roberts;,citation_author=David F Haasl;,citation_publication_date=1981;,citation_cover_date=1981;,citation_year=1981;,citation_technical_report_institution=Nuclear Regulatory Commission Washington DC;">
+<meta name="citation_reference" content="citation_title=Fault tree handbook with aerospace applications;,citation_author=Stamatelatos Michael;,citation_author=D Joane;,citation_author=F Joseph;,citation_author=M Joseph;,citation_author=R Jan;,citation_publication_date=2002;,citation_cover_date=2002;,citation_year=2002;,citation_journal_title=NASA Office of Safety and Mission Assurance-NASA Headquarters, Washington;">
+<meta name="citation_reference" content="citation_title=Are the acute effects of particulate matter on mortality in the national morbidity, mortality, and air pollution study the result of inadequate control for weather and season? A sensitivity analysis using flexible distributed lag models;,citation_author=Leah J Welty;,citation_author=Scott L Zeger;,citation_publication_date=2005;,citation_cover_date=2005;,citation_year=2005;,citation_issue=1;,citation_volume=162;,citation_journal_title=American journal of epidemiology;,citation_publisher=Oxford University Press;">
+<meta name="citation_reference" content="citation_title=Fine particulate air pollution and mortality in 20 US cities, 1987–1994;,citation_author=Jonathan M Samet;,citation_author=Francesca Dominici;,citation_author=Frank C Curriero;,citation_author=Ivan Coursac;,citation_author=Scott L Zeger;,citation_publication_date=2000;,citation_cover_date=2000;,citation_year=2000;,citation_issue=24;,citation_volume=343;,citation_journal_title=New England journal of medicine;,citation_publisher=Mass Medical Soc;">
+<meta name="citation_reference" content="citation_title=Towards a framework for teaching debugging;,citation_author=Chen Li;,citation_author=Emily Chan;,citation_author=Paul Denny;,citation_author=Andrew Luxton-Reilly;,citation_author=Ewan Tempero;,citation_publication_date=2019;,citation_cover_date=2019;,citation_year=2019;,citation_conference_title=Proceedings of the twenty-first australasian computing education conference;">
+<meta name="citation_reference" content="citation_title=Teaching creative and practical data science at scale;,citation_author=Thomas Donoghue;,citation_author=Bradley Voytek;,citation_author=Shannon E Ellis;,citation_publication_date=2021;,citation_cover_date=2021;,citation_year=2021;,citation_issue=sup1;,citation_volume=29;,citation_journal_title=Journal of Statistics and Data Science Education;,citation_publisher=Taylor &amp;amp;amp; Francis;">
+<meta name="citation_reference" content="citation_title=Statistical thinking in empirical enquiry;,citation_author=Chris J Wild;,citation_author=Maxine Pfannkuch;,citation_publication_date=1999;,citation_cover_date=1999;,citation_year=1999;,citation_issue=3;,citation_volume=67;,citation_journal_title=International statistical review;,citation_publisher=Wiley Online Library;">
+<meta name="citation_reference" content="citation_title=Logic Regression;,citation_author=Ingo Ruczinski;,citation_author=Charles Kooperberg;,citation_author=Michael LeBlanc;,citation_publication_date=2003-09;,citation_cover_date=2003-09;,citation_year=2003;,citation_fulltext_html_url=https://doi.org/10.1198/1061860032238;,citation_issue=3;,citation_doi=10.1198/1061860032238;,citation_issn=1061-8600;,citation_volume=12;,citation_journal_title=Journal of Computational and Graphical Statistics;">
+<meta name="citation_reference" content="citation_title=How do data analysts respond to ai assistance? A wizard-of-oz study;,citation_author=Ken Gu;,citation_author=Madeleine Grunde-McLaughlin;,citation_author=Andrew McNutt;,citation_author=Jeffrey Heer;,citation_author=Tim Althoff;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;,citation_conference_title=Proceedings of the CHI conference on human factors in computing systems;">
+<meta name="citation_reference" content="citation_title=A Cognitive Interpretation of Data Analysis;,citation_author=Garrett Grolemund;,citation_author=Hadley Wickham;,citation_publication_date=2014-08;,citation_cover_date=2014-08;,citation_year=2014;,citation_fulltext_html_url=https://onlinelibrary.wiley.com/doi/10.1111/insr.12028;,citation_issue=2;,citation_doi=10.1111/insr.12028;,citation_volume=82;,citation_journal_title=International Statistical Review;">
+<meta name="citation_reference" content="citation_title=Ambient particulate air pollution and daily mortality in 652 cities;,citation_author=Cong Liu;,citation_author=Renjie Chen;,citation_author=Francesco Sera;,citation_author=Ana M Vicedo-Cabrera;,citation_author=Yuming Guo;,citation_author=Shilu Tong;,citation_author=Micheline SZS Coelho;,citation_author=Paulo HN Saldiva;,citation_author=Eric Lavigne;,citation_author=Patricia Matus;,citation_author=others;,citation_publication_date=2019;,citation_cover_date=2019;,citation_year=2019;,citation_issue=8;,citation_volume=381;,citation_journal_title=New England Journal of Medicine;,citation_publisher=Mass Medical Soc;">
+<meta name="citation_reference" content="citation_title=The oracle problem in software testing: A survey;,citation_author=Earl T Barr;,citation_author=Mark Harman;,citation_author=Phil McMinn;,citation_author=Muzammil Shahbaz;,citation_author=Shin Yoo;,citation_publication_date=2014;,citation_cover_date=2014;,citation_year=2014;,citation_issue=5;,citation_volume=41;,citation_journal_title=IEEE transactions on software engineering;,citation_publisher=IEEE;">
+<meta name="citation_reference" content="citation_title=Assertthat: Easy pre and post assertions;,citation_author=Hadley Wickham;,citation_publication_date=2019;,citation_cover_date=2019;,citation_year=2019;,citation_fulltext_html_url=https://CRAN.R-project.org/package=assertthat;">
+<meta name="citation_reference" content="citation_title=Pointblank: Data validation and organization of metadata for local and remote tables;,citation_author=Richard Iannone;,citation_author=Mauricio Vargas;,citation_author=June Choe;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;,citation_fulltext_html_url=https://CRAN.R-project.org/package=pointblank;">
+<meta name="citation_reference" content="citation_title=Reproducible research: A retrospective;,citation_author=Roger D Peng;,citation_author=Stephanie C Hicks;,citation_publication_date=2021;,citation_cover_date=2021;,citation_year=2021;,citation_issue=1;,citation_volume=42;,citation_journal_title=Annual review of public health;,citation_publisher=Annual Reviews;">
+<meta name="citation_reference" content="citation_title=Perspective on data science;,citation_author=Roger D Peng;,citation_author=Hilary S Parker;,citation_publication_date=2022;,citation_cover_date=2022;,citation_year=2022;,citation_issue=1;,citation_volume=9;,citation_journal_title=Annual Review of Statistics and Its Application;,citation_publisher=Annual Reviews;">
+<meta name="citation_reference" content="citation_title=Reproducible research in computational science;,citation_author=Roger D Peng;,citation_publication_date=2011;,citation_cover_date=2011;,citation_year=2011;,citation_issue=6060;,citation_volume=334;,citation_journal_title=Science;,citation_publisher=American Association for the Advancement of Science;">
+<meta name="citation_reference" content="citation_title=Diagnosing Data Analytic Problems in the Classroom;,citation_author=Roger D. Peng;,citation_author=Athena Chen;,citation_author=Eric Bridgeford;,citation_author=Jeffrey T. Leek;,citation_author=Stephanie C. Hicks;,citation_publication_date=2021-09;,citation_cover_date=2021-09;,citation_year=2021;,citation_fulltext_html_url=https://doi.org/10.1080/26939169.2021.1971586;,citation_issue=3;,citation_doi=10.1080/26939169.2021.1971586;,citation_volume=29;,citation_journal_title=Journal of Statistics and Data Science Education;">
+<meta name="citation_reference" content="citation_title=performance: An R package for assessment, comparison and testing of statistical models;,citation_author=Daniel Lüdecke;,citation_author=Mattan S. Ben-Shachar;,citation_author=Indrajeet Patil;,citation_author=Philip Waggoner;,citation_author=Dominique Makowski;,citation_publication_date=2021;,citation_cover_date=2021;,citation_year=2021;,citation_issue=60;,citation_doi=10.21105/joss.03139;,citation_volume=6;,citation_journal_title=Journal of Open Source Software;">
+<meta name="citation_reference" content="citation_title=Yardstick: Tidy characterizations of model performance;,citation_author=Max Kuhn;,citation_author=Davis Vaughan;,citation_author=Emil Hvitfeldt;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;,citation_fulltext_html_url=https://CRAN.R-project.org/package=yardstick;">
+<meta name="citation_reference" content="citation_title=Tidymodels: A collection of packages for modeling and machine learning using tidyverse principles.;,citation_author=Max Kuhn;,citation_author=Hadley Wickham;,citation_publication_date=2020;,citation_cover_date=2020;,citation_year=2020;,citation_fulltext_html_url=https://www.tidymodels.org;">
+<meta name="citation_reference" content="citation_title=Testthat: Get started with testing;,citation_author=Hadley Wickham;,citation_publication_date=2011;,citation_cover_date=2011;,citation_year=2011;,citation_fulltext_html_url=https://journal.r-project.org/archive/2011-1/RJournal_2011-1_Wickham.pdf;,citation_volume=3;,citation_journal_title=The R Journal;">
+<meta name="citation_reference" content="citation_title=Assertr: Assertive programming for r analysis pipelines;,citation_author=Tony Fischetti;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_fulltext_html_url=https://CRAN.R-project.org/package=assertr;">
+<meta name="citation_reference" content="citation_title=R: A language and environment for statistical computing;,citation_author=R Core Team;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_fulltext_html_url=https://www.R-project.org/;">
+<meta name="citation_reference" content="citation_title=Quarto;,citation_author=J. J. Allaire;,citation_author=Charles Teague;,citation_author=Carlos Scheidegger;,citation_author=Yihui Xie;,citation_author=Christophe Dervieux;,citation_publication_date=2022-01;,citation_cover_date=2022-01;,citation_year=2022;,citation_fulltext_html_url=https://github.com/quarto-dev/quarto-cli;,citation_doi=10.5281/zenodo.5960048;">
+</head>
+
+  <body class="quarto-notebook quarto-light">
+    <div id="quarto-embed-header" class="headroom fixed-top bg-primary">
+      
+      <a onclick="window.quartoBackToArticle(); return false;" class="btn btn-primary quarto-back-link" href=""><i class="bi bi-caret-left"></i> Back to Article</a>
+      <h6><i class="bi bi-journal-code"></i> Article Notebook</h6>
+
+            <a href="./index.qmd" class="btn btn-primary quarto-download-embed" download="index.qmd">Download Source</a>
+          </div>
+
+     <header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">My wonderful paper</h1>
+          </div>
+
+    
+    <div class="quarto-title-meta-container">
+      <div class="quarto-title-meta-column-start">
+            <div class="quarto-title-meta-author">
+          <div class="quarto-title-meta-heading">Authors</div>
+          <div class="quarto-title-meta-heading">Affiliation</div>
+          
+                <div class="quarto-title-meta-contents">
+            <p class="author">H. Sherry Zhang <a href="mailto:huize.zhang@austin.utexas.edu" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+          </div>
+                <div class="quarto-title-meta-contents">
+                    <p class="affiliation">
+                        University of Texas at Austin
+                      </p>
+                  </div>
+                      <div class="quarto-title-meta-contents">
+            <p class="author">Roger D. Peng <a href="mailto:roger.peng@austin.utexas.edu" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+          </div>
+                <div class="quarto-title-meta-contents">
+                    <p class="affiliation">
+                        University of Texas at Austin
+                      </p>
+                  </div>
+                    </div>
+        
+        <div class="quarto-title-meta">
+
+                      
+          
+                
+              </div>
+      </div>
+      <div class="quarto-title-meta-column-end quarto-other-formats-target">
+      </div>
+    </div>
+
+    <div>
+      <div class="abstract">
+        <div class="block-title">Abstract</div>
+        This is the abstract
+      </div>
+    </div>
+
+
+    <div class="quarto-other-links-text-target">
+    </div>  </div>
+</header><div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#sec-plan" id="toc-sec-plan" class="nav-link" data-scroll-target="#sec-plan">Analysis plan</a></li>
+  <li><a href="#sec-examples" id="toc-sec-examples" class="nav-link" data-scroll-target="#sec-examples">Examples</a>
+  <ul class="collapse">
+  <li><a href="#a-toy-example" id="toc-a-toy-example" class="nav-link" data-scroll-target="#a-toy-example">A toy example</a></li>
+  <li><a href="#sec-linear-reg" id="toc-sec-linear-reg" class="nav-link" data-scroll-target="#sec-linear-reg">Linear regression</a></li>
+  </ul></li>
+  <li><a href="#sec-conclusion" id="toc-sec-conclusion" class="nav-link" data-scroll-target="#sec-conclusion">Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content quarto-banner-title-block" id="quarto-document-content">      
+
+       <div class="cell-container"><div class="cell-decorator"><pre>In [1]:</pre></div><div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">echo =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'MASS'
+
+The following object is masked from 'package:patchwork':
+
+    area
+
+The following object is masked from 'package:dplyr':
+
+    select</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggh4x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'ggh4x'
+
+The following object is masked from 'package:ggplot2':
+
+    guide_axis_logticks</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>pm10 <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"pm10.csv"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(pm10)) <span class="sc">|&gt;</span>    </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">season =</span> <span class="fu">as.factor</span>(season))  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 3288 Columns: 6
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+</div></div>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>[background]</p>
+<p>In this paper, a concept called analysis plan is proposed to describe the logical structure of a data analysis. An analysis plan is a set of analysis steps plus their expected outcomes. It is a formal representation of the analysis process and can be used to guide the analysis process, to communicate and compare the analysis process to others, and to evaluate the analysis process. The concept of analysis plan is illustrated with examples. The implications of the concept for data analysis practice is discussed.</p>
+<p>The analysis plan described in this paper should be differentiated from the pre-specifies analysis plan document often used in biostatistics to specifies the hypothesis, data collection mechanism, statistical procedures etc of randomized experiments.</p>
+<p>The rest of the paper is organized as follows: <a href="#sec-plan" class="quarto-xref">Section&nbsp;2</a> describes the concept of analysis plan in detail. <a href="#sec-examples" class="quarto-xref">Section&nbsp;3</a> provides examples of analysis plan [more details]. (need another section here or before examples?) <a href="#sec-conclusion" class="quarto-xref">Section&nbsp;4</a> concludes the paper.</p>
+</section>
+<section id="sec-plan" class="level1">
+<h1>Analysis plan</h1>
+<ul>
+<li><p>describe/ define what analysis plan is, expectation (outcome and plan)</p></li>
+<li><p>why it is useful to be explicit about expectation?</p>
+<ul>
+<li>expectations can be used to formulate unit tests, which helps to divide the “result universe”</li>
+</ul></li>
+</ul>
+</section>
+<section id="sec-examples" class="level1">
+<h1>Examples</h1>
+<p>Three examples are presented to illustrate how the concept of analysis plan can be applied to data analysis. [toy example]. <a href="#sec-linear-reg" class="quarto-xref">Section&nbsp;3.2</a> illustrates how constructing the result universe in a linear regression model of PM10 on mortality can help understand the impact of sample size, model specification, and variable correlation structure on data analysis. [example three]</p>
+<section id="a-toy-example" class="level2">
+<h2 class="anchored" data-anchor-id="a-toy-example">A toy example</h2>
+<p>Let’s think about a 5-day step count. You make a resolution to walk on average 5000 steps a day (your expectation) and using an app to record your step count. After 5 days, the app tells you’ve walked on average 8000 steps.</p>
+<p>It is easy to come up with reasons why an 8000 average step is resulted based on common sense:</p>
+<ol type="1">
+<li>you may run a 10k on day 1, resulting a high step count on the day (outlier on the right).</li>
+<li>you left your phone at home on day 3, resulting a zero or minimal step count on the day (outlier on the left).</li>
+<li>you may realise the step count may increase since you were in a hiking trip in the last five days (average shift).</li>
+</ol>
+<p>Based on these reasons, you may devise a set of unit tests to check the step count data, i.e.&nbsp;check the maximum and minimum step count, check the difference between each day.</p>
+<ul>
+<li>If the daily count looks like c(4000, 5000, 5500, 5500, 20000), the maximum check will flag the data for investigate the maximum. The difference between days test will also flag the data</li>
+<li>If the daily count looks like c(20000, 20000, 20000, 20000, 20000), the maximum check will flag the data for investigate the maximum.</li>
+</ul>
+<p>Some part of the space is impossible: c(0, 4000, 5000, 5500, 5500) is flagged by the minimal tests but won’t cause an average of 8000 average step.</p>
+<p>The statistical procedure of averaging 5 numbers “around 5000” to get a mean of 5000 is <em>consistent</em> meaning if all the numbers are around 5000, we are guaranteed to get a mean around 5000. We could devise 5 unit tests to check each number. Since you’re more familiar with your daily life, you may realise the step count may increase since you were in a hiking trip in the last two days. This may prompt you to check the step count.</p>
+<p>In a data analysis, it is not practical to check every entry of the data, a similar strategy of devising tests to check for</p>
+<ul>
+<li>The combination of unit tests are not unique</li>
+<li>The unit tests provide guidance for diagnosing the results, but are not red flags: c(2000, 2000, 5000, 8000, 8000) will likely to fail the max diff test but receive a within expectation mean.</li>
+</ul>
+</section>
+<section id="sec-linear-reg" class="level2">
+<h2 class="anchored" data-anchor-id="sec-linear-reg">Linear regression</h2>
+<p>Consider a linear regression model to study the effect of PM10 on mortality (provide context of using PM10 to study mortality). Analysts may expect a significant (p-value <span class="math inline">\(\le\)</span> 0.05) PM10 coefficient in the linear model from the literature. This is the <em>outcome expectation</em>. There are multiple factors that can affect the outcome expectation of linear regression, which here is called <em>plan expectation</em>, for example, 1) sample size, 2) model specification, and 3) correlation structure between variables. Adequate sample size is required to achieve the desired power to detect the significance of PM10 on mortality. Temperature is often an important confounder to consider in such study (add reference). From some domain knowledge, an analyst may expect that the significance of PM10 coefficient can be attained by adding temperature to the model. Analysts may also expect certain correlation structure between PM10, temperature, and mortality, and the distribution of each variable.</p>
+<p>To build the result universe, datasets can be simulated to either meet and fail these plan expectations, allowing the analysts to observe the significance of PM10 coefficient. Here, sample sizes of 50, 100, 500, and 1000 are considered. Two model specifications are included: 1) linear model with PM10 as the only covariate (<span class="math inline">\(\text{mortality} \sim \text{PM10}\)</span>), 2) linear model with PM10 and temperature as covariates (<span class="math inline">\(\text{mortality} \sim \text{PM10} + \text{temp}\)</span>). A grid-based approach is used to simulate correlation structure. Reasonable ranges of correlation between the three variables are <span class="math inline">\(\text{cor}(\text{mortality}, \text{PM10}) \in [-0.01, 0]\)</span>, <span class="math inline">\(\text{cor}(\text{mortality}, \text{temperature}) \in [-0.6, -0.2]\)</span>, and <span class="math inline">\(\text{cor}(\text{PM10}, \text{temperature}) \in [0.2, 0.6]\)</span>.</p>
+<ul>
+<li><p>add a paragraph to describe the simulation process</p></li>
+<li><p>add a fourth panel to describe the comparison of a right/ wrong expectation, i.e.&nbsp;correlation on PM10 and mortality</p></li>
+</ul>
+<p><a href="#fig-result-universe" class="quarto-xref">Figure&nbsp;1</a> shows that result universe of the linear regression model and how a change of decision in one of the plan expectations above affect the outcome expectation. Panel a) is colored by the outcome expectation – whether a significant p-value is found in the PM10 coefficient. Panel b) shows the effect of adding temperature to the model and the results show that the significance of PM10 coefficient can be achieved by adding temperature to the model for a sample size of 500. Panel c) shows that increasing sample size from 50 to 100 enhances the significance of p-value for PM10 and the significance remains with further increases in sample size. [note: weave the “actual data” into the example linear regression model]</p>
+<p>(these two paragraphs may go to a new section <em>discussion</em>) A result universe constructed in this example can be presented to analysts to answer the what-if questions raised in the data analysis. What if the sample size is increased? What if temperature is added to the model? What would the results expect to be changed when the correlation structure is different? For analysts, expectations can be used as unit tests to divide the result universe, which allows them to understand the impact of each factor on the outcome expectation.</p>
+<p>The result universe also provides a holistic view of how the results obtained by the analysts are situated in all possible results. This can be seen as a direct towards trustworthy data analysis, where the audience of the analysis to exercise their own cognitive model <span class="citation" data-cites="grolemund_cognitive_2014">[@grolemund_cognitive_2014]</span> to evaluate the results reported.</p>
+<div class="cell-container"><div class="cell-decorator"><pre>In [2]:</pre></div><div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate correlation matrices </span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>corr_grid <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="fu">seq</span>(<span class="sc">-</span><span class="fl">0.01</span>, <span class="sc">-</span><span class="fl">0.001</span>, <span class="at">by =</span> <span class="fl">0.001</span>), </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">seq</span>(<span class="sc">-</span><span class="fl">0.6</span>, <span class="sc">-</span><span class="fl">0.2</span>, <span class="fl">0.05</span>), <span class="fu">seq</span>(<span class="fl">0.2</span>, <span class="fl">0.6</span>, <span class="fl">0.05</span>))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to compute correlation matrix for each combination </span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>gen_corr_mtx <span class="ot">&lt;-</span> <span class="cf">function</span>(r1, r2, r3) {   </span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  cor_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, r1, r2,                          </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                         r1, <span class="dv">1</span>, r3,                          </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>                         r2, r3, <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)          </span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Store the matrix in the list   </span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">all</span>(<span class="fu">eigen</span>(cor_matrix)<span class="sc">$</span>values <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="fu">return</span>(cor_matrix) </span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  }  </span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Plan for parallel processing</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>corr_mtx <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(corr_grid), <span class="cf">function</span>(i) {   </span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gen_corr_mtx</span>(corr_grid[i, <span class="dv">1</span>], corr_grid[i, <span class="dv">2</span>], corr_grid[i, <span class="dv">3</span>]) </span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  }) </span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>corr_mtx <span class="ot">&lt;-</span> corr_mtx[<span class="fu">map_lgl</span>(corr_mtx, <span class="sc">~!</span><span class="fu">is.null</span>(.x))]  </span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>sample_size <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">500</span>, <span class="dv">1000</span>) </span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"mortality ~ pm10 + temp"</span>, <span class="st">"mortality ~ pm10"</span>) <span class="sc">|&gt;</span> <span class="fu">map</span>(as.formula) </span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>generate_data <span class="ot">&lt;-</span> <span class="cf">function</span>(n, mtx, <span class="at">seed =</span> <span class="dv">123</span>) {   </span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)   </span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>  data <span class="ot">&lt;-</span> <span class="fu">mvrnorm</span>(n, mu, mtx, <span class="at">empirical =</span> <span class="cn">TRUE</span>)   </span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>  U <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(data, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)   </span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(seed)      </span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">mortality =</span> <span class="fu">qpois</span>(U[,<span class="dv">1</span>], <span class="dv">182</span>), <span class="co"># assume distribution</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>         <span class="at">pm10 =</span> <span class="fu">qgamma</span>(U[,<span class="dv">2</span>], <span class="at">shape =</span> <span class="dv">6</span>, <span class="at">rate =</span> <span class="fl">0.2</span>),           </span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>         <span class="at">temp =</span> <span class="fu">qnorm</span>(U[,<span class="dv">3</span>], <span class="at">mean =</span> <span class="dv">55</span>, <span class="at">sd =</span> <span class="dv">16</span>))   </span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  }  </span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co"># test for dist fit</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co"># fitdist(pm10$pm10, "gamma") -&gt; pm10_fit</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(pm10_fit) # gamma is better than normal for the fit of pm10</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="co">#fitdist(pm10$temp, "norm") -&gt; temp_fit</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(temp_fit)</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">corr_mtx =</span> corr_mtx) <span class="sc">|&gt;</span> </span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">id =</span> <span class="fu">row_number</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">crossing</span>(sample_size, model) <span class="sc">|&gt;</span> </span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span>   </span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">data =</span> <span class="fu">list</span>(<span class="fu">generate_data</span>(<span class="at">n =</span> sample_size, <span class="at">mtx =</span> corr_mtx)),          </span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>         <span class="at">fit =</span> <span class="fu">list</span>(<span class="fu">summary</span>(<span class="fu">lm</span>(model, data))<span class="sc">$</span>coefficients))  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div>
+<div class="cell-container"><div class="cell-decorator"><pre>In [3]:</pre></div><div id="cell-fig-result-universe" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dt <span class="ot">&lt;-</span> res <span class="sc">|&gt;</span>   </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(     </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_value =</span> fit[<span class="dv">2</span>,<span class="dv">4</span>],     </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">coef =</span> fit[<span class="dv">2</span>,<span class="dv">1</span>],     </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">xy_correlation =</span> <span class="fu">as.numeric</span>(corr_mtx[<span class="dv">1</span>, <span class="dv">2</span>]),     </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">xz_correlation =</span> <span class="fu">as.numeric</span>(corr_mtx[<span class="dv">1</span>, <span class="dv">3</span>]),     </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">yz_correlation =</span> <span class="fu">as.numeric</span>(corr_mtx[<span class="dv">2</span>, <span class="dv">3</span>]),     </span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">fml =</span> <span class="fu">deparse</span>(model) <span class="sc">|&gt;</span> <span class="fu">as.factor</span>(),     </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">expect =</span> <span class="fu">ifelse</span>(p_value <span class="sc">&lt;</span> <span class="fl">0.05</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">|&gt;</span> <span class="fu">as.factor</span>(),     </span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span>    </span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>code_tbl <span class="ot">&lt;-</span> <span class="fu">crossing</span>(<span class="at">V1 =</span> <span class="fu">c</span>(<span class="st">"signifpm10"</span>, <span class="cn">NA</span>),           </span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>                     <span class="at">V2 =</span> <span class="fu">c</span>(<span class="st">"smallsample"</span>, <span class="cn">NA</span>), </span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">V3 =</span> <span class="fu">c</span>(<span class="st">"withtemp"</span>, <span class="cn">NA</span>)) <span class="sc">|&gt;</span>      </span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">col1 =</span> <span class="fu">paste0</span>(V1,<span class="st">"_"</span>, V2, <span class="st">"_"</span>, V3))   </span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>lookup_tbl <span class="ot">&lt;-</span> <span class="fu">tibble</span>(   </span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">value =</span> <span class="fu">crossing</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>), <span class="at">z =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">|&gt;</span>      </span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">col =</span> <span class="fu">paste0</span>(x,<span class="st">"_"</span>, y, <span class="st">"_"</span>, z)) <span class="sc">|&gt;</span> </span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="sc">-</span>x, <span class="sc">-</span>y, <span class="sc">-</span>z) <span class="sc">|&gt;</span>      </span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(col),   </span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">plan1 =</span> <span class="fu">unique</span>(code_tbl<span class="sc">$</span>col1) )  </span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>dt2 <span class="ot">&lt;-</span> dt <span class="sc">|&gt;</span>    </span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">T1 =</span> <span class="fu">ifelse</span>(sample_size <span class="sc">&lt;</span> <span class="dv">200</span>, <span class="dv">1</span>, <span class="dv">0</span>),          </span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>         <span class="at">T2 =</span> <span class="fu">ifelse</span>(fml <span class="sc">==</span> <span class="st">"mortality ~ pm10 + temp"</span>, <span class="dv">1</span>, <span class="dv">0</span>),          </span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>         <span class="at">pp1 =</span> <span class="fu">paste0</span>(expect, <span class="st">"_"</span>, T1, <span class="st">"_"</span>, T2),) <span class="sc">|&gt;</span>    </span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(lookup_tbl, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"pp1"</span> <span class="ot">=</span> <span class="st">"value"</span>))      </span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>p0 <span class="ot">&lt;-</span> dt <span class="sc">|&gt;</span> <span class="fu">ggplot</span>() <span class="sc">+</span>   </span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> p_value , <span class="at">y =</span> coef), <span class="at">color =</span> <span class="st">"grey"</span>, <span class="at">size =</span> <span class="fl">0.5</span>) <span class="sc">+</span>  </span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"p-value"</span>, <span class="at">y =</span> <span class="st">"coefficient"</span>) <span class="sc">+</span>   </span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span>    </span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>, </span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>()) </span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>df0 <span class="ot">&lt;-</span>  dt <span class="sc">|&gt;</span> <span class="fu">filter</span>(sample_size <span class="sc">==</span> <span class="dv">500</span>, xy_correlation <span class="sc">==</span> <span class="sc">-</span><span class="fl">0.005</span>, </span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">between</span>(xz_correlation, <span class="sc">-</span><span class="fl">0.46</span>, <span class="sc">-</span><span class="fl">0.43</span>),</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>                     yz_correlation <span class="sc">==</span> <span class="fl">0.4</span>) <span class="sc">|&gt;</span> <span class="fu">arrange</span>(expect)</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>df2 <span class="ot">&lt;-</span> df0 <span class="sc">|&gt;</span> <span class="fu">filter</span>(fml <span class="sc">==</span> <span class="st">"mortality ~ pm10 + temp"</span>) <span class="co"># test for model spec</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> p0 <span class="sc">+</span> </span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> p_value , <span class="at">y =</span> coef, <span class="at">color =</span> expect), <span class="at">size =</span> <span class="fl">0.3</span>) <span class="sc">+</span>  </span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>, <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Coefficient vs. p-value"</span>) <span class="sc">+</span> </span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">'none'</span>)</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> p0 <span class="sc">+</span> </span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> df0, <span class="fu">aes</span>(<span class="at">x =</span> p_value, <span class="at">y =</span> coef, <span class="at">color =</span> expect), <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">data =</span> df0, <span class="fu">aes</span>(<span class="at">x =</span> p_value, <span class="at">y =</span> coef), <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>            <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">type =</span> <span class="st">"open"</span>, <span class="at">angle =</span> <span class="dv">30</span>, </span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>                          <span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.1</span>, <span class="st">"inches"</span>))) <span class="sc">+</span></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>  ggrepel<span class="sc">::</span><span class="fu">geom_label_repel</span>(</span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> df0, <span class="fu">aes</span>(<span class="at">x =</span> p_value, <span class="at">y =</span> coef, <span class="at">label =</span> fml, <span class="at">color =</span> expect)</span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>, <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Effect of adding temperature"</span>) </span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>df00 <span class="ot">&lt;-</span>  dt <span class="sc">|&gt;</span> <span class="fu">filter</span>(xy_correlation <span class="sc">==</span> <span class="sc">-</span><span class="fl">0.005</span>, </span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>                     <span class="fu">between</span>(xz_correlation, <span class="sc">-</span><span class="fl">0.46</span>, <span class="sc">-</span><span class="fl">0.43</span>),</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>                     yz_correlation <span class="sc">==</span> <span class="fl">0.4</span>) <span class="sc">|&gt;</span> <span class="fu">arrange</span>(expect)</span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df00 <span class="sc">|&gt;</span> <span class="fu">filter</span>((fml <span class="sc">==</span> <span class="st">"mortality ~ pm10 + temp"</span>))</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> p0 <span class="sc">+</span> </span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> df, <span class="fu">aes</span>(<span class="at">x =</span> p_value, <span class="at">y =</span> coef, <span class="at">color =</span> expect), <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">data =</span> df, <span class="fu">aes</span>(<span class="at">x =</span> p_value, <span class="at">y =</span> coef), <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>            <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">type =</span> <span class="st">"open"</span>, <span class="at">angle =</span> <span class="dv">30</span>, </span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>                          <span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.1</span>, <span class="st">"inches"</span>))) <span class="sc">+</span></span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>  ggrepel<span class="sc">::</span><span class="fu">geom_label_repel</span>(</span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> df, <span class="fu">aes</span>(<span class="at">x =</span> p_value, <span class="at">y =</span> coef, <span class="at">label =</span> sample_size, <span class="at">color =</span> expect)</span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>, <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Effect of sample size"</span>) </span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>(p1 <span class="sc">|</span> p2) <span class="sc">/</span> (p3 <span class="sc">|</span> <span class="fu">plot_spacer</span>()) <span class="sc">+</span> </span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"a"</span>) <span class="sc">+</span> </span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">'collect'</span>) <span class="sc">&amp;</span></span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">'bottom'</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-result-universe" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-result-universe-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="">
+<a href="index_files/figure-html/fig-result-universe-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: The result universe of linear regression model to study the effect of PM10 on mortality: a) colored by whether the p-value of PM10is significant (less than 0.05), b) the effect of adding temperature to the model for a sample size of 500, c) the effect of increasing sample size for a fixed correlation structure."><img src="index_files/figure-html/fig-result-universe-1.png" class="img-fluid figure-img" width="1152"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-result-universe-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: The result universe of linear regression model to study the effect of PM10 on mortality: a) colored by whether the p-value of PM10is significant (less than 0.05), b) the effect of adding temperature to the model for a sample size of 500, c) the effect of increasing sample size for a fixed correlation structure.
+</figcaption>
+</figure>
+</div>
+</div>
+</div></div>
+</section>
+</section>
+<section id="sec-conclusion" class="level1">
+<h1>Conclusion</h1>
+</section>
+<section id="references" class="level1">
+<h1>References</h1>
+</section>
+     </main>
+<!-- /main column -->  <script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>  </div> <!-- /content -->  <script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script> 
+  
+</body></html>
