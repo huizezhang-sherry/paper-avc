@@ -52,6 +52,7 @@ library(patchwork)
 library(readr)
 library(kableExtra)
 library(scales)
+library(qqplotr)
 pm10 <- read_csv(here::here("data", "pm10.csv")) |> 
   filter(!is.na(pm10)) |>    
   mutate(season = as.factor(season))  
@@ -61,7 +62,9 @@ pm10 <- read_csv(here::here("data", "pm10.csv")) |>
 
 In data analysis, analysts often rely on their prior knowledge or domain expertise to form expectations and assess whether results align with them. When results deviate from these expectations, experienced analysts check assumptions made about the data and during the analysis, but often do so without discussing the underlying reasoning in the publications. While publication of analysis code and data is now a common a requirement for the sake of reproducibility [@peng2011reproducible], the published code alone is often insufficient for understanding the thought process behind an analysis. Code corresponding to published analyses often reflect the final decisions made about analysis and do not reveal the decisions or assumptions made about the data during the analysis. Thus, a reader looking at published code can often be left with many questions about why certain choices were made.
 
-We might gain insight into analysts' thought processes by speaking with them directly or watching them work via screencast videos they produce, such as, TidyTuesday screencast videos or think-aloud type studies [e.g. @gu2024data]. However, direct observation of analysis is not scalable and may not always be feasible; creating educational screencast videos requires significant effort from the analysts. Ideally, there could be a way to explicitly communicate these thought processes in the data analysis to others. Even better, if these expectations were machine-readable, we could analyze them and learn from the analysis itself. For example, we could answer questions about whether the checks also apply to other researchers analyzing new data in the same context, whether they reflect common practices in the field, or whether they are specific to the data or analysis at hand. Externalizing these thought processes is a practice that has potential to improve the trustworthiness of the analyses [@yu2024veridical] in general and the trustworthiness of subsequent products, such as machine learning models, that may be built on such analyses. Developing an approach to reveal some of this process without requiring a reader to essentially reconstruct the analysis process from the raw data would provide an improved basis for trusting an analysis result [@peng2021reproducible].
+We might gain insight into analysts' thought processes by speaking with them directly or watching them work via screencast videos they produce, such as TidyTuesday screencast videos or think-aloud type studies [e.g. @gu2024data]. However, direct observation of analysis is not scalable and may not always be feasible; creating educational screencast videos requires significant effort from the analysts. Ideally, there could be a way to explicitly communicate these thought processes in the data analysis to others. Even better, if these expectations were machine-readable, we could analyze them and learn from the analysis itself. For example, we could answer questions about whether the checks also apply to other researchers analyzing new data in the same context, whether they reflect common practices in the field, or whether they are specific to the data or analysis at hand. Externalizing these thought processes can improve the trustworthiness of the analyses [@yu2024veridical]. 
+
+The trustworthiness of an analysis depends not only on the robustness of the methods used but also on a deep understanding of the data. This corresponds to the third step identified in @broderick_toward_2023, where trust can break down if the assumptions underlying an algorithm are not satisfied in practice. In the past, data were often collected directly by analysts through carefully designed experiments, however, contemporary analyses often rely on data curated by government or research institutions, where some data characteristics may be unknown to the analysts. When unexpected outcomes arise, they often later traced back to implicit assumptions made by the analysts - assumptions that were unknowingly violated by the idiosyncratic in the data. By externalizing these assumptions through analysis validation checks, we aim to make it easier to identify and diagnose such unexpected results.  
 
 In this paper, we conceptualize these implicit expectations as *analysis validation checks*, which allows us to examine the assumptions made about the data during an analysis. We then introduce a procedure to identify the subset of checks that best predict the occurrence of unexpected outcomes. The procedure, based on simulations of the original data, compares the accuracy and independence of different combinations of analysis validation checks. Accuracy is determined using binary classification metrics (precision and recall) from a logic regression model [@ruczinski_logic_2003], while independence measures the shared information among checks. The proposed workflow offers a numerical guarantee that the analysis will produce the expected results, assuming the assumptions about the data generating mechanism hold.
 
@@ -106,7 +109,7 @@ Consider a 30-day step count experiment in a public health setting. Subjects are
 
   > Expectation: The average step count of a given subject is between $[8,500, 9,500]$
 
-To diagnose potential reasons why this expectation might fail, we can establish a few analysis validation checks in anticipation of seeing the data. For example, we can check the quantile of the step count, if more than a third of the days fall below 8,000, or more than a third exceed 10,000 steps, this could indicate an excess of low-count or high-count days. Similarly, we may may expect the standard deviation of the step count not to be overly large. These considerations yield the following three analysis validation checks that *fail* when:
+To diagnose potential reasons why this expectation might fail, we can establish a few analysis validation checks in anticipation of seeing the data. [TODO: Add guidelines for designing the checks] For example, we can check the quantile of the step count, if more than a third of the days fall below 8,000, or more than a third exceed 10,000 steps, this could indicate an excess of low-count or high-count days. Similarly, we may may expect the standard deviation of the step count not to be overly large. These considerations yield the following three analysis validation checks that *fail* when:
 
 -   Check 1: the 60% quantile of the observed step counts is greater than 10,000
 -   Check 2: the 40% quantile of the observed step counts is less than 8,000, and
@@ -155,7 +158,9 @@ step_count |>
 
 While not all analysis validation checks are equally important, some may be more useful at diagnosing unexpected outcomes than others. This section introduces a procedure to identify a subset of analysis validation checks that best predict the occurrence of unexpected outcomes. 
 
-The approach uses simulated datasets that have the same structure and characteristics of the observed data to be analyzed in the future. For each simulated dataset, analysis validation checks are applied to record  their TRUE or FALSE values. The outcome of the analysis is also computed to determine whether it is unexpected (1) or expected (0). By generating many datasets, each time applying the analysis validation checks and computing the outcome, we can relate the patterns in the checks to the likely that the outcome will be unexpected. @fig-metric-calc provides an overview of the process. 
+The approach generates simulated datasets from the observed data to compute the outcome and the analysis validation checks (unexpected as 1 and expected as 0). This then allows us to apply a logic regression tree to link the outcome and the check results to construct a Boolean expression to best predict the unexpected outcomes. @fig-metric-calc provides an overview of the process. 
+
+The specific strategy to simulate the data depends on the problem and the nature of the data at hand. Simulated data can be generated using prior domain knowledge, summary statistics derived from the observed data, or statistical techniques such as training-testing splits or bootstrap sampling. While each simulated data may not be independent of the original data - as is the case with bootstrap samples - it should adequately capture the range of possible idiosyncrasies present in the data. Failure to do so can reduce the ability of the resulting Boolean expression to predict unexpected outcomes. 
 
 ```{r}
 #| label: fig-metric-calc
@@ -166,11 +171,11 @@ knitr::include_graphics(here::here("figures", "metric-calc.png"))
 
 ## Accuracy
 
-From the simulated data, the accuracy branch in @fig-metric-calc refers to the set of checks' ability to detect unexpected outcomes accurately. To relate multiple checks to the outcome, a logic regression model [@ruczinski_logic_2003] is used. Originally developed for SNP micro-array data, logic regression constructs Boolean combinations of binary variables, $\mathcal{L}(X_1, X_2, \cdots, X_n)$, to predict classification or regression outcomes. The logical operations allowed to construct $\mathcal{L(\cdot)}$ includes AND ($\land$), OR ($\lor$), and NOT ($\neg$) and an example of the Boolean combination of $\mathcal{L(\cdot)}$ is $X_1 \text{ AND } (X_2 \text{ OR } X_3)$. In our binary-binary classification problem, the logic regression model can be written as follows:
+From the simulated data, the accuracy branch in @fig-metric-calc refers to the set of checks' ability to detect unexpected outcomes accurately. To relate multiple checks to the outcome, a logic regression model [@ruczinski_logic_2003] is used. Originally developed for SNP micro-array data, logic regression predict classification or regression outcomes by constructing Boolean combinations, $\mathcal{L}(X_1, X_2, \cdots, X_k)$, where $X_i$ are binary predictors. The logical operations allowed to construct $\mathcal{L(\cdot)}$ includes AND ($\land$), OR ($\lor$), and NOT ($\neg$) and an example of the Boolean combination of $\mathcal{L(\cdot)}$ is $X_1 \text{ AND } (X_2 \text{ OR } X_3)$. In our binary-binary classification problem, the logic regression model can be written as follows:
 
-$$E(Y) = \mathcal{L}(X_1, X_2, \cdots, X_n)$$
+$$E(Y) = \mathcal{L}(X_1, X_2, \cdots, X_k)$$
 
-where the outcome, $Y$, indicates whether the outcome is *unexpected* (1) or *expected* (0), and the analysis validation checks, $X_1, X_2, \cdots, X_n$, are labeled as 1 if they fail and 0 if they pass. 
+where the outcome, $Y$, indicates whether the outcome is *unexpected* (1) or *expected* (0), and the analysis validation checks, $X_1, X_2, \cdots, X_k$, are labeled as 1 if they fail and 0 if they pass. 
 
 This objective function is optimized using simulated annealing algorithm to minimize the misclassification error and the following 6 moves are permitted during the optimization to grow or prune the tree (as detailed in Figure 2 of @ruczinski_logic_2003): 1) replacing a leaf node, 2) replacing an operator, 3) growing a branch, 4) pruning a branch, 5) splitting a leaf node, and 6) deleting a leaf node. Predictions from the logic regression model is then used, along with the observed outcome, to calculate the precision and recall of the optimized Boolean combination of checks. Compared to other tree-based methods for binary-binary prediction, the Boolean combinations from the logic regression model produce a tree structure that can be directly interpreted as the possible combination of checks leading to an unexpected outcome, without the need to invert the tree as required in classic tree-based recursive partitioning methods. 
 
@@ -181,12 +186,11 @@ This objective function is optimized using simulated annealing algorithm to mini
 
 While checks may score high on predictive accuracy, they may be correlated and less useful to provide actions to act on the analysis. This could happen if a set of checks are all tangentially related to the cause of the unexpected results, but none addresses the root cause. The independence score in @fig-metric-calc is defined as 1 minus total correlation per observation.
 
+Total correlation is a generalization of mutual information that measures the amount of shared information across multiple variables, based on Kullback-Leibler distance: 
 
-Total correlation is a generalization of mutual information that measures the amount of shared information across multiple variables multiple variables based on Kullback-Leibler distance: 
+$$C(X_1, X_2, \cdots, X_k) = \sum_{x_1} \sum_{x_2} \cdots \sum_{x_k} p(x_1, x_2, \cdots, x_k) \log \frac{p(x_1, x_2, \cdots, x_k)}{p(x_1)p(x_2) \cdots p(x_k)},$$
 
-$$C(X_1, X_2, \cdots, X_n) = \sum_{x_1} \sum_{x_2} \cdots \sum_{x_n} p(x_1, x_2, \cdots, x_n) \log \frac{p(x_1, x_2, \cdots, x_n)}{p(x_1)p(x_2) \cdots p(x_n)},$$
-
-where $p(.)$ is the TODO. A high total correlation value indicates overlapping of information among the analysis validation checks, while a low value suggests that the checks are independent and provides unique information to diagnose the unexpected outcome. To standardize this measure, the total correlation *per observation* is used in calculating the independence score.
+where $p(x_1, x_2, \cdots, x_k)$ is the joint distribution of the predictors and $p(\cdot)$ is the individual distribution of the predictors. A high total correlation value indicates overlapping of information among the analysis validation checks, while a low value suggests that the checks are independent and provides unique information to diagnose the unexpected outcome. To standardize this measure, the total correlation *per observation* is used in calculating the independence score.
 
 The three metrics (precision, recall, and independence) can be combined into a single metric using the arithmetic mean, harmonic mean, or quadratic mean. The differences among these means are minimal when the three metrics are similar. However, as the differences among the metrics increases, the harmonic mean tends to produce the smallest overall score, as it penalizes low values, while the quadratic mean tends to produce the largest score by rewarding higher values more. For simple interpretation of the score, the arithmetic mean is preferred, while in applications where the difference between precision, recall, and independence need to be penalized or rewarded more, the harmonic and quadratic mean should be considered.
 
@@ -282,40 +286,43 @@ To ensure a reasonable likeness to data that might be used in such an analysis, 
 
 ```{r}
 #| label: fig-dist-fit
-#| fig-cap: QQ-plot of the distribution fit for mortality, PM10, and temperature based on the fitted distribution from the original data. The fitted distribution is compared to the observed data to assess the distribution fit. 
+#| fig-cap: "QQ-plot of the goodness-of-fit of selected distributions used to generate simulated data for mortality, PM10, and temperature. Left: Mortality as a negative binomial distribution (size = 74, mean = 183), Middle: PM10 is modeled using a rescaled beta distribution with shape parameters 4.21 and 11.67, multiplied by 10 to match the observed range. Right: Temperature is modeled using a Weibull distribution (shape = 3.8, scale = 61)"
 #| fig.height: 4
 #| fig.width: 10
 aa2 <- fitdistrplus::fitdist(pm10$mortality, "nbinom")
-p1 <- tibble(fitted= rnbinom(558, size = aa2$estimate[1], mu = aa2$estimate[2]),
-       observed= pm10$mortality) %>%
+p1 <- tibble(fitted = rnbinom(558, size = aa2$estimate[1], mu = aa2$estimate[2]),
+       observed = pm10$mortality) %>%
   ggplot(aes(sample = fitted)) +
-  stat_qq() +
-  stat_qq_line() + 
+  stat_qq_band(fill = "grey80") +
+  stat_qq_line(color = "grey30") +
+  stat_qq_point(size = 0.3) +
   theme_bw() + 
   theme(aspect.ratio = 1) + 
-  ggtitle("mortality: \nNB(size = 74, mu = 183)")
+  ggtitle("Mortality")
 
 
 aa6 <- fitdistrplus::fitdist(pm10$pm10[pm10$pm10 < 90]/100, "beta")
 p2 <- tibble(fitted = rbeta(557, shape1 = aa6$estimate[1], shape2 = aa6$estimate[2]) * 100,
        observed = pm10$pm10[pm10$pm10 < 90]) %>%
   ggplot(aes(sample = fitted)) +
-  stat_qq() +
-  stat_qq_line() + 
+  stat_qq_band(fill = "grey80") +
+  stat_qq_line(color = "grey30") +
+  stat_qq_point(size = 0.3) +
   theme_bw() + 
-  theme(aspect.ratio = 1) + 
-  ggtitle("pm10: \n100 * beta(shp1 = 4.21, shp2 = 11.67)")
+  theme(aspect.ratio = 1) +
+  ggtitle("PM10")
   
 
 aa4 <- fitdistrplus::fitdist(pm10$temp, "weibull")
 p3 <- tibble(fitted= rweibull(558, aa4$estimate[1], aa4$estimate[2]),
        observed= pm10$temp) %>%
   ggplot(aes(sample = fitted)) +
-  stat_qq() +
-  stat_qq_line() + 
+  stat_qq_band(fill = "grey80") +
+  stat_qq_line(color = "grey30") +
+  stat_qq_point(size = 0.3) +
   theme_bw() + 
-  theme(aspect.ratio = 1) + 
-  ggtitle("temperature: \nweibull(shape = 3.8, scale = 61)")
+  theme(aspect.ratio = 1) +
+  ggtitle("Temperature")
 
 p1 | p2 | p3
 ```
