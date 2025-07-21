@@ -467,8 +467,12 @@ days can be simulated from a Poisson distribution with \(\lambda = 8\).
 Figure~\ref{fig-step-count} displays average step count across 300
 simulated 30-day periods.
 
-\phantomsection\label{cell-fig-step-count}
-\begin{figure}[H]
+\begin{verbatim}
+Orientation inferred to be along y-axis; override with
+`position_quasirandom(orientation = 'x')`
+\end{verbatim}
+
+\begin{figure}
 
 \centering{
 
@@ -511,8 +515,7 @@ adequately capture the range of possible idiosyncrasies present in the
 data. Failure to do so can reduce the ability of the resulting Boolean
 expression to predict unexpected outcomes.
 
-\phantomsection\label{cell-fig-metric-calc}
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -578,24 +581,32 @@ partitioning methods.
 While checks may score high on predictive accuracy, they may be
 correlated and less useful to provide actions to act on the analysis.
 This could happen if a set of checks are all tangentially related to the
-cause of the unexpected results, but none addresses the root cause. The
-independence score in Figure~\ref{fig-metric-calc} is defined as 1 minus
-total correlation per observation.
+cause of the unexpected results, but none addresses the root cause. To
+quantify the redundancy among the checks, we use total correlation,
+\(C\), a multivariate generalization of mutual information that captures
+the amount of shared information across two variables. We define the
+normalized total correlation, \(C'\), as
 
-Total correlation is a generalization of mutual information that
-measures the amount of shared information across multiple variables,
-based on Kullback-Leibler distance:
+\[C'(X_1, X_2, \cdots, X_k) = \frac{C(X_1, X_2, \cdots, X_k)}{\sum_{i= 1}^k H(X_i)} = \frac{\sum_{i= 1}^k H(X_i) - H(X_1, X_2, \cdots, X_k)}{\sum_{i= 1}^k H(X_i)}, \]
+where \(H(X_i)\) is the entropy of the \(i\)-th check and
+\(H(X_1, X_2, \cdots, X_k)\) is the joint entropy of checks
+\(\{X_1, X_2, \cdots, X_k\}\). The amount of independent information,
+\(\eta\), can be defined as:
 
-\[C(X_1, X_2, \cdots, X_k) = \sum_{x_1} \sum_{x_2} \cdots \sum_{x_k} p(x_1, x_2, \cdots, x_k) \log \frac{p(x_1, x_2, \cdots, x_k)}{p(x_1)p(x_2) \cdots p(x_k)},\]
+\[\eta(X_1, X_2, \cdots, X_k) = 1 - C'(X_1, X_2, \cdots, X_k) = \frac{H(X_1, X_2, \cdots, X_k)}{\sum_{i= 1}^k H(X_i)}.\]
 
-where \(p(x_1, x_2, \cdots, x_k)\) is the joint distribution of the
-predictors and \(p(\cdot)\) is the individual distribution of the
-predictors. A high total correlation value indicates overlapping of
-information among the analysis validation checks, while a low value
-suggests that the checks are independent and provides unique information
-to diagnose the unexpected outcome. To standardize this measure, the
-total correlation \emph{per observation} is used in calculating the
-independence score.
+To scale this quantity to the range \([0,1]\) for consistency with other
+metrics (i.e., precision and recall), we define the independence metric
+as:
+
+\[\text{independence} = \frac{\eta - 1/k}{1 - 1/k}= \frac{H(X_1, X_2, \cdots, X_k)/\sum_{i= 1}^K H(X_i) - 1/k}{1 - 1/k}.\]
+
+The metric attains a value of 1 indicates that all checks are
+independent: \(H(X_1, X_2, \cdots, X_k)=\sum_{i= 1}^k H(X_i)\) and
+provide unique information to diagnose the unexpected outcome (trivia
+case when there is only one check), and a value of 0 when the checks are
+identical:
+\(H(X_1, X_2, \cdots, X_k)- \sum_{i= 1}^k H(X_i) = H(X_i)/ k H(X_i) = 1/k\).
 
 The three metrics (precision, recall, and independence) can be combined
 into a single metric using the arithmetic mean, harmonic mean, or
@@ -628,8 +639,7 @@ deviation of the step count is not too large (2,500) and either the 60\%
 quantile of the step count exceeds 10,000 or the 40\% quantile of the
 step count falls below 8,000.
 
-\phantomsection\label{cell-fig-logic-reg}
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -667,15 +677,17 @@ step counts (more than five days with fewer than 8,000 steps).}
 
 \centering
 \resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
-\begin{tabular}{>{\raggedright\arraybackslash}p{17em}rrrrr}
+\begin{tabular}{>{\raggedright\arraybackslash}p{19em}rrrrr}
 \toprule
 Checks & Precision & Recall & Independence & Harmonic & Arithmetic\\
 \midrule
 Check 1: q(step, 0.6) > 10000 & 0.319 & 0.575 & 1.000 & 0.511 & 0.631\\
 Check 2: q(step, 0.4) < 8000 & 0.264 & 0.613 & 1.000 & 0.467 & 0.626\\
 Check 3: sd(step) > 2500 & 0.153 & 0.289 & 1.000 & 0.273 & 0.481\\
-Logic regression: (check 1 OR check 2) AND (not check 3) & 0.861 & 0.431 & 0.998 & 0.669 & 0.763\\
-Regression tree & 0.542 & 0.780 & 1.000 & 0.727 & 0.774\\
+Logic regression: (check 1 OR check 2) AND (not check 3) & 0.861 & 0.431 & 0.818 & 0.637 & 0.703\\
+Comparison: (check 1) AND (not check 3) & 0.278 & 0.870 & 0.881 & 0.510 & 0.676\\
+\addlinespace
+Regression tree & 0.542 & 0.780 & 0.818 & 0.689 & 0.713\\
 \bottomrule
 \end{tabular}}
 
@@ -683,13 +695,19 @@ Regression tree & 0.542 & 0.780 & 1.000 & 0.727 & 0.774\\
 
 \end{table}%
 
-For comparison, the regression tree produces a similar prediction to the
-logic regression, however, we argue that the logic regression tree shown
-in Figure~\ref{fig-logic-reg} is more interpretable for our purposes
-because it provides a direct representation of which combinations of
-analysis checks lead to unexpected outcomes. The logic regression tree
-is also directly comparable to other diagnostic techniques, which we
-discuss further in Section~\ref{sec-discussion}.
+For comparison, we include a simplified rule, (quantile(step, 0.6)
+\textgreater{} 10,000) AND (NOT sd(step) \textgreater{} 2,500). Although
+the checks on the 60th quantile and standard deviation are less
+correlated -- reflected in a higher independence score -- this pair is
+less accurate at predicting the unexpected outcome, resulting in lower
+harmonic and arithmetic mean scores. The regression tree produces a
+similar prediction to the logic regression, however, we argue that the
+logic regression tree shown in Figure~\ref{fig-logic-reg} is more
+interpretable for our purposes because it provides a direct
+representation of which combinations of analysis checks lead to
+unexpected outcomes. The logic regression tree is also directly
+comparable to other diagnostic techniques, which we discuss further in
+Section~\ref{sec-discussion}.
 
 \section{Application}\label{sec-pm10-mortality}
 
@@ -787,8 +805,7 @@ distribution for temperature. To include the potential effect of
 outliers, we add a single outlier to the data for both the mortality and
 PM10 variables.
 
-\phantomsection\label{cell-fig-dist-fit}
-\begin{figure}[H]
+\begin{figure}
 
 \centering{
 
@@ -805,6 +822,20 @@ match the observed range. Right: Temperature is modeled using a Weibull
 distribution (shape = 3.8, scale = 61)}
 
 \end{figure}%
+
+\begin{verbatim}
+Warning: There were 990 warnings in `mutate()`.
+The first warning was:
+i In argument: `fit = list(...)`.
+i In row 2.
+Caused by warning in `dpois()`:
+! non-integer x = 291.790133
+i Run `dplyr::last_dplyr_warnings()` to see the 989 remaining warnings.
+\end{verbatim}
+
+\begin{verbatim}
+Joining with `by = join_by(unexpect)`
+\end{verbatim}
 
 A logic regression is fitted using all variations of the checks in
 Table~\ref{tbl-checks} to predict whether the PM10 coefficient is
@@ -848,11 +879,11 @@ check, along with harmonic and arithmetic means.}
 \toprule
 Checks & Precision & Recall & Independence & Harmonic & Arithmetic\\
 \midrule
-Check 1: cor(m, PM10) < -0.03 & 0.551 & 0.894 & 1 & 0.763 & 0.815\\
-Check 2: cor(m, tmp) > -0.35 & 0.281 & 0.556 & 1 & 0.472 & 0.612\\
-Check 3: mortality outlier & 0.302 & 0.775 & 1 & 0.536 & 0.692\\
-Check 4: PM10 outlier & 0.305 & 0.766 & 1 & 0.537 & 0.690\\
-Logic regression: (check 1) AND ((check 2) OR (check 3 AND check 4)) & 0.722 & 0.876 & 1 & 0.851 & 0.866\\
+Check 1: cor(m, PM10) < -0.03 & 0.551 & 0.894 & 1.000 & 0.763 & 0.815\\
+Check 2: cor(m, tmp) > -0.35 & 0.281 & 0.556 & 1.000 & 0.472 & 0.612\\
+Check 3: mortality outlier & 0.302 & 0.775 & 1.000 & 0.536 & 0.692\\
+Check 4: PM10 outlier & 0.305 & 0.766 & 1.000 & 0.537 & 0.690\\
+Logic regression: (check 1) AND ((check 2) OR (check 3 AND check 4)) & 0.876 & 0.722 & 0.812 & 0.798 & 0.803\\
 \bottomrule
 \end{tabular}}
 
@@ -884,7 +915,7 @@ The fitted logic regression model is
 \textgreater{} -0.3 OR (mortality outlier AND PM10 outlier))
 \end{quote}
 
-This generates a precision of 0.722 and a recall of 0.876 for predicting
+This generates a precision of 0.876 and a recall of 0.722 for predicting
 the unexpected PM10 coefficient. As shown in
 Figure~\ref{fig-linear-reg-tree}, there is no single analysis check in
 the tree that predicts an unexpected outcome. rather at least three
@@ -903,6 +934,395 @@ metropolitan areas in the United States by population. The complete list
 of cities used are presented in Table~\ref{tbl-all-cities}. For each
 city, we had daily data on all-cause mortality, PM10, and average
 temperature for the years 1992--2000.
+
+\begin{verbatim}
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 3288 Columns: 6
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr  (1): season
+dbl  (4): mortality, pm10, temp, dewpt
+date (1): date
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Rows: 40 Columns: 2
+-- Column specification --------------------------------------------------------
+Delimiter: ","
+chr (2): city, cityname
+
+i Use `spec()` to retrieve the full column specification for this data.
+i Specify the column types or set `show_col_types = FALSE` to quiet this message.
+Joining with `by = join_by(city)`
+\end{verbatim}
 
 \begin{table}
 
@@ -1112,9 +1532,13 @@ inadequate in reflecting the range of possible configurations that the
 data could take. In particular, our split-data approach, using New York
 City to guide the simulation and then applying the analysis checks to
 other cities, may not have been ideal. It may be worth exploring some
-recent work in data thinning \citep{neufeld2024data} and data fission
-\citep{leiner2023data} to create training datasets that are more
-representative of future data.
+recent work in data thinning \citep{neufeld2024data}, data fission
+\citep{leiner2023data}, or differential privacy methods
+\citep{dong_gaussian_2022} to create training datasets that are more
+representative of future data. The Gaussian copula used in the example
+doesn't account for the tail dependence between the variables and other
+copula, e.g.~t-copula or extreme value distribution copula, could also
+be explored to better capture the tail dependence.
 
 Analysis validation checks are closely related to the concept of unit
 testing in software engineering. While unit tests isolate and test

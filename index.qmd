@@ -184,13 +184,19 @@ This objective function is optimized using simulated annealing algorithm to mini
 
 ## Independence
 
-While checks may score high on predictive accuracy, they may be correlated and less useful to provide actions to act on the analysis. This could happen if a set of checks are all tangentially related to the cause of the unexpected results, but none addresses the root cause. The independence score in @fig-metric-calc is defined as 1 minus total correlation per observation.
+While checks may score high on predictive accuracy, they may be correlated and less useful to provide actions to act on the analysis. This could happen if a set of checks are all tangentially related to the cause of the unexpected results, but none addresses the root cause. To quantify the redundancy among the checks, we use total correlation, $C$, a multivariate generalization of mutual information that captures the amount of shared information across two variables. We define the normalized total correlation, $C'$, as 
 
-Total correlation is a generalization of mutual information that measures the amount of shared information across multiple variables, based on Kullback-Leibler distance: 
+$$C'(X_1, X_2, \cdots, X_k) = \frac{C(X_1, X_2, \cdots, X_k)}{\sum_{i= 1}^k H(X_i)} = \frac{\sum_{i= 1}^k H(X_i) - H(X_1, X_2, \cdots, X_k)}{\sum_{i= 1}^k H(X_i)}, $$
+where $H(X_i)$ is the entropy of the $i$-th check and $H(X_1, X_2, \cdots, X_k)$ is the joint entropy of checks $\{X_1, X_2, \cdots, X_k\}$. The amount of independent information, $\eta$, can be defined as:
 
-$$C(X_1, X_2, \cdots, X_k) = \sum_{x_1} \sum_{x_2} \cdots \sum_{x_k} p(x_1, x_2, \cdots, x_k) \log \frac{p(x_1, x_2, \cdots, x_k)}{p(x_1)p(x_2) \cdots p(x_k)},$$
+$$\eta(X_1, X_2, \cdots, X_k) = 1 - C'(X_1, X_2, \cdots, X_k) = \frac{H(X_1, X_2, \cdots, X_k)}{\sum_{i= 1}^k H(X_i)}.$$
 
-where $p(x_1, x_2, \cdots, x_k)$ is the joint distribution of the predictors and $p(\cdot)$ is the individual distribution of the predictors. A high total correlation value indicates overlapping of information among the analysis validation checks, while a low value suggests that the checks are independent and provides unique information to diagnose the unexpected outcome. To standardize this measure, the total correlation *per observation* is used in calculating the independence score.
+To scale this quantity to the range $[0,1]$ for consistency with other metrics (i.e., precision and recall), we define the independence metric as:
+
+$$\text{independence} = \frac{\eta - 1/k}{1 - 1/k}= \frac{H(X_1, X_2, \cdots, X_k)/\sum_{i= 1}^K H(X_i) - 1/k}{1 - 1/k}.$$
+
+The metric attains a value of 1 indicates that all checks are independent: $H(X_1, X_2, \cdots, X_k)=\sum_{i= 1}^k H(X_i)$ and provide unique information to diagnose the unexpected outcome (trivia case when there is only one check), and a value of 0 when the checks are identical: $H(X_1, X_2, \cdots, X_k)- \sum_{i= 1}^k H(X_i) = H(X_i)/ k H(X_i) = 1/k$. 
+
 
 The three metrics (precision, recall, and independence) can be combined into a single metric using the arithmetic mean, harmonic mean, or quadratic mean. The differences among these means are minimal when the three metrics are similar. However, as the differences among the metrics increases, the harmonic mean tends to produce the smallest overall score, as it penalizes low values, while the quadratic mean tends to produce the largest score by rewarding higher values more. For simple interpretation of the score, the arithmetic mean is preferred, while in applications where the difference between precision, recall, and independence need to be penalized or rewarded more, the harmonic and quadratic mean should be considered.
 
@@ -216,21 +222,39 @@ fit_regtree <- rpart(unexpect ~ ., data = step_count |> dplyr::select(unexpect:`
                      control = rpart.control(cp = 0.01)) 
 pred_vec <- predict(fit_regtree) |> as_tibble() |> mutate(.fitted = ifelse(`0` > `1`, 0, 1)) |> dplyr::select(.fitted)
 regtree_df <- step_count |> dplyr::select(unexpect) |> bind_cols(pred_vec) |> 
-  calc_miscla_rate(unexpect, .fitted) |> 
-  mutate(overlapping = multiinformation(step_count[,c(8, 11)])/nrow(step_count), 
-         independence = 1 - overlapping) |> 
+  calc_miscla_rate(unexpect, .fitted) 
+
+sum_entropy <- lapply(as.list(step_count[,c(9:11)]),  function(x){infotheo::entropy(x, method = "emp")}) |> unlist() |> sum()
+multi_info <- infotheo::multiinformation(step_count[,c(9:11)])
+joint_entropy <- sum_entropy - multi_info
+ratio <- joint_entropy / sum_entropy
+
+regtree_df <- regtree_df |> 
+  mutate(independence =  (ratio - 1/3) / (1 - 1/3)) |> 
   calc_metrics(metrics = c("harmonic", "arithmetic"))
+
+sum_entropy <- lapply(as.list(step_count[,c(9,11)]),  function(x){infotheo::entropy(x, method = "emp")}) |> unlist() |> sum()
+multi_info <- infotheo::multiinformation(step_count[,c(9,11)])
+joint_entropy <- sum_entropy - multi_info
+ratio <-  joint_entropy / sum_entropy
+
+another <- tibble(.fitted = as.vector(step_count[,9] & !step_count[,11]) |> as.numeric(), 
+                  unexpect = step_count$unexpect) |> 
+  calc_miscla_rate(unexpect, .fitted) |>
+  mutate(independence = (ratio - 1/2) / (1 - 1/2)) |> 
+  calc_metrics(metrics = c("harmonic", "arithmetic")) |> 
+  mutate(id = 6)
 ```
 
 @tbl-logic-reg presents the calculated precision, recall, and independence for the three individual checks and the check rule found by the logic regression. The harmonic and arithmetic means are included to combine the three measures. The results show that the three checks produced by the logic regression can accurately predict 86.1% cases of all *predicted unexpected results* in the simulation data. Furthermore, 43.1% of all *actual unexpected results* were in fact observed to be unexpected.  
 
 ```{r}
 #| label: tbl-logic-reg
-#| tbl-cap: "Precision, recall, and independence calculated for each individual check and the logic regression check rule. The harmonic and arithmetic means of the three metrics are included to evaluate the quality of the checks in  diagnosing unexpected step counts (more than five days with fewer than 8,000 steps)."
+#| tbl-cap: "Precision, recall, and independence calculated for each individual check and the logic regression check rule. The harmonic and arithmetic means of the three metrics are included to evaluate the quality of the checks in  diagnosing unexpected step counts (more than five days with fewer than 8,000 steps)." 
 list(tibble(.fitted = step_count$`q(step, 0.6) > 10000`, unexpect = step_count$unexpect),
      tibble(.fitted = step_count$`q(step, 0.4) < 8000`, unexpect = step_count$unexpect),
      tibble(.fitted = step_count$`sd(step) > 2500`, unexpect = step_count$unexpect)
-) |>
+) |> 
   map_dfr(~.x |> calc_miscla_rate(unexpect, .fitted) |> 
             mutate(independence = 1) |> 
             calc_metrics(metrics = c("harmonic", "arithmetic"))) |> 
@@ -239,20 +263,20 @@ list(tibble(.fitted = step_count$`q(step, 0.6) > 10000`, unexpect = step_count$u
               calc_miscla_rate(.fitted, unexpect) |> 
               calc_independence() |> 
               calc_metrics(metrics = c("harmonic", "arithmetic")) |> 
-              mutate(checks = "Logic regression: (check 1 OR check 2) AND (not check 3)") |> 
-              dplyr::select(-overlapping)) |> 
+              mutate(checks = "Logic regression: (check 1 OR check 2) AND (not check 3)")) |> 
+  bind_rows(another  |>
+              mutate(checks = "Comparison: (check 1) AND (not check 3)")) |>
   bind_rows(regtree_df |>
-              dplyr::select(-overlapping) |>
               mutate(checks = "Regression tree")) |>
   dplyr::select(checks, precision:arithmetic) |> 
   dplyr::rename(`indep.` = independence) |> 
   kable(digits = 3, escape = FALSE, format = "latex", booktab = TRUE, 
         col.names = c("Checks", "Precision", "Recall", "Independence", "Harmonic", "Arithmetic")) |> 
   kableExtra::kable_styling(latex_options="scale_down") |> 
-  column_spec(1, width = '17em')
+  column_spec(1, width = '19em')
 ```
 
-For comparison, the regression tree produces a similar prediction to the logic regression, however, we argue that the logic regression tree shown in @fig-logic-reg is more interpretable for our purposes because it provides a direct representation of which combinations of analysis checks lead to unexpected outcomes. The logic regression tree is also directly comparable to other diagnostic techniques, which we discuss further in @sec-discussion.
+For comparison, we include a simplified rule, (quantile(step, 0.6) > 10,000) AND (NOT sd(step) > 2,500). Although the checks on the 60th quantile and standard deviation are less correlated -- reflected in a higher independence score -- this pair is less accurate at predicting the unexpected outcome, resulting in lower harmonic and arithmetic mean scores. The regression tree produces a similar prediction to the logic regression, however, we argue that the logic regression tree shown in @fig-logic-reg is more interpretable for our purposes because it provides a direct representation of which combinations of analysis checks lead to unexpected outcomes. The logic regression tree is also directly comparable to other diagnostic techniques, which we discuss further in @sec-discussion.
 
 # Application {#sec-pm10-mortality}
 
@@ -442,16 +466,24 @@ df <- list(
   tibble(.fitted = pm10_df$mortality_outlier, 
          unexpect = pm10_df$unexpect),
   tibble(.fitted = pm10_df$PM10_outlier, 
-         unexpect = pm10_df$unexpect),
-  augment(fit)) |>
+         unexpect = pm10_df$unexpect)) |>
   map_dfr(~.x |> calc_miscla_rate(.fitted, unexpect) |> 
-            mutate(overlapping = 0, independence = 1) |> 
-            calc_metrics(metrics = c("harmonic", "arithmetic")), .id = "id") 
+            mutate(independence = 1) |> 
+            calc_metrics(metrics = c("harmonic", "arithmetic")), .id = "id") |> 
+  mutate(id = as.numeric(id))
+
+reg <- fit |> augment() |>
+  calc_miscla_rate(unexpect, .fitted) |>
+  calc_independence() |> 
+  calc_metrics(metrics = c("harmonic", "arithmetic")) |> 
+  mutate(id = 5)
+
+df <- df |> bind_rows(reg)
 
 tbl <- tibble(check = c("Check 1: cor(m, PM10) < -0.03", "Check 2: cor(m, tmp) > -0.35",
                         "Check 3: mortality outlier", "Check 4: PM10 outlier", 
                         "Logic regression: (check 1) AND ((check 2) OR (check 3 AND check 4))")) |> 
-  bind_cols(df |> dplyr::select(-id, -overlapping)) |> rename(`indep.` = independence) 
+  bind_cols(df |> dplyr::select(-id)) |> rename(`indep.` = independence) 
 
 tbl |> 
   kable(digits = 3, escape = FALSE, format = "latex", booktab = TRUE,
@@ -579,7 +611,7 @@ An interesting connection can be drawn between our logic regression trees and a 
 
 Visualization methods are also valuable tools for assessing data assumptions and can potentially be formalized as analysis validation checks. For instance, plotting a variable's distribution using a histogram, density plot, or bee swarm plot can reveal outliers or deviations from normality. These visualizations could be re-framed as analysis checks that fail when the data does not conform to the visual expectation. However, translating visualization results into binary checks remains an open challenge, requiring either manual verification or the development of automated methods to interpret visualization outputs. An existing example of visual test is the R package `vdiffr` [@vdiffr] for graphic software unit testing. The package saves a template plot and compares it to the current plot to determine whether the unit tests passes or fails.
 
-Systematically generating realistic simulated data is a key component of our approach and is deserving of further consideration. In the PM10 example in @sec-pm10-mortality, the inverse transform method was used to preserve the correlation structure among mortality, PM10, and temperature. However, the simulation process can become complex when additional restrictions are imposed or when a greater range of scenarios is desired. In such cases, techniques like the acceptance-reject method or permutation may be used to generate the data. The results in @sec-pm10-mortality on the broader NMMAPS dataset suggest that our simulation procedure may have been inadequate in reflecting the range of possible configurations that the data could take. In particular, our split-data approach, using New York City to guide the simulation and then applying the analysis checks to other cities, may not have been ideal. It may be worth exploring some recent work in data thinning [@neufeld2024data] and data fission [@leiner2023data] to create training datasets that are more representative of future data.
+Systematically generating realistic simulated data is a key component of our approach and is deserving of further consideration. In the PM10 example in @sec-pm10-mortality, the inverse transform method was used to preserve the correlation structure among mortality, PM10, and temperature. However, the simulation process can become complex when additional restrictions are imposed or when a greater range of scenarios is desired. In such cases, techniques like the acceptance-reject method or permutation may be used to generate the data. The results in @sec-pm10-mortality on the broader NMMAPS dataset suggest that our simulation procedure may have been inadequate in reflecting the range of possible configurations that the data could take. In particular, our split-data approach, using New York City to guide the simulation and then applying the analysis checks to other cities, may not have been ideal. It may be worth exploring some recent work in data thinning [@neufeld2024data], data fission [@leiner2023data], or differential privacy methods [@dong_gaussian_2022] to create training datasets that are more representative of future data. The Gaussian copula used in the example doesn't account for the tail dependence between the variables and other copula, e.g. t-copula or extreme value distribution copula, could also be explored to better capture the tail dependence.
 
 Analysis validation checks are closely related to the concept of unit testing in software engineering. While unit tests isolate and test specific lines of the code, analysis validation checks focus on the assumptions underlying the analysis rather than the explicit code itself. Moreover, while software testing is deterministic, with clear rules for determining failure, analysis validation checks are probabilistic. As a result, an analysis may fail several assumption checks yet produce an expected outcome, or pass all checks but yield an unexpected result.
 
