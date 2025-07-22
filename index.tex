@@ -1,5 +1,4 @@
 % Options for packages loaded elsewhere
-% Options for packages loaded elsewhere
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
@@ -7,22 +6,22 @@
 \documentclass[
   12pt,
 ]{interact}
-\usepackage{xcolor}
+
 \usepackage{amsmath,amssymb}
-\setcounter{secnumdepth}{5}
+\usepackage{setspace}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
 \else % if luatex or xetex
-  \usepackage{unicode-math} % this also loads fontspec
+  \usepackage{unicode-math}
   \defaultfontfeatures{Scale=MatchLowercase}
   \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
 \fi
 \usepackage{lmodern}
-\ifPDFTeX\else
-  % xetex/luatex font selection
+\ifPDFTeX\else  
+    % xetex/luatex font selection
 \fi
 % Use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
@@ -30,7 +29,6 @@
   \usepackage[]{microtype}
   \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
-\usepackage{setspace}
 \makeatletter
 \@ifundefined{KOMAClassName}{% if non-KOMA class
   \IfFileExists{parskip.sty}{%
@@ -41,6 +39,9 @@
 }{% if KOMA class
   \KOMAoptions{parskip=half}}
 \makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{5}
 % Make \paragraph and \subparagraph free-standing
 \makeatletter
 \ifx\paragraph\undefined\else
@@ -66,7 +67,8 @@
 \makeatother
 
 
-\usepackage{longtable,booktabs,array}
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
 \usepackage{etoolbox}
@@ -91,22 +93,6 @@
 % Set default figure placement to htbp
 \def\fps@figure{htbp}
 \makeatother
-
-
-
-
-
-\setlength{\emergencystretch}{3em} % prevent overfull lines
-
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-
-
-
- 
-\usepackage[]{natbib}
-\bibliographystyle{plainnat}
-
 
 \usepackage{booktabs}
 \usepackage{longtable}
@@ -164,9 +150,13 @@
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
 \makeatother
+
+\usepackage[]{natbib}
+\bibliographystyle{plainnat}
 \usepackage{bookmark}
+
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
-\urlstyle{same}
+\urlstyle{same} % disable monospaced font for URLs
 \hypersetup{
   pdftitle={Inside Out: Externalizing Assumptions in Data Analysis as Validation Checks},
   pdfauthor={H. Sherry Zhang; Roger D. Peng},
@@ -601,11 +591,11 @@ as:
 
 \[\text{independence} = \frac{\eta - 1/k}{1 - 1/k}= \frac{H(X_1, X_2, \cdots, X_k)/\sum_{i= 1}^K H(X_i) - 1/k}{1 - 1/k}.\]
 
-The metric attains a value of 1 indicates that all checks are
-independent: \(H(X_1, X_2, \cdots, X_k)=\sum_{i= 1}^k H(X_i)\) and
-provide unique information to diagnose the unexpected outcome (trivia
-case when there is only one check), and a value of 0 when the checks are
-identical:
+An independence metric value of 1 indicates that all checks are
+independent: \(H(X_1, X_2, \cdots, X_k)=\sum_{i= 1}^k H(X_i)\) and each
+check provides unique information to diagnose the unexpected outcome
+(the trivial case is when there is only one check). A value of 0
+indicates the checks are all identical:
 \(H(X_1, X_2, \cdots, X_k)- \sum_{i= 1}^k H(X_i) = H(X_i)/ k H(X_i) = 1/k\).
 
 The three metrics (precision, recall, and independence) can be combined
@@ -879,11 +869,11 @@ check, along with harmonic and arithmetic means.}
 \toprule
 Checks & Precision & Recall & Independence & Harmonic & Arithmetic\\
 \midrule
-Check 1: cor(m, PM10) < -0.03 & 0.551 & 0.894 & 1.000 & 0.763 & 0.815\\
-Check 2: cor(m, tmp) > -0.35 & 0.281 & 0.556 & 1.000 & 0.472 & 0.612\\
-Check 3: mortality outlier & 0.302 & 0.775 & 1.000 & 0.536 & 0.692\\
-Check 4: PM10 outlier & 0.305 & 0.766 & 1.000 & 0.537 & 0.690\\
-Logic regression: (check 1) AND ((check 2) OR (check 3 AND check 4)) & 0.876 & 0.722 & 0.812 & 0.798 & 0.803\\
+Check 1: cor(m, PM10) < -0.03 & 0.518 & 0.888 & 1.000 & 0.740 & 0.802\\
+Check 2: cor(m, tmp) > -0.35 & 0.259 & 0.543 & 1.000 & 0.448 & 0.601\\
+Check 3: mortality outlier & 0.281 & 0.833 & 1.000 & 0.521 & 0.705\\
+Check 4: PM10 outlier & 0.289 & 0.871 & 1.000 & 0.535 & 0.720\\
+Logic regression: (check 1) AND ((check 2) OR (check 3 AND check 4)) & 0.874 & 0.667 & 0.779 & 0.764 & 0.773\\
 \bottomrule
 \end{tabular}}
 
@@ -915,7 +905,7 @@ The fitted logic regression model is
 \textgreater{} -0.3 OR (mortality outlier AND PM10 outlier))
 \end{quote}
 
-This generates a precision of 0.876 and a recall of 0.722 for predicting
+This generates a precision of 0.874 and a recall of 0.667 for predicting
 the unexpected PM10 coefficient. As shown in
 Figure~\ref{fig-linear-reg-tree}, there is no single analysis check in
 the tree that predicts an unexpected outcome. rather at least three
@@ -1568,7 +1558,7 @@ paper can be found at:
 
 
 \renewcommand\refname{References}
-\bibliography{references.bib}
+  \bibliography{references.bib}
 
 
 

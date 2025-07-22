@@ -195,7 +195,7 @@ To scale this quantity to the range $[0,1]$ for consistency with other metrics (
 
 $$\text{independence} = \frac{\eta - 1/k}{1 - 1/k}= \frac{H(X_1, X_2, \cdots, X_k)/\sum_{i= 1}^K H(X_i) - 1/k}{1 - 1/k}.$$
 
-The metric attains a value of 1 indicates that all checks are independent: $H(X_1, X_2, \cdots, X_k)=\sum_{i= 1}^k H(X_i)$ and provide unique information to diagnose the unexpected outcome (trivia case when there is only one check), and a value of 0 when the checks are identical: $H(X_1, X_2, \cdots, X_k)- \sum_{i= 1}^k H(X_i) = H(X_i)/ k H(X_i) = 1/k$. 
+An independence metric value of 1 indicates that all checks are independent: $H(X_1, X_2, \cdots, X_k)=\sum_{i= 1}^k H(X_i)$ and each check provides unique information to diagnose the unexpected outcome (the trivial case is when there is only one check). A value of 0 indicates the checks are all identical: $H(X_1, X_2, \cdots, X_k)- \sum_{i= 1}^k H(X_i) = H(X_i)/ k H(X_i) = 1/k$. 
 
 
 The three metrics (precision, recall, and independence) can be combined into a single metric using the arithmetic mean, harmonic mean, or quadratic mean. The differences among these means are minimal when the three metrics are similar. However, as the differences among the metrics increases, the harmonic mean tends to produce the smallest overall score, as it penalizes low values, while the quadratic mean tends to produce the largest score by rewarding higher values more. For simple interpretation of the score, the arithmetic mean is preferred, while in applications where the difference between precision, recall, and independence need to be penalized or rewarded more, the harmonic and quadratic mean should be considered.
