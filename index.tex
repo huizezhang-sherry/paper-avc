@@ -1,4 +1,5 @@
 % Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
 \PassOptionsToPackage{unicode}{hyperref}
 \PassOptionsToPackage{hyphens}{url}
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
@@ -6,22 +7,22 @@
 \documentclass[
   12pt,
 ]{interact}
-
+\usepackage{xcolor}
 \usepackage{amsmath,amssymb}
-\usepackage{setspace}
+\setcounter{secnumdepth}{5}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
 \else % if luatex or xetex
-  \usepackage{unicode-math}
+  \usepackage{unicode-math} % this also loads fontspec
   \defaultfontfeatures{Scale=MatchLowercase}
   \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
 \fi
 \usepackage{lmodern}
-\ifPDFTeX\else  
-    % xetex/luatex font selection
+\ifPDFTeX\else
+  % xetex/luatex font selection
 \fi
 % Use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
@@ -29,6 +30,7 @@
   \usepackage[]{microtype}
   \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
+\usepackage{setspace}
 \makeatletter
 \@ifundefined{KOMAClassName}{% if non-KOMA class
   \IfFileExists{parskip.sty}{%
@@ -39,9 +41,6 @@
 }{% if KOMA class
   \KOMAoptions{parskip=half}}
 \makeatother
-\usepackage{xcolor}
-\setlength{\emergencystretch}{3em} % prevent overfull lines
-\setcounter{secnumdepth}{5}
 % Make \paragraph and \subparagraph free-standing
 \makeatletter
 \ifx\paragraph\undefined\else
@@ -67,8 +66,7 @@
 \makeatother
 
 
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
 \usepackage{etoolbox}
@@ -93,6 +91,22 @@
 % Set default figure placement to htbp
 \def\fps@figure{htbp}
 \makeatother
+
+
+
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+\usepackage[]{natbib}
+\bibliographystyle{plainnat}
+
 
 \usepackage{booktabs}
 \usepackage{longtable}
@@ -150,16 +164,13 @@
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
 \makeatother
-
-\usepackage[]{natbib}
-\bibliographystyle{plainnat}
 \usepackage{bookmark}
-
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
-\urlstyle{same} % disable monospaced font for URLs
+\urlstyle{same}
 \hypersetup{
   pdftitle={Inside Out: Externalizing Assumptions in Data Analysis as Validation Checks},
   pdfauthor={H. Sherry Zhang; Roger D. Peng},
+  pdfkeywords={diagnostic, logic regression, data analysis assumptions},
   colorlinks=true,
   linkcolor={blue},
   filecolor={Maroon},
@@ -200,6 +211,11 @@ example using step count data and a generalized linear model example
 examining the effect of particulate matter air pollution on daily
 mortality.
 \end{abstract}
+\begin{keywords}
+\def\sep{;\ }
+diagnostic, logic regression, data analysis assumptions\sep 
+diagnostic, logic regression, data analysis assumptions
+\end{keywords}
 
 
 \setstretch{1.15}
@@ -457,11 +473,6 @@ days can be simulated from a Poisson distribution with \(\lambda = 8\).
 Figure~\ref{fig-step-count} displays average step count across 300
 simulated 30-day periods.
 
-\begin{verbatim}
-Orientation inferred to be along y-axis; override with
-`position_quasirandom(orientation = 'x')`
-\end{verbatim}
-
 \begin{figure}
 
 \centering{
@@ -544,7 +555,7 @@ binary predictors. The logical operations allowed to construct
 our binary-binary classification problem, the logic regression model can
 be written as follows:
 
-\[E(Y) = \mathcal{L}(X_1, X_2, \cdots, X_k)\]
+\[E(Y) = \mathcal{L}(X_1, X_2, \cdots, X_k),\]
 
 where the outcome, \(Y\), indicates whether the outcome is
 \emph{unexpected} (1) or \emph{expected} (0), and the analysis
@@ -723,11 +734,11 @@ temperature values from 1992--2000. We then will apply the analysis
 checks to similar data from 39 other cities from the NMMAPS study.
 
 The typical approach to studying the association between PM10 and
-mortality is to apply a generalized linear model with a Poisson link to
-relate daily mortality counts to daily measures of PM10. Based on
-previous work and the range of effect sizes published in the literature,
-an analyst might expect the coefficient for PM10 in this GLM to lie
-between \([0, 0.005]\), after adjusting for daily temperature
+mortality is to apply a generalized linear model (Poisson family with a
+log link) to relate daily mortality counts to daily measures of PM10.
+Based on previous work and the range of effect sizes published in the
+literature, an analyst might expect the coefficient for PM10 in this GLM
+to lie between \([0, 0.005]\), after adjusting for daily temperature
 \citep{samet2000fine, welty2005acute}. Note that the relatively simple
 modeling approach being used here is primarily for demonstration;
 typically far more sophisticated semi-parametric approaches are used in
@@ -813,20 +824,6 @@ distribution (shape = 3.8, scale = 61)}
 
 \end{figure}%
 
-\begin{verbatim}
-Warning: There were 990 warnings in `mutate()`.
-The first warning was:
-i In argument: `fit = list(...)`.
-i In row 2.
-Caused by warning in `dpois()`:
-! non-integer x = 291.790133
-i Run `dplyr::last_dplyr_warnings()` to see the 989 remaining warnings.
-\end{verbatim}
-
-\begin{verbatim}
-Joining with `by = join_by(unexpect)`
-\end{verbatim}
-
 A logic regression is fitted using all variations of the checks in
 Table~\ref{tbl-checks} to predict whether the PM10 coefficient is
 unexpected. Given the imbalance of outcome (expected vs.~unexpected),
@@ -869,11 +866,11 @@ check, along with harmonic and arithmetic means.}
 \toprule
 Checks & Precision & Recall & Independence & Harmonic & Arithmetic\\
 \midrule
-Check 1: cor(m, PM10) < -0.03 & 0.518 & 0.888 & 1.000 & 0.740 & 0.802\\
-Check 2: cor(m, tmp) > -0.35 & 0.259 & 0.543 & 1.000 & 0.448 & 0.601\\
-Check 3: mortality outlier & 0.281 & 0.833 & 1.000 & 0.521 & 0.705\\
-Check 4: PM10 outlier & 0.289 & 0.871 & 1.000 & 0.535 & 0.720\\
-Logic regression: (check 1) AND ((check 2) OR (check 3 AND check 4)) & 0.874 & 0.667 & 0.779 & 0.764 & 0.773\\
+Check 1: cor(m, PM10) < -- 0.03 & 0.551 & 0.894 & 1.000 & 0.763 & 0.815\\
+Check 2: cor(m, tmp) > -- 0.35 & 0.281 & 0.556 & 1.000 & 0.472 & 0.612\\
+Check 3: mortality outlier & 0.302 & 0.775 & 1.000 & 0.536 & 0.692\\
+Check 4: PM10 outlier & 0.305 & 0.766 & 1.000 & 0.537 & 0.690\\
+Logic regression: (check 1) AND ((check 2) OR (check 3 AND check 4)) & 0.876 & 0.722 & 0.812 & 0.798 & 0.803\\
 \bottomrule
 \end{tabular}}
 
@@ -901,11 +898,11 @@ model picks up the following cutoff values for each type of check:
 The fitted logic regression model is
 
 \begin{quote}
-(cor(mortality, PM10) \textless{} -0.03) AND (cor(mortality, tmp)
-\textgreater{} -0.3 OR (mortality outlier AND PM10 outlier))
+(cor(mortality, PM10) \textless{} -- 0.03) AND (cor(mortality, tmp)
+\textgreater{} -- 0.3 OR (mortality outlier AND PM10 outlier))
 \end{quote}
 
-This generates a precision of 0.874 and a recall of 0.667 for predicting
+This generates a precision of 0.876 and a recall of 0.722 for predicting
 the unexpected PM10 coefficient. As shown in
 Figure~\ref{fig-linear-reg-tree}, there is no single analysis check in
 the tree that predicts an unexpected outcome. rather at least three
@@ -925,395 +922,6 @@ of cities used are presented in Table~\ref{tbl-all-cities}. For each
 city, we had daily data on all-cause mortality, PM10, and average
 temperature for the years 1992--2000.
 
-\begin{verbatim}
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 3288 Columns: 6
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr  (1): season
-dbl  (4): mortality, pm10, temp, dewpt
-date (1): date
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Rows: 40 Columns: 2
--- Column specification --------------------------------------------------------
-Delimiter: ","
-chr (2): city, cityname
-
-i Use `spec()` to retrieve the full column specification for this data.
-i Specify the column types or set `show_col_types = FALSE` to quiet this message.
-Joining with `by = join_by(city)`
-\end{verbatim}
-
 \begin{table}
 
 \caption{\label{tbl-all-cities}Results from full analysis of 40 cities
@@ -1329,8 +937,8 @@ passed.}
 \toprule
 City & \makecell[l]{PM10\\Estimated\\Coefficient} & \makecell[l]{Outcome\\Observed\\Unexpected} & \makecell[l]{Logic Regression\\Predicted\\Unexpected} & \makecell[l]{Correlation:\\Mortality-\\Temperature} & \makecell[l]{Correlation:\\Mortality-\\PM10} & \makecell[l]{Mortality\\Outlier} & \makecell[l]{PM10\\Outlier}\\
 \midrule
-Atlanta & -0.0008 & T & T & --0.26 (T) & --0.16 (T) & F & F\\
-Austin & -0.0030 & T & T & --0.12 (T) & --0.11 (T) & F & T\\
+Atlanta & --0.0008 & T & T & --0.26 (T) & --0.16 (T) & F & F\\
+Austin & --0.0030 & T & T & --0.12 (T) & --0.11 (T) & F & T\\
 Baltimore & 0.0018 & F & F & --0.21 (T) & 0.01 (F) & T & T\\
 Boston & 0.0019 & F & F & --0.16 (T) & 0.02 (F) & F & T\\
 Buffalo & 0.0028 & F & F & --0.23 (T) & --0.02 (F) & F & T\\
@@ -1350,14 +958,14 @@ Indianapolis & 0.0014 & F & F & --0.13 (T) & 0.02 (F) & F & T\\
 Kansas City & 0.0022 & F & F & --0.20 (T) & 0.02 (F) & F & T\\
 Los Angeles & 0.0011 & F & F & --0.47 (F) & --0.01 (F) & T & T\\
 Las Vegas & 0.0008 & F & F & --0.27 (T) & 0.05 (F) & T & T\\
-Memphis & -0.0007 & T & T & --0.16 (T) & --0.10 (T) & F & T\\
-Miami & -0.0004 & T & F & --0.16 (T) & --0.02 (F) & F & T\\
+Memphis & --0.0007 & T & T & --0.16 (T) & --0.10 (T) & F & T\\
+Miami & --0.0004 & T & F & --0.16 (T) & --0.02 (F) & F & T\\
 \addlinespace
 Milwaukee & 0.0026 & F & F & --0.22 (T) & 0.09 (F) & F & T\\
 Minneapolis/St. Paul & 0.0009 & F & F & --0.30 (F) & --0.01 (F) & T & T\\
 New York & 0.0022 & F & F & --0.46 (F) & --0.01 (F) & T & T\\
 Oakland & 0.0008 & F & F & --0.28 (T) & 0.04 (F) & F & T\\
-Orlando & -0.0008 & T & T & --0.21 (T) & --0.05 (T) & F & T\\
+Orlando & --0.0008 & T & T & --0.21 (T) & --0.05 (T) & F & T\\
 \addlinespace
 Philadelphia & 0.0021 & F & F & --0.27 (T) & 0.11 (F) & T & T\\
 Phoenix & 0.0009 & F & F & --0.44 (F) & 0.07 (F) & T & T\\
@@ -1365,8 +973,8 @@ Pittsburgh & 0.0009 & F & T & --0.36 (F) & --0.08 (T) & T & T\\
 Riverside & 0.0001 & F & T & --0.27 (T) & --0.11 (T) & T & T\\
 Sacramento & 0.0005 & F & F & --0.30 (T) & 0.05 (F) & T & T\\
 \addlinespace
-Salt Lake City & -0.0004 & T & T & --0.19 (T) & --0.03 (T) & F & T\\
-San Antonio & -0.0021 & T & T & --0.22 (T) & --0.16 (T) & F & T\\
+Salt Lake City & --0.0004 & T & T & --0.19 (T) & --0.03 (T) & F & T\\
+San Antonio & --0.0021 & T & T & --0.22 (T) & --0.16 (T) & F & T\\
 San Bernardino & 0.0006 & F & T & --0.28 (T) & --0.09 (T) & T & T\\
 San Diego & 0.0011 & F & F & --0.33 (F) & 0.03 (F) & T & T\\
 San Jose & 0.0006 & F & F & --0.23 (T) & 0.08 (F) & F & T\\
@@ -1374,7 +982,7 @@ San Jose & 0.0006 & F & F & --0.23 (T) & 0.08 (F) & F & T\\
 Seattle & 0.0003 & F & F & --0.24 (T) & 0.06 (F) & F & T\\
 Santa Ana/Anaheim & 0.0005 & F & T & --0.26 (T) & --0.04 (T) & T & T\\
 St. Petersburg & 0.0012 & F & F & --0.31 (F) & 0.01 (F) & F & T\\
-Tampa & -0.0003 & T & T & --0.20 (T) & --0.04 (T) & F & T\\
+Tampa & --0.0003 & T & T & --0.20 (T) & --0.04 (T) & F & T\\
 Tucson & 0.0028 & F & F & --0.31 (F) & 0.18 (F) & T & T\\
 \bottomrule
 \end{tabular}}
@@ -1558,7 +1166,7 @@ paper can be found at:
 
 
 \renewcommand\refname{References}
-  \bibliography{references.bib}
+\bibliography{references.bib}
 
 
 

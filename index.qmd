@@ -30,6 +30,7 @@ format:
    fontsize: 12pt
    linestretch: 1.15
    notebook-links: false
+   keywords: diagnostic, logic regression, data analysis assumptions
 preamble: >
   \usepackage{amsfonts,amsmath,amssymb,amsthm}
 editor_options: 
@@ -37,7 +38,7 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 #remotes::install_github("huizezhang-sherry/adtoolbox")
 library(tidyverse)
 library(patchwork)
@@ -173,7 +174,7 @@ knitr::include_graphics(here::here("figures", "metric-calc.png"))
 
 From the simulated data, the accuracy branch in @fig-metric-calc refers to the set of checks' ability to detect unexpected outcomes accurately. To relate multiple checks to the outcome, a logic regression model [@ruczinski_logic_2003] is used. Originally developed for SNP micro-array data, logic regression predict classification or regression outcomes by constructing Boolean combinations, $\mathcal{L}(X_1, X_2, \cdots, X_k)$, where $X_i$ are binary predictors. The logical operations allowed to construct $\mathcal{L(\cdot)}$ includes AND ($\land$), OR ($\lor$), and NOT ($\neg$) and an example of the Boolean combination of $\mathcal{L(\cdot)}$ is $X_1 \text{ AND } (X_2 \text{ OR } X_3)$. In our binary-binary classification problem, the logic regression model can be written as follows:
 
-$$E(Y) = \mathcal{L}(X_1, X_2, \cdots, X_k)$$
+$$E(Y) = \mathcal{L}(X_1, X_2, \cdots, X_k),$$
 
 where the outcome, $Y$, indicates whether the outcome is *unexpected* (1) or *expected* (0), and the analysis validation checks, $X_1, X_2, \cdots, X_k$, are labeled as 1 if they fail and 0 if they pass. 
 
@@ -282,7 +283,7 @@ For comparison, we include a simplified rule, (quantile(step, 0.6) > 10,000) AND
 
 In the study of the health effects of outdoor air pollution, one area of interest is the association between short-term, day-to-day changes in particulate matter air pollution and daily mortality counts. Substantial work has been done to study this question and to date, there appears to be strong evidence of an association between particulate matter less than 10 $\mu$g/m$^3$ in aerodynamic diameter (PM10) and daily mortality from all non-accidental causes [@samet2000fine]. In the following example, we use the problem of studying PM10 and mortality along with data from the National Morbidity, Mortality, and Air Pollution Study (NMMAPS) to demonstrate how our analysis validation checks described in @sec-method can be applied. In addition to providing a more substantial problem for our methods, this example also demonstrates how the procedure presented in @sec-method can be used to select cutoff values in the analysis checks to diagnose an unexpected PM10 coefficient from the generalized linear model. The dataset that we use to develop our simulations and analysis checks is from New York City, and contains daily PM10, all-cause (non-accidental) mortality, and average temperature values from 1992--2000. We then will apply the analysis checks to similar data from 39 other cities from the NMMAPS study.
 
-The typical approach to studying the association between PM10 and mortality is to apply a generalized linear model with a Poisson link to relate daily mortality counts to daily measures of PM10. Based on previous work and the range of effect sizes published in the literature, an analyst might expect the coefficient for PM10 in this GLM to lie between $[0, 0.005]$, after adjusting for daily temperature [@samet2000fine; @welty2005acute]. Note that the relatively simple modeling approach being used here is primarily for demonstration; typically far more sophisticated semi-parametric approaches are used in the literature [@peng2006model]. 
+The typical approach to studying the association between PM10 and mortality is to apply a generalized linear model (Poisson family with a log link) to relate daily mortality counts to daily measures of PM10. Based on previous work and the range of effect sizes published in the literature, an analyst might expect the coefficient for PM10 in this GLM to lie between $[0, 0.005]$, after adjusting for daily temperature [@samet2000fine; @welty2005acute]. Note that the relatively simple modeling approach being used here is primarily for demonstration; typically far more sophisticated semi-parametric approaches are used in the literature [@peng2006model]. 
 
 Multiple factors can affect the estimated PM10 coefficient, such as the strength of the correlation between mortality and PM10, or between mortality and temperature. Outliers in the variables can also leverage the coefficient. While these are possible factors that could affect the analysis result, it is not clear what the cutoff values for these checks should be to determine a failure. Here we consider a list of checks in @tbl-checks with varied cutoff values: 
 
@@ -480,7 +481,7 @@ reg <- fit |> augment() |>
 
 df <- df |> bind_rows(reg)
 
-tbl <- tibble(check = c("Check 1: cor(m, PM10) < -0.03", "Check 2: cor(m, tmp) > -0.35",
+tbl <- tibble(check = c("Check 1: cor(m, PM10) < -- 0.03", "Check 2: cor(m, tmp) > -- 0.35",
                         "Check 3: mortality outlier", "Check 4: PM10 outlier", 
                         "Logic regression: (check 1) AND ((check 2) OR (check 3 AND check 4))")) |> 
   bind_cols(df |> dplyr::select(-id)) |> rename(`indep.` = independence) 
@@ -502,7 +503,7 @@ As indicated in @fig-linear-reg-tree, the logic regression model picks up the fo
 
 The fitted logic regression model is 
 
-  > (cor(mortality, PM10) < -0.03) AND (cor(mortality, tmp) > -0.3 OR (mortality outlier AND PM10 outlier))
+  > (cor(mortality, PM10) < -- 0.03) AND (cor(mortality, tmp) > -- 0.3 OR (mortality outlier AND PM10 outlier))
 
 This generates a precision of `r round(as.numeric(df[5, "precision"]), 3)` and a recall of `r round(as.numeric(df[5, "recall"]), 3)` for predicting the unexpected PM10 coefficient. As shown in @fig-linear-reg-tree, there is no single analysis check in the tree that predicts an unexpected outcome. rather at least three checks in the tree must be TRUE in order for the model to predict an unexpected outcome. Given the high independence of the checks (@tbl-linear-reg), this suggests that unexpected results are only likely after multiple anomalies are observed in the data.
 
@@ -510,7 +511,7 @@ This generates a precision of `r round(as.numeric(df[5, "precision"]), 3)` and a
 
 In order to test our development of analysis validation checks based on the New York City data, we incorporate data from 39 additional cities from the original NMMAPS study and apply our checks to those data. These cities (along with New York City) represent approximately the largest 40 metropolitan areas in the United States by population. The complete list of cities used are presented in @tbl-all-cities. For each city, we had daily data on all-cause mortality, PM10, and average temperature for the years 1992--2000.
 
-```{r}
+```{r message=FALSE}
 #| label: tbl-all-cities
 #| tbl-cap: Results from full analysis of 40 cities from the NMMAPS air pollution and mortality study. In the table, a "T" indicates that a check failed and an "F" indicates that a check passed.
 
@@ -550,7 +551,7 @@ df |>
   mutate(pm10 = format(round(pm10, 4), nsmall = 4),
          cor_m_tmp = format(round(cor_m_tmp, 2), nsmall = 2),
          cor_m_pm10 = format(round(cor_m_pm10, 2), nsmall = 2),
-         across(c(cor_m_pm10, cor_m_tmp), ~str_replace(.x, "-", "--"))) |> 
+         across(c(pm10, cor_m_pm10, cor_m_tmp), ~str_replace(.x, "-", "--"))) |> 
   mutate(across(c(unexpect, .pred, lgl_cor_m_pm10, lgl_cor_m_tmp, mort_outlier, pm10_outlier), 
                 ~ifelse(.x, "T", "F"))) |>
   mutate(cor_m_tmp = paste0(cor_m_tmp, " (", lgl_cor_m_tmp, ")"),
