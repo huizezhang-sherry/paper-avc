@@ -1,0 +1,18 @@
+---
+title: "Response to Reviewers JDS24112"
+subtitle: "Inside Out: Externalizing Assumptions in Data Analysis as Validation Checks"
+author: "H. Sherry Zhang, Roger D. Peng"
+date: "2025-07-08"
+format: pdf
+---
+
+
+We would like to thank the reviewers and editor for taking the time to review our paper and provide constructive comments. Below is a point-by-point explanation of how we have changed the paper. Reviewers' comments are in normal text and **\textcolor{purple}{our responses are in red}**.
+
+The reproducibility check did not go through because the adtoolbox package cannot be installed. It is the authors’ responsibility to ensure that the package exists and is properly maintained so that reproducibility can be guaranteed in the future (at least near future). If this is not feasible, the package source should be submitted as supplementary material. **\textcolor{purple}{}**.
+
+Please submit the revision to the Section of Data Science in Action. The Section of Philosophy of Data Science is reserved for a different type of contribution. **\textcolor{purple}{Fixed}**.
+
+Add an unnumbered section titled Supplementary Material and provide a list of its contents. **\textcolor{purple}{our responses are in red}**.
+
+Our production team accepts LaTeX source but not Quarto. Please be prepared to provide the LaTeX source. The R package jds.rmd can be used to generate LaTeX files following the JDS template. **\textcolor{purple}{Fixed}**.
