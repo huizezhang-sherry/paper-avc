@@ -624,4 +624,8 @@ The article is created using Quarto [@Allaire_Quarto_2022] in R [@R].
 The source code for reproducing the work reported in this paper can be
 found at: <https://github.com/huizezhang-sherry/paper-avc>. 
 
+# Supplementary material {.unnumbered}
+
+The supplementary materials include a full script of the examples in the paper (`index.R`) and its output (`index.html`), the data used for in the examples in Section 5 (`data/`), the package source (`adtoolbox_0.1.0.tar.gz`), and a README.md file containing the install instructions for running the scripts.
+
 # References
