@@ -103,7 +103,7 @@
 
 
 
-
+ 
 \usepackage[]{natbib}
 \bibliographystyle{plainnat}
 
@@ -213,7 +213,7 @@ mortality.
 \end{abstract}
 \begin{keywords}
 \def\sep{;\ }
-diagnostic, logic regression, data analysis assumptions\sep
+diagnostic, logic regression, data analysis assumptions\sep 
 diagnostic, logic regression, data analysis assumptions
 \end{keywords}
 
@@ -221,20 +221,19 @@ diagnostic, logic regression, data analysis assumptions
 \setstretch{1.15}
 \section{Introduction}\label{introduction}
 
-In data analysis, analysts often rely on their prior knowledge or domain
+In data analysis, analysts often rely on prior knowledge or domain
 expertise to form expectations and assess whether results align with
 them. When results deviate from these expectations, experienced analysts
-check assumptions made about the data and during the analysis, but often
-do so without discussing the underlying reasoning in the publications.
-While publication of analysis code and data is now a common a
-requirement for the sake of reproducibility
-\citep{peng2011reproducible}, the published code alone is often
-insufficient for understanding the thought process behind an analysis.
-Code corresponding to published analyses often reflect the final
-decisions made about analysis and do not reveal the decisions or
-assumptions made about the data during the analysis. Thus, a reader
-looking at published code can often be left with many questions about
-why certain choices were made.
+check assumptions made about the data during the analysis, but often do
+so without discussing the underlying reasoning in the publications.
+While publication of analysis code and data is now a common requirement
+for the sake of reproducibility \citep{peng2011reproducible}, the
+published code alone is often insufficient for understanding the thought
+process behind an analysis. Code corresponding to published analyses
+often reflects the final decisions made about analysis and does not
+reveal the decisions or assumptions about the data during the analysis.
+Thus, a reader looking at published code can often be left with many
+questions about why certain choices were made.
 
 We might gain insight into analysts' thought processes by speaking with
 them directly or watching them work via screencast videos they produce,
@@ -260,10 +259,10 @@ assumptions underlying an algorithm are not satisfied in practice. In
 the past, data were often collected directly by analysts through
 carefully designed experiments, however, contemporary analyses often
 rely on data curated by government or research institutions, where some
-data characteristics may be unknown to the analysts. When unexpected
-outcomes arise, they often later traced back to implicit assumptions
+data characteristics may be unknown to analysts. When unexpected
+outcomes arise, they are often later traced back to implicit assumptions
 made by the analysts - assumptions that were unknowingly violated by the
-idiosyncratic in the data. By externalizing these assumptions through
+idiosyncrasies in the data. By externalizing these assumptions through
 analysis validation checks, we aim to make it easier to identify and
 diagnose such unexpected results.
 
@@ -290,7 +289,7 @@ Section~\ref{sec-method} describes the procedure that selects the best
 subset of checks for understanding the occurrence of unexpected
 outcomes. Section~\ref{sec-pm10-mortality} applies this procedure to a
 larger example that estimates the effect of particulate matter air
-pollution on daily mortality. Section~\ref{sec-discussion} summarises
+pollution on daily mortality. Section~\ref{sec-discussion} summarizes
 the paper and discusses a few key considerations.
 
 \section{Related Work}\label{sec-lit-review}
@@ -350,7 +349,7 @@ like Google TensorFlow \citep{polyzotis2019data} to ensure the quality
 of data for training machine learning models, as well as for supporting
 business decision-making \citep{schelter2018automating}. With the
 increasing availability of open data in scientific research, the users
-of the data are often not the original data collector and may not be
+of the data are often not the original data collectors and may not be
 aware of all the details or nuances of the data. This encourages
 researchers to conduct data quality checks before beginning the analytic
 process, helping to avoid unexpected discoveries later on. In R,
@@ -429,9 +428,9 @@ Subjects are instructed to walk at least 8,000 steps each day, with an
 expected average of 9,000 steps, tracked by a step counter app. With
 data of this nature, we may expect there to be occasional ``low'' days
 due to factors such as unfavorable weather conditions limiting outdoor
-activities. We may also expect ``high'' days recorded after an outdoor
-activities or intense workout. Given the requirements of the study, we
-form our expectation as follows:
+activities. We may also expect ``high'' days after outdoor activities or
+intense workouts. Given the requirements of the study, we form our
+expectation as follows:
 
 \begin{quote}
 Expectation: The average step count of a given subject is between
@@ -444,7 +443,7 @@ data. {[}TODO: Add guidelines for designing the checks{]} For example,
 we can check the quantile of the step count, if more than a third of the
 days fall below 8,000, or more than a third exceed 10,000 steps, this
 could indicate an excess of low-count or high-count days. Similarly, we
-may may expect the standard deviation of the step count not to be overly
+may expect the standard deviation of the step count not to be overly
 large. These considerations yield the following three analysis
 validation checks that \emph{fail} when:
 
@@ -486,7 +485,7 @@ across 300 simulated 30-day periods. Each point represents the average
 step count from one simulation. Similar to a boxplot or violin plot, the
 beeswarm plot also displays the distribution of each individual data
 point. The orange points indicate instances where the average step count
-fails outside the {[}8,500, 9,500{]} interval, representing an
+falls outside the {[}8,500, 9,500{]} interval, representing an
 unexpected outcome in this scenario.}
 
 \end{figure}%
@@ -500,10 +499,10 @@ validation checks that best predict the occurrence of unexpected
 outcomes.
 
 The approach generates simulated datasets from the observed data to
-compute the outcome and the analysis validation checks (unexpected as 1
-and expected as 0). This then allows us to apply a logic regression tree
-to link the outcome and the check results to construct a Boolean
-expression to best predict the unexpected outcomes.
+compute the outcome and the analysis validation checks (coded as 1 for
+unexpected and 0 as expected). This then allows us to apply a logic
+regression tree to link the outcome and the check results to construct a
+Boolean expression to best predict the unexpected outcomes.
 Figure~\ref{fig-metric-calc} provides an overview of the process.
 
 The specific strategy to simulate the data depends on the problem and
@@ -526,16 +525,16 @@ expression to predict unexpected outcomes.
 
 \caption{\label{fig-metric-calc}Overview of the procedure to quantify
 the effectiveness of analysis validation checks. The procedure involves
-simulating replicates of the data, applying the anlysis, and running the
-analysis validation checks on each replicate to determine whether the
-outcome meets the expectation (the unexpected column) and whether each
-check passes (check 1, check 2, \ldots). The simulation results are then
-passed to two branches: the accuracy branch calculates the precision and
-recall of the checks from a logic regression prediction, while the
-redundancy branch to calculate the mutual information and independence
-of the checks. These three metrics are combined to produce a single
-metric that quantifies the effectiveness of the checks in diagnosing
-unexpected outcomes in the analysis.}
+simulating replicates of the data, applying the analysis, and running
+the analysis validation checks on each replicate to determine whether
+the outcome meets the expectation (the unexpected column) and whether
+each check passes (check 1, check 2, \ldots). The simulation results are
+then passed to two branches: the accuracy branch calculates the
+precision and recall of the checks from a logic regression prediction,
+while the redundancy branch calculates the mutual information and
+independence of the checks. These three metrics are combined to produce
+a single metric that quantifies the effectiveness of the checks in
+diagnosing unexpected outcomes in the analysis.}
 
 \end{figure}%
 
@@ -545,11 +544,11 @@ From the simulated data, the accuracy branch in
 Figure~\ref{fig-metric-calc} refers to the set of checks' ability to
 detect unexpected outcomes accurately. To relate multiple checks to the
 outcome, a logic regression model \citep{ruczinski_logic_2003} is used.
-Originally developed for SNP micro-array data, logic regression predict
+Originally developed for SNP micro-array data, logic regression predicts
 classification or regression outcomes by constructing Boolean
 combinations, \(\mathcal{L}(X_1, X_2, \cdots, X_k)\), where \(X_i\) are
 binary predictors. The logical operations allowed to construct
-\(\mathcal{L(\cdot)}\) includes AND (\(\land\)), OR (\(\lor\)), and NOT
+\(\mathcal{L(\cdot)}\) include AND (\(\land\)), OR (\(\lor\)), and NOT
 (\(\neg\)) and an example of the Boolean combination of
 \(\mathcal{L(\cdot)}\) is \(X_1 \text{ AND } (X_2 \text{ OR } X_3)\). In
 our binary-binary classification problem, the logic regression model can
@@ -562,20 +561,20 @@ where the outcome, \(Y\), indicates whether the outcome is
 validation checks, \(X_1, X_2, \cdots, X_k\), are labeled as 1 if they
 fail and 0 if they pass.
 
-This objective function is optimized using simulated annealing algorithm
-to minimize the misclassification error and the following 6 moves are
-permitted during the optimization to grow or prune the tree (as detailed
-in Figure 2 of \citet{ruczinski_logic_2003}): 1) replacing a leaf node,
-2) replacing an operator, 3) growing a branch, 4) pruning a branch, 5)
-splitting a leaf node, and 6) deleting a leaf node. Predictions from the
-logic regression model is then used, along with the observed outcome, to
-calculate the precision and recall of the optimized Boolean combination
-of checks. Compared to other tree-based methods for binary-binary
-prediction, the Boolean combinations from the logic regression model
-produce a tree structure that can be directly interpreted as the
-possible combination of checks leading to an unexpected outcome, without
-the need to invert the tree as required in classic tree-based recursive
-partitioning methods.
+This objective function is optimized using a simulated annealing
+algorithm to minimize the misclassification error and the following six
+moves are permitted during the optimization to grow or prune the tree
+(as detailed in Figure 2 of \citet{ruczinski_logic_2003}): 1) replacing
+a leaf node, 2) replacing an operator, 3) growing a branch, 4) pruning a
+branch, 5) splitting a leaf node, and 6) deleting a leaf node.
+Predictions from the logic regression model are then used, along with
+the observed outcome, to calculate the precision and recall of the
+optimized Boolean combination of checks. Compared to other tree-based
+methods for binary-binary prediction, the Boolean combinations from the
+logic regression model produce a tree structure that can be directly
+interpreted as the possible combination of checks leading to an
+unexpected outcome, without the need to invert the tree as required in
+classic tree-based recursive partitioning methods.
 
 \subsection{Independence}\label{independence}
 
@@ -585,8 +584,8 @@ This could happen if a set of checks are all tangentially related to the
 cause of the unexpected results, but none addresses the root cause. To
 quantify the redundancy among the checks, we use total correlation,
 \(C\), a multivariate generalization of mutual information that captures
-the amount of shared information across two variables. We define the
-normalized total correlation, \(C'\), as
+the amount of shared information across multiple variables. We define
+the normalized total correlation, \(C'\), as
 
 \[C'(X_1, X_2, \cdots, X_k) = \frac{C(X_1, X_2, \cdots, X_k)}{\sum_{i= 1}^k H(X_i)} = \frac{\sum_{i= 1}^k H(X_i) - H(X_1, X_2, \cdots, X_k)}{\sum_{i= 1}^k H(X_i)}, \]
 where \(H(X_i)\) is the entropy of the \(i\)-th check and
@@ -600,7 +599,7 @@ To scale this quantity to the range \([0,1]\) for consistency with other
 metrics (i.e., precision and recall), we define the independence metric
 as:
 
-\[\text{independence} = \frac{\eta - 1/k}{1 - 1/k}= \frac{H(X_1, X_2, \cdots, X_k)/\sum_{i= 1}^K H(X_i) - 1/k}{1 - 1/k}.\]
+\[\text{independence} = \frac{\eta - 1/k}{1 - 1/k}= \frac{H(X_1, X_2, \cdots, X_k)/\sum_{i= 1}^k H(X_i) - 1/k}{1 - 1/k}.\]
 
 An independence metric value of 1 indicates that all checks are
 independent: \(H(X_1, X_2, \cdots, X_k)=\sum_{i= 1}^k H(X_i)\) and each
@@ -626,7 +625,7 @@ quadratic mean should be considered.
 Returning to the step count example introduced in Section~\ref{sec-toy},
 the logic regression model is fitted to the three validation checks
 described previously to predict the outcome, whether the average number
-of step falls within the {[}8,500, 9,500{]} interval.
+of steps fall within the {[}8,500, 9,500{]} interval.
 Figure~\ref{fig-logic-reg} shows the best-fitting logic regression model
 as
 
@@ -753,7 +752,7 @@ should be to determine a failure. Here we consider a list of checks in
 Table~\ref{tbl-checks} with varied cutoff values:
 
 \begin{longtable}[]{@{}l@{}}
-\caption{A list of checks considered for the generalized linear model of
+\caption{List of checks considered for the generalized linear model of
 mortality on PM10 and temperature. The checks are based on the sample
 size, correlation between mortality and PM10, correlation between
 mortality and temperature, and univariate outlier detection. Multiple
@@ -777,8 +776,8 @@ Mortality-temperature correlation greater than \(-0.3\) \\
 Mortality-temperature correlation greater than \(-0.35\) \\
 Mortality-temperature correlation greater than \(-0.4\) \\
 Mortality-temperature correlation greater than \(-0.45\) \\
-Outlier(s) are presented in the variable PM10 \\
-Outlier(s) are presented in the variable mortality \\
+Outliers are present in the variable PM10 \\
+Outliers are present in the variable mortality \\
 \end{longtable}
 
 \subsection{Data Simulation}\label{data-simulation}
@@ -791,20 +790,19 @@ The multivariate normal distribution is transformed using the normal CDF
 before the inverse CDF of the assumed distributions of the three
 variables is applied. To determine the appropriate distribution of each
 variable, various distributions are fitted and compared. This includes
-poisson and negative binomial for mortality; gamma, log-normal,
-exponential, weibull, and normal for PM10 and temperature; and beta for
+Poisson and negative binomial for mortality; gamma, log-normal,
+exponential, Weibull, and normal for PM10 and temperature; and beta for
 PM10 after rescaling the data to \([0,1]\).
 
-To ensure a reasonable likeness to data that might be used in such an
-analysis, we use characteristics of the observed New York City dataset
-to refine our simulations. AIC is used to determine the best
-distribution fit for each variable with the QQ-plot presented in
-Figure~\ref{fig-dist-fit} to evaluate the fit. AIC suggests a negative
-binomial distribution for mortality, a beta distribution for PM10
-(multiple by 100 to recover the original scale), and a Weibull
-distribution for temperature. To include the potential effect of
-outliers, we add a single outlier to the data for both the mortality and
-PM10 variables.
+To ensure reasonable similarity to observed data, we use characteristics
+of the observed New York City dataset to refine our simulations. AIC is
+used to determine the best distribution fit for each variable with the
+QQ-plot presented in Figure~\ref{fig-dist-fit} to evaluate the fit. AIC
+suggests a negative binomial distribution for mortality, a beta
+distribution for PM10 (multiplied by 100 to recover the original scale),
+and a Weibull distribution for temperature. To include the potential
+effect of outliers, we add a single outlier to the data for both the
+mortality and PM10 variables.
 
 \begin{figure}
 
@@ -818,7 +816,7 @@ PM10 variables.
 distributions used to generate simulated data for mortality, PM10, and
 temperature. Left: Mortality as a negative binomial distribution (size =
 74, mean = 183), Middle: PM10 is modeled using a rescaled beta
-distribution with shape parameters 4.21 and 11.67, multiplied by 10 to
+distribution with shape parameters 4.21 and 11.67, multiplied by 100 to
 match the observed range. Right: Temperature is modeled using a Weibull
 distribution (shape = 3.8, scale = 61)}
 
@@ -826,12 +824,12 @@ distribution (shape = 3.8, scale = 61)}
 
 A logic regression is fitted using all variations of the checks in
 Table~\ref{tbl-checks} to predict whether the PM10 coefficient is
-unexpected. Given the imbalance of outcome (expected vs.~unexpected),
+unexpected. Given the outcome imbalance (expected vs.~unexpected),
 inverse weights proportional to the number of observations in each
 outcome are applied during the logic regression fit.
 Figure~\ref{fig-linear-reg-tree} shows the optimal logic regression tree
 from the fitted model. Precision, recall, and independence score, along
-with their harmonic and arithmetic mean are presented in
+with their harmonic and arithmetic means are presented in
 Table~\ref{tbl-linear-reg}.
 
 \begin{figure}
@@ -846,8 +844,8 @@ Table~\ref{tbl-linear-reg}.
 fourteen checks and the outcome expectation (unexpected) as the response
 variable. The model suggests the relationship: (mortality-PM10
 correlation \textless{} \(-0.03\)) AND (mortality-temperature
-correlation \textgreater{} \(-0.3\) OR (there exist mortality outlier
-AND there exist PM10 outlier)) to predict the unexpected PM10
+correlation \textgreater{} \(-0.3\) OR (there exists mortality outlier
+AND there exists PM10 outlier)) to predict the unexpected PM10
 coefficient.}
 
 \end{figure}%
@@ -905,7 +903,7 @@ The fitted logic regression model is
 This generates a precision of 0.876 and a recall of 0.722 for predicting
 the unexpected PM10 coefficient. As shown in
 Figure~\ref{fig-linear-reg-tree}, there is no single analysis check in
-the tree that predicts an unexpected outcome. rather at least three
+the tree that predicts an unexpected outcome. Rather, at least three
 checks in the tree must be TRUE in order for the model to predict an
 unexpected outcome. Given the high independence of the checks
 (Table~\ref{tbl-linear-reg}), this suggests that unexpected results are
@@ -1024,18 +1022,18 @@ TRUE & 1 & 7\\
 \end{table}%
 
 It is clear from Table~\ref{tbl-all-cities} that some of the estimated
-PM10 coefficients are outside the expected range of {[}0, 0.005{]}.
-Eight of the 40 cities had negative estimated coefficients and were
-therefore considered unexpected by our original criterion. (It is
-perhaps worth noting that none of the unexpected outcomes was in the
-positive direction.) Table~\ref{tbl-accuracy} summarizes the prediction
-accuracy of the logic regression model for the 40 cities. The model
-correctly predicts the PM10 coefficient status of 32 cities, producing
-an accuracy rate of 80\%. Among the 8 cities with an unexpected outcome,
-the model correctly identifies 7 (Atlanta, Austin, Memphis, Orlando,
-Salt Lake City, San Antonio, Tampa), giving a recall of 88\% (only Miami
-was not properly classified by the logic regression model). These cities
-were flagged due to failures in both the mortality-PM10 correlation and
+PM10 coefficients are outside the expected range {[}0, 0.005{]}. Eight
+of the 40 cities had negative estimated coefficients and were therefore
+considered unexpected by our original criterion. (It is perhaps worth
+noting that none of the unexpected outcomes was in the positive
+direction.) Table~\ref{tbl-accuracy} summarizes the prediction accuracy
+of the logic regression model for the 40 cities. The model correctly
+predicts the PM10 coefficient status of 32 cities, producing an accuracy
+rate of 80\%. Among the 8 cities with an unexpected outcome, the model
+correctly identifies 7 (Atlanta, Austin, Memphis, Orlando, Salt Lake
+City, San Antonio, Tampa), giving a recall of 88\% (only Miami were not
+properly classified by the logic regression model). These cities were
+flagged due to failures in both the mortality-PM10 correlation and
 mortality-temperature correlation analysis checks. Out of the 14 cities
 with positive predictions from the model, 7 cities (Cincinnati,
 Columbus, Dallas/Fort Worth, Pittsburgh, Riverside, San Bernardino,
@@ -1047,20 +1045,20 @@ features of the data generation process.
 
 \section{Discussion}\label{sec-discussion}
 
-In this paper we have developed an approach to using analysis validation
-checks to externalize the assumptions about the data and analysis tools
-made during the data analysis process. These checks can serve as a
-useful summary of the analyst's thought process and can describe how
-characteristics of the data may lead to unexpected outcomes. Using logic
-regression, we can develop a graphical summary of the analysis
-validation checks as well as use the logic regression fitting process to
-choose the optimal set of checks. The logic regression model can also be
-used to develop summaries of the precision and recall of the collection
-of analysis validation checks in predicting the likelihood of an
-unexpected outcome. We demonstrated our method on an example relating
-daily mortality to outdoor air pollution data. The results from that
-example could be used to inform future analyses of air pollution and
-health data, perhaps in other cities or locations.
+In this paper, we have developed an approach to using analysis
+validation checks to externalize the assumptions about the data and
+analysis tools made during the data analysis process. These checks can
+serve as a useful summary of the analyst's thought process and can
+describe how characteristics of the data may lead to unexpected
+outcomes. Using logic regression, we can develop a graphical summary of
+the analysis validation checks as well as use the logic regression
+fitting process to choose the optimal set of checks. The logic
+regression model can also be used to develop summaries of the precision
+and recall of the collection of analysis validation checks in predicting
+the likelihood of an unexpected outcome. We demonstrated our method on
+an example relating daily mortality to outdoor air pollution data. The
+results from that example could be used to inform future analyses of air
+pollution and health data, perhaps in other cities or locations.
 
 In Section~\ref{sec-pm10-mortality} we used the analysis checks in a
 diagnostic manner to examine the eight cities whose PM10 coefficients
@@ -1092,7 +1090,7 @@ recursively until we reach a root cause that cannot be further
 investigated. Each level of the tree is connected together using logic
 gates such as AND and OR gates. The leaf nodes of the tree indicate the
 root causes that may lead to an anomaly. While the logic regression
-tress are not identical to fault trees, they share many properties, such
+trees are not identical to fault trees, they share many properties, such
 as the tree-based structure and the indicator of root causes at the leaf
 nodes. Perhaps more critically, both serve as graphical summaries of the
 assumptions made in a problem and the specific violations of those
@@ -1107,18 +1105,18 @@ assumptions and can potentially be formalized as analysis validation
 checks. For instance, plotting a variable's distribution using a
 histogram, density plot, or bee swarm plot can reveal outliers or
 deviations from normality. These visualizations could be re-framed as
-analysis checks that fail when the data does not conform to the visual
-expectation. However, translating visualization results into binary
-checks remains an open challenge, requiring either manual verification
-or the development of automated methods to interpret visualization
-outputs. An existing example of visual test is the R package
-\texttt{vdiffr} \citep{vdiffr} for graphic software unit testing. The
-package saves a template plot and compares it to the current plot to
-determine whether the unit tests passes or fails.
+analysis checks, which fail when: the data does not conform to the
+visual expectation. However, translating visualization results into
+binary checks remains an open challenge, requiring either manual
+verification or the development of automated methods to interpret
+visualization outputs. An existing example of visual test is the R
+package \texttt{vdiffr} \citep{vdiffr} for graphic software unit
+testing. The package saves a template plot and compares it to the
+current plot to determine whether the unit tests pass or fail.
 
 Systematically generating realistic simulated data is a key component of
 our approach and is deserving of further consideration. In the PM10
-example in Section~\ref{sec-pm10-mortality}, the inverse transform
+example in Section~\ref{sec-pm10-mortality}, the inverse-transform
 method was used to preserve the correlation structure among mortality,
 PM10, and temperature. However, the simulation process can become
 complex when additional restrictions are imposed or when a greater range
@@ -1151,7 +1149,7 @@ unexpected result.
 Communicating the process of data analysis is a key element to providing
 transparency, improving reproducibility, and building trust with a range
 of audiences. The analysis validation checks described here provide a
-general way to encode the assumptions that an data analyst makes about
+general way to encode the assumptions that a data analyst makes about
 the data and statistical tools applied to the data. These assumptions
 can be studied or challenged, depending on the specific analyst's
 perspective, and can serve as a roadmap for diagnosing unexpected
@@ -1169,9 +1167,9 @@ paper can be found at:
 
 The supplementary materials include a full script of the examples in the
 paper (\texttt{index.R}) and its output (\texttt{index.html}), the data
-used for in the examples in Section 5 (\texttt{data/}), the package
-source (\texttt{adtoolbox\_0.1.0.tar.gz}), and a README.md file
-containing the install instructions for running the scripts.
+used in the examples in Section 5 (\texttt{data/}), the package source
+(\texttt{adtoolbox\_0.1.0.tar.gz}), and a README.md file containing the
+install instructions for running the scripts.
 
 
 \renewcommand\refname{References}

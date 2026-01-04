@@ -1,0 +1,208 @@
+\begin{thebibliography}{36}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Allaire et~al.(2022)Allaire, Teague, Scheidegger, Xie, and Dervieux]{Allaire_Quarto_2022}
+J.J. Allaire, Charles Teague, Carlos Scheidegger, Yihui Xie, and Christophe Dervieux.
+\newblock \emph{{Quarto}}, January 2022.
+\newblock URL \url{https://github.com/quarto-dev/quarto-cli}.
+
+\bibitem[Batini et~al.(2009)Batini, Cappiello, Francalanci, and Maurino]{batini2009methodologies}
+Carlo Batini, Cinzia Cappiello, Chiara Francalanci, and Andrea Maurino.
+\newblock Methodologies for data quality assessment and improvement.
+\newblock \emph{ACM Computing Surveys (CSUR)}, 41\penalty0 (3):\penalty0 1--52, 2009.
+
+\bibitem[Bell et~al.(2004)Bell, McDermott, Zeger, Samet, and Dominici]{bell2004ozone}
+Michelle~L Bell, Aidan McDermott, Scott~L Zeger, Jonathan~M Samet, and Francesca Dominici.
+\newblock Ozone and short-term mortality in 95 {US} urban communities, 1987-2000.
+\newblock \emph{Journal of the American Medical Association}, 292\penalty0 (19):\penalty0 2372--2378, 2004.
+\newblock URL \url{https://doi.org/10.1001/jama.292.19.2372}.
+
+\bibitem[Broderick et~al.(2023)Broderick, Gelman, Meager, Smith, and Zheng]{broderick_toward_2023}
+Tamara Broderick, Andrew Gelman, Rachael Meager, Anna~L. Smith, and Tian Zheng.
+\newblock Toward a taxonomy of trust for probabilistic machine learning.
+\newblock \emph{Science Advances}, 9\penalty0 (7), February 2023.
+\newblock URL \url{https://www.science.org/doi/10.1126/sciadv.abn3999}.
+
+\bibitem[Cai and Zhu(2015)]{cai2015challenges}
+Li~Cai and Yangyong Zhu.
+\newblock The challenges of data quality and data quality assessment in the big data era.
+\newblock \emph{Data Science Journal}, 14:\penalty0 2--2, 2015.
+\newblock URL \url{https://doi.org/10.5334/dsj-2015-002}.
+
+\bibitem[Cichy and Rass(2019)]{8642813}
+Corinna Cichy and Stefan Rass.
+\newblock An overview of data quality frameworks.
+\newblock \emph{IEEE Access}, 7:\penalty0 24634--24648, 2019.
+\newblock URL \url{https://doi.org/10.1109/ACCESS.2019.2899751}.
+
+\bibitem[Dong et~al.(2022)Dong, Roth, and Su]{dong_gaussian_2022}
+Jinshuo Dong, Aaron Roth, and Weijie~J. Su.
+\newblock Gaussian differential privacy.
+\newblock \emph{Journal of the Royal Statistical Society Series B: Statistical Methodology}, 84\penalty0 (1):\penalty0 3--37, February 2022.
+\newblock ISSN 1369-7412.
+\newblock URL \url{https://doi.org/10.1111/rssb.12454}.
+
+\bibitem[Donoghue et~al.(2021)Donoghue, Voytek, and Ellis]{donoghue2021teaching}
+Thomas Donoghue, Bradley Voytek, and Shannon~E Ellis.
+\newblock Teaching creative and practical data science at scale.
+\newblock \emph{Journal of Statistics and Data Science Education}, 29\penalty0 (sup1):\penalty0 S27--S39, 2021.
+\newblock URL \url{https://doi.org/10.1080/10691898.2020.1860725}.
+
+\bibitem[Fischetti(2023)]{assertr}
+Tony Fischetti.
+\newblock \emph{{assertr}: Assertive programming for {R} analysis pipelines}, 2023.
+\newblock URL \url{https://CRAN.R-project.org/package=assertr}.
+\newblock R package version 3.0.1.
+
+\bibitem[Grolemund and Wickham(2014)]{grolemund_cognitive_2014}
+Garrett Grolemund and Hadley Wickham.
+\newblock A cognitive interpretation of data analysis.
+\newblock \emph{International Statistical Review}, 82\penalty0 (2):\penalty0 184--204, 08 2014.
+\newblock URL \url{https://onlinelibrary.wiley.com/doi/10.1111/insr.12028}.
+
+\bibitem[Gu et~al.(2024)Gu, Grunde-McLaughlin, McNutt, Heer, and Althoff]{gu2024data}
+Ken Gu, Madeleine Grunde-McLaughlin, Andrew McNutt, Jeffrey Heer, and Tim Althoff.
+\newblock How do data analysts respond to {AI} assistance? {A} wizard-of-oz study.
+\newblock In \emph{Proceedings of the CHI Conference on Human Factors in Computing Systems}, pages 1--22, 2024.
+\newblock URL \url{https://doi.org/10.1145/3613904.3641891}.
+
+\bibitem[Henry et~al.(2023)Henry, Pedersen, Luciani, Decorde, and Lise]{vdiffr}
+Lionel Henry, Thomas~Lin Pedersen, T~Jake Luciani, Matthieu Decorde, and Vaudor Lise.
+\newblock \emph{{vdiffr}: Visual regression testing and graphical diffing}, 2023.
+\newblock URL \url{https://CRAN.R-project.org/package=vdiffr}.
+\newblock R package version 1.0.7.
+
+\bibitem[Iannone et~al.(2024)Iannone, Vargas, and Choe]{pointblank}
+Richard Iannone, Mauricio Vargas, and June Choe.
+\newblock \emph{pointblank: Data validation and organization of metadata for local and remote tables}, 2024.
+\newblock URL \url{https://CRAN.R-project.org/package=pointblank}.
+\newblock R package version 0.12.2.
+
+\bibitem[Leiner et~al.(2023)Leiner, Duan, Wasserman, and Ramdas]{leiner2023data}
+James Leiner, Boyan Duan, Larry Wasserman, and Aaditya Ramdas.
+\newblock Data fission: Splitting a single data point.
+\newblock \emph{Journal of the American Statistical Association}, pages 1--12, 2023.
+\newblock URL \url{https://doi.org/10.1080/01621459.2023.2270748}.
+
+\bibitem[Li et~al.(2019)Li, Chan, Denny, Luxton-Reilly, and Tempero]{li2019towards}
+Chen Li, Emily Chan, Paul Denny, Andrew Luxton-Reilly, and Ewan Tempero.
+\newblock Towards a framework for teaching debugging.
+\newblock In \emph{Proceedings of the Twenty-First Australasian Computing Education Conference}, pages 79--86, 2019.
+
+\bibitem[Michael et~al.(2002)Michael, Joane, Joseph, Joseph, and Jan]{michael2002fault}
+Stamatelatos Michael, D~Joane, F~Joseph, M~Joseph, and R~Jan.
+\newblock Fault tree handbook with aerospace applications.
+\newblock \emph{NASA Office of Safety and Mission Assurance-NASA Headquarters, Washington}, pages 2--8, 2002.
+
+\bibitem[Neufeld et~al.(2024)Neufeld, Dharamshi, Gao, and Witten]{neufeld2024data}
+Anna Neufeld, Ameer Dharamshi, Lucy~L Gao, and Daniela Witten.
+\newblock Data thinning for convolution-closed distributions.
+\newblock \emph{Journal of Machine Learning Research}, 25\penalty0 (57):\penalty0 1--35, 2024.
+
+\bibitem[Peng(2011)]{peng2011reproducible}
+Roger~D Peng.
+\newblock Reproducible research in computational science.
+\newblock \emph{Science}, 334\penalty0 (6060):\penalty0 1226--1227, 2011.
+
+\bibitem[Peng and Parker(2022)]{peng2022perspective}
+Roger~D Peng and Hilary~S Parker.
+\newblock Perspective on data science.
+\newblock \emph{Annual Review of Statistics and Its Application}, 9\penalty0 (1):\penalty0 1--20, 2022.
+
+\bibitem[Peng et~al.(2006)Peng, Dominici, and Louis]{peng2006model}
+Roger~D Peng, Francesca Dominici, and Thomas~A Louis.
+\newblock Model choice in time series studies of air pollution and mortality.
+\newblock \emph{Journal of the Royal Statistical Society Series A: Statistics in Society}, 169\penalty0 (2):\penalty0 179--203, 2006.
+
+\bibitem[Peng et~al.(2021)Peng, Chen, Bridgeford, Leek, and Hicks]{peng_diagnosing_2021}
+Roger~D. Peng, Athena Chen, Eric Bridgeford, Jeffrey~T. Leek, and Stephanie~C. Hicks.
+\newblock Diagnosing data analytic problems in the classroom.
+\newblock \emph{Journal of Statistics and Data Science Education}, 29\penalty0 (3):\penalty0 267--276, September 2021.
+\newblock URL \url{https://doi.org/10.1080/26939169.2021.1971586}.
+
+\bibitem[Petersen and Ekstr{\o}m(2019)]{dataMaid}
+Anne~Helby Petersen and Claus~Thorn Ekstr{\o}m.
+\newblock Datamaid: Your assistant for documenting supervised data quality screening in {R}.
+\newblock \emph{Journal of Statistical Software}, 90:\penalty0 1--38, 2019.
+
+\bibitem[Polyzotis et~al.(2019)Polyzotis, Zinkevich, Roy, Breck, and Whang]{polyzotis2019data}
+Neoklis Polyzotis, Martin Zinkevich, Sudip Roy, Eric Breck, and Steven Whang.
+\newblock Data validation for machine learning.
+\newblock \emph{Proceedings of Machine Learning and Systems}, 1:\penalty0 334--347, 2019.
+
+\bibitem[{R Core Team}(2023)]{R}
+{R Core Team}.
+\newblock \emph{R: A Language and Environment for Statistical Computing}.
+\newblock R Foundation for Statistical Computing, Vienna, Austria, 2023.
+\newblock URL \url{https://www.R-project.org/}.
+
+\bibitem[Ruczinski et~al.(2003)Ruczinski, Kooperberg, and LeBlanc]{ruczinski_logic_2003}
+Ingo Ruczinski, Charles Kooperberg, and Michael LeBlanc.
+\newblock Logic regression.
+\newblock \emph{Journal of Computational and Graphical Statistics}, 12\penalty0 (3):\penalty0 475--511, September 2003.
+\newblock ISSN 1061-8600.
+\newblock URL \url{https://doi.org/10.1198/1061860032238}.
+
+\bibitem[Samet et~al.(2000)Samet, Dominici, Curriero, Coursac, and Zeger]{samet2000fine}
+Jonathan~M Samet, Francesca Dominici, Frank~C Curriero, Ivan Coursac, and Scott~L Zeger.
+\newblock Fine particulate air pollution and mortality in 20 {US} cities, 1987--1994.
+\newblock \emph{New England Journal of Medicine}, 343\penalty0 (24):\penalty0 1742--1749, 2000.
+
+\bibitem[Schelter et~al.(2018)Schelter, Lange, Schmidt, Celikel, Biessmann, and Grafberger]{schelter2018automating}
+Sebastian Schelter, Dustin Lange, Philipp Schmidt, Meltem Celikel, Felix Biessmann, and Andreas Grafberger.
+\newblock Automating large-scale data quality verification.
+\newblock \emph{Proceedings of the VLDB Endowment}, 11\penalty0 (12):\penalty0 1781--1794, 2018.
+
+\bibitem[Sidi et~al.(2012)Sidi, Shariat~Panahy, Affendey, Jabar, Ibrahim, and Mustapha]{6204995}
+Fatimah Sidi, Payam~Hassany Shariat~Panahy, Lilly~Suriani Affendey, Marzanah~A. Jabar, Hamidah Ibrahim, and Aida Mustapha.
+\newblock Data quality: A survey of data quality dimensions.
+\newblock In \emph{2012 International Conference on Information Retrieval \& Knowledge Management}, pages 300--304, 2012.
+\newblock URL \url{https://doi.org/10.1109/InfRKM.2012.6204995}.
+
+\bibitem[van~der Loo and de~Jonge(2021)]{validate}
+Mark van~der Loo and Edwin de~Jonge.
+\newblock Data validation infrastructure for {R}.
+\newblock \emph{Journal of Statistical Software}, 97:\penalty0 1--33, 2021.
+\newblock URL \url{https://www.jstatsoft.org/article/view/v097i10}.
+
+\bibitem[Vesely et~al.(1981)Vesely, Goldberg, Roberts, and Haasl]{vesely1981fault}
+William~E Vesely, Francine~F Goldberg, Norman~H Roberts, and David~F Haasl.
+\newblock Fault tree handbook.
+\newblock Technical report, Nuclear Regulatory Commission Washington DC, 1981.
+
+\bibitem[Wang and Strong(1996)]{wang1996beyond}
+Richard~Y Wang and Diane~M Strong.
+\newblock Beyond accuracy: What data quality means to data consumers.
+\newblock \emph{Journal of Management Information Systems}, 12\penalty0 (4):\penalty0 5--33, 1996.
+
+\bibitem[Waring et~al.(2022)Waring, Quinn, McNamara, {Arino de la Rubia}, Zhu, and Ellis]{skimr}
+Elin Waring, Michael Quinn, Amelia McNamara, Eduardo {Arino de la Rubia}, Hao Zhu, and Shannon Ellis.
+\newblock \emph{skimr: Compact and flexible summaries of data}, 2022.
+\newblock URL \url{https://CRAN.R-project.org/package=skimr}.
+\newblock R package version 2.1.5.
+
+\bibitem[Welty and Zeger(2005)]{welty2005acute}
+Leah~J Welty and Scott~L Zeger.
+\newblock Are the acute effects of particulate matter on mortality in the national morbidity, mortality, and air pollution study the result of inadequate control for weather and season? {A} sensitivity analysis using flexible distributed lag models.
+\newblock \emph{American Journal of Epidemiology}, 162\penalty0 (1):\penalty0 80--88, 2005.
+
+\bibitem[Wild and Pfannkuch(1999)]{wild1999statistical}
+Chris~J Wild and Maxine Pfannkuch.
+\newblock Statistical thinking in empirical enquiry.
+\newblock \emph{International Statistical Review}, 67\penalty0 (3):\penalty0 223--248, 1999.
+
+\bibitem[Woodall et~al.(2014)Woodall, Oberhofer, and Borek]{woodall2014classification}
+Philip Woodall, Martin Oberhofer, and Alexander Borek.
+\newblock A classification of data quality assessment and improvement methods.
+\newblock \emph{International Journal of Information Quality 16}, 3\penalty0 (4):\penalty0 298--321, 2014.
+
+\bibitem[Yu and Barter(2024)]{yu2024veridical}
+Bin Yu and Rebecca~L Barter.
+\newblock \emph{Veridical data science: The practice of responsible data analysis and decision making}.
+\newblock MIT Press, 2024.
+
+\end{thebibliography}
